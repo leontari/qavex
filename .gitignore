@@ -1,0 +1,460 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://github.com/github/gitignore for other .gitignore templates.
+
+# =============================================================================
+# OS
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# EDITORS / IDE
+# =============================================================================
+# VSCode
+# Visual Studio Code
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
+#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
+#  you could uncomment the following to ignore the entire vscode folder
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains (PyCharm, IntelliJ, WebStorm, etc.)
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+.idea/
+*.iml
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Abstra
+# Abstra is an AI-powered process automation framework.
+# Ignore directories containing user credentials, local state, and settings.
+# Learn more at https://abstra.io/docs
+.abstra/
+
+# Cursor
+#  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
+#  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
+#  refer to https://docs.cursor.com/context/ignore-files
+.cursorignore
+.cursorindexingignore
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# =============================================================================
+# Git
+# =============================================================================
+*.orig
+
+# =============================================================================
+# Python
+# =============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# UV
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#uv.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+#poetry.toml
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+#pdm.lock
+#pdm.toml
+# .pdm-python
+# .pdm-build/
+
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+#pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+# .pixi
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.*
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Ruff stuff:
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# =============================================================================
+# JavaScript
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.pnp/
+.pnp.js
+
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# =============================================================================
+# TypeScript
+# =============================================================================
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# =============================================================================
+# Angular
+# =============================================================================
+.angular/
+.angular/cache/
+.angular/cache/*
+.angular/cache/**/*
+.angular.json.timestamp-*
+.angular-build/
+.angular-build/**
+
+# Angular build outputs
+out-tsc/
+
+# =============================================================================
+# React / Vue / Svelte
+# =============================================================================
+# Common build outputs
+out/
+.vite/
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+
+# React
+*.cache/
+*.parcel-cache/
+*.eslintcache
+
+# Vue
+.vuepress/dist
+.nuxt/
+.output/
+.hugo_build.lock
+
+# Svelte
+.svelte-kit/
+.svelte/
+
+# =============================================================================
+# Docker
+# =============================================================================
+docker-compose.override.yml
+.docker/
+
+# =============================================================================
+# Kubernetes / k8s
+# =============================================================================
+k8s/generated/
+*.kubeconfig
+*.yaml.tmp
+
+# =============================================================================
+# Helm
+# =============================================================================
+charts/**/charts/
+charts/**/tmpcharts/
+charts/**/Chart.lock
+charts/**/values.schema.json
+helmfile.lock
+
+# =============================================================================
+# TERRAFORM
+# =============================================================================
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore transient lock info files created by terraform apply
+.terraform.tfstate.lock.info
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Optional: ignore graph output files generated by `terraform graph`
+# *.dot
+
+# Optional: ignore plan files saved before destroying Terraform configuration
+# Uncomment the line below if you want to ignore planout files.
+# planout
+
+# =============================================================================
+# Ansible
+# =============================================================================
+# Local inventory
+inventory/*.ini
+inventory/*.yaml
+inventory/*.yml
+
+# Sensitive vars (unencrypted)
+group_vars/*/*.vault
+host_vars/*/*.vault
+group_vars/*/vault.yml
+host_vars/*/vault.yml
+group_vars/*/secrets.yml
+host_vars/*/secrets.yml
+
+# Ansible retry files
+*.retry
+
+# Ansible Galaxy roles
+roles/*/.git/
+roles/*/.cache/
+roles/*/.galaxy_install_info
+
+# Collections cache
+.ansible/
+.ansible_cache/
+.ansible_tmp/
+
+# SSH keys (never commit)
+*.pem
+*.key
+*.pub
+
+# =============================================================================
+# Prometheus
+# =============================================================================
+# TSDB data (never commit)
+prometheus/data/
+prometheus/tsdb/
+prometheus/wal/
+prometheus/chunks_head/
+prometheus/chunks/
+
+# Remote write buffers
+prometheus/remote_write/
+
+# Temporary rule files
+prometheus/*.tmp
+prometheus/*.swp
+
+# =============================================================================
+# Grafana
+# =============================================================================
+# Grafana local data
+grafana/data/
+grafana/plugins-bundled/
+grafana/plugins/
+
+# Grafana logs
+grafana/logs/
+grafana/*.log
+
+# Grafana provisioning cache
+grafana/provisioning/tmp/
+grafana/provisioning/.cache/
+
+# Auto-generated dashboards
+grafana/dashboards-generated/
+
+# =============================================================================
+# Common build artifacts / caches
+# =============================================================================
+.cache/
+coverage/
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+*.tar
