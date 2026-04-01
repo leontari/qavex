@@ -1,0 +1,30 @@
+image:
+  backend:
+    repository: myregistry/backend-api
+    tag: "dev-latest"
+  frontend:
+    repository: myregistry/frontend
+    tag: "dev-latest"
+
+backend:
+  replicaCount: 1
+  env:
+    DATABASE_URL: "postgresql://user:pass@postgres:5432/market_dev"
+    LOG_LEVEL: "debug"
+
+frontend:
+  replicaCount: 1
+
+postgres:
+  user: user
+  password: pass
+  database: market_dev
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: "dev.myapp.local"
+      paths:
+        - path: /
+          pathType: Prefix
