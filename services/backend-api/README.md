@@ -1,3 +1,4 @@
+<<<<<<< feature/structure
 api-gateway / backend-api (FastAPI)
 
 objective:
@@ -14,3 +15,16 @@ interactions:
     - /candles?symbol=C98USDT&tf=1h
     - /indicators?symbol=C98USDT
     - /signals?symbol=C98USDT
+=======
+Analytics-service
+
+objective:
+  - count indicators
+  - signals
+  - patterns
+  - alerts
+  
+interface:
+  - REST/gRPC for API-service or
+  - writes results in separate tables (signals, indicators)
+>>>>>>> main
