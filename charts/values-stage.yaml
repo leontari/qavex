@@ -1,0 +1,30 @@
+image:
+  backend:
+    repository: myregistry/backend-api
+    tag: "stage-1.0.0"
+  frontend:
+    repository: myregistry/frontend
+    tag: "stage-1.0.0"
+
+backend:
+  replicaCount: 2
+  env:
+    DATABASE_URL: "postgresql://user:pass@postgres:5432/market_stage"
+    LOG_LEVEL: "info"
+
+frontend:
+  replicaCount: 2
+
+postgres:
+  user: user
+  password: pass
+  database: market_stage
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: "stage.myapp.com"
+      paths:
+        - path: /
+          pathType: Prefix

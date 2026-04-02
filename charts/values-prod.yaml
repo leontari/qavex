@@ -1,0 +1,30 @@
+image:
+  backend:
+    repository: myregistry/backend-api
+    tag: "1.0.0"
+  frontend:
+    repository: myregistry/frontend
+    tag: "1.0.0"
+
+backend:
+  replicaCount: 3
+  env:
+    DATABASE_URL: "postgresql://prod_user:prod_pass@postgres:5432/market"
+    LOG_LEVEL: "warning"
+
+frontend:
+  replicaCount: 3
+
+postgres:
+  user: prod_user
+  password: prod_pass
+  database: market
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: "myapp.com"
+      paths:
+        - path: /
+          pathType: Prefix
