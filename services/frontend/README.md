@@ -1,45 +1,42 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9149960 (feature: project structure (#1))
-<<<<<<< feature/structure
-frontend (Vue or Svelte + lightweight-charts)
+# sv
 
-objective:
-  - UI
-  - charts
-  - routing
-  - authorisation
-  - settings
-  
-interface:
-  - interacts only with ```backend-api```
+Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-layers:
- - lightweght-charts -> candles
- - overlays -> indicators
- - markers -> signals
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 3f129e9 (feature: project structure (#1))
-=======
->>>>>>> 9149960 (feature: project structure (#1))
-api-gateway / backend-api (FastAPI)
+## Creating a project
 
-objective:
-  - authorisation/authentication (if in need)
-  - REST API for the fronend:
-    - /candles, /orderbook, /signals, /stats, etc. 
-  
-interface:
-  - reads from database/cache
-  - can go to market-data/analytics via inner HTTP/gRPC
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> 3f129e9 (feature: project structure (#1))
-=======
->>>>>>> main
->>>>>>> 9149960 (feature: project structure (#1))
+If you're seeing this, you've probably already done this step. Congrats!
+
+```sh
+# create a new project
+npx sv create my-app
+```
+
+To recreate this project with the same configuration:
+
+```sh
+# recreate this project
+npx sv@0.13.2 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" playwright tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:auto" devtools-json drizzle="database:sqlite+sqlite:libsql" better-auth="demo:password" mdsvex paraglide="languageTags:en, ru+demo:yes" storybook mcp="ide:other,vscode+setup:local" --install npm frontend-app
+```
+
+## Developing
+
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+
+```sh
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```sh
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
