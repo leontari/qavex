@@ -106,7 +106,7 @@ Workflow files are located in ```/github/workflows/```.
 
 ---
 
-## 8. Contac & Support
+## 8. Contact & Support
 
 For questions, discussions, or contributions:
 - Open an issue:

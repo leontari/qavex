@@ -1,4 +1,4 @@
-# Qavex Platform — Monorepo
+# Qavex
 
 This repository contains the full set of microservices, frontend, database and documentation for a analytics platform.
 
@@ -70,6 +70,13 @@ make run SERVICE=api-gateway
 
 ---
 
+## 📦 Contributing
+- [Onboarding guide](/docs/onboarding.md)
+- [Contribution guide](/CONTRIBUTING.md)
+- [Security policy](/SECURITY.md)
+
+---
+
 ## 🛠 CI/CD
 
 The project uses GitHub Actions:
@@ -85,5 +92,4 @@ Configuration: `.github/workflows/*.yml`
 
 ## 📄 License
 
-MIT
-
+[MIT](/LICENSE)
