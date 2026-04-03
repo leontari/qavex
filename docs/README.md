@@ -1,12 +1,20 @@
 # Qavex
 
-This repository contains the full set of microservices, frontend, database and documentation for a analytics platform.
+This repository contains a modular microservices architecture designed for scalability, reliability, and developer productivity. 
+
+It includes backend services, a frontend application, shared libraries, protobuf definitions, infrastructure tooling, and Kubernetes deployment configurations.
 
 ---
 
-## 📦 Repo structure
+## 📁 Repository Structure
 ```
 repo/
+├── db/                    # Migrations and database schema
+├── deploy/                # Helm charts, Traefik, Kubernetes configs
+├── docs/                  # Arhitecture docs
+├── frontend/              # SPA (Vue/Svelte)
+├── infra/                 # Local development environment (Docker, Kind, Makefile)
+├── scripts/               # Utility scripts for CI, automation, validation
 ├── services/              # Backend microservices
 │   ├── api-gateway/
 │   ├── market-data/
@@ -15,31 +23,70 @@ repo/
 │   ├── worker-service/
 │   └── scheduler/
 │
-├── frontend/              # SPA (Vue/Svelte)
-│
-├── db/                    # Migrations and database schema
-│
-└── docs/                  # Arhitecture adn docs
+├── shared-libs/           # Reusable libraries for Python and Node
+└── shared-proto/          # Protobuf contracts for inter-service communication
 ```
-
 
 ---
 
-## 🚀 Quick Start
+## 🧩 Core Concepts
 
-### 1. Install dependencies
+### **Microservices**
+Each service is isolated, independently deployable, and follows a consistent structure:
+- `src/` — application code  
+- `Dockerfile` / `Dockerfile.dev`  
+- `requirements.txt`  
+- `README.md`  
+
+### **Shared Protobuf**
+`shared-proto/` contains all `.proto` files used for gRPC and event schemas.  
+This ensures consistent contracts across all services.
+
+### **Shared Libraries**
+`shared-libs/` provides reusable infrastructure code:
+- logging  
+- configuration  
+- database utilities  
+- middleware  
+- retry/backoff logic  
+
+### **Infrastructure**
+`infra/` contains everything for local development:
+- Docker Compose  
+- Kind cluster configs  
+- Makefile commands  
+- helper scripts  
+
+### **Deployment**
+`deploy/` contains:
+- Helm charts  
+- Traefik ingress  
+- Argo CD GitOps configuration  
+
+---
+
+## 🚀 Getting Started 
+
+### Run services locally (Docker-Compose)
 
 ```bash
-make install
-```
+cd infra
+make up
+````
 
-### 2. Run everything locally
-
+### Run services locally (no Docker)
 ```bash
-docker-compose up --build
+make run-backend
+make run-frontend
+````
+
+### Run services in Kubernetes (Kind)
+```
+cd infra
+make kind-up
 ```
 
-### 3. Run a single service
+### Run a single service
 
 ```bash
 make run SERVICE=api-gateway
@@ -73,20 +120,29 @@ make run SERVICE=api-gateway
 ## 📦 Contributing
 - [Onboarding guide](/docs/onboarding.md)
 - [Contribution guide](/CONTRIBUTING.md)
+- [Code of conduct](/CODE_OF_CONDUCT.md)
 - [Security policy](/SECURITY.md)
 
 ---
 
 ## 🛠 CI/CD
 
-The project uses GitHub Actions:
+GitHub Actions handles:
 
-- linting
-- tests
-- Docker image builds
-- deployment в k8s
+- building & pushing images
+- running pre‑commit hooks
+- validating Kubernetes manifests
+- triggering Argo CD sync
 
 Configuration: `.github/workflows/*.yml`
+
+---
+
+## 🛠 Tooling
+- **uv** for Python virtualenvs
+- **nvm** for Node version management
+- **pre‑commit** for formatting, linting, and validation
+- **kubeconform** for Kubernetes schema validation
 
 ---
 

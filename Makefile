@@ -1,121 +1,194 @@
-# =============================================================================
-# CONFIG
-# =============================================================================
-PY_SERVICES = \
-    services/backend-api \
-    services/market-data-service \
-    services/analytics-service \
-    services/worker-service
+# ---------------------------------------------------------
+# Developer Onboarding Makefile (root)
+# Adds:
+# - automatic .env generation
+# - service health checks
+# - Python virtualenv management via uv
+# - Node version enforcement via nvm
+# ---------------------------------------------------------
 
-FRONTEND_DIR = services/frontend
+INFRA := infra
+SERVICES_DIR := services
+FRONTEND_DIR := frontend
 
-DOCKER_SERVICES = backend-api market-data-service analytics-service worker-service frontend
+PY_SERVICES := api-gateway market-data analytics alert-service worker-service scheduler
 
-HELM_CHART = charts/app
-K8S_NAMESPACE = app
+# ---------------------------------------------------------
+# Local Development (Docker)
+# ---------------------------------------------------------
 
-# =============================================================================
-# PYTHON: VENV + RUN
-# =============================================================================
-.PHONY: venv
-venv:
-    @for srv in $(PY_SERVICES); do \
-        echo ">>> Creating venv for $$srv"; \
-        python3 -m venv $$srv/.venv; \
-        $$srv/.venv/bin/pip install -U pip; \
-        if [ -f $$srv/requirements.txt ]; then \
-            $$srv/.venv/bin/pip install -r $$srv/requirements.txt; \
-        fi \
-    done
+up:
+    @$(MAKE) -C $(INFRA) up
 
-.PHONY: run-backend
-run-backend:
-    @for srv in $(PY_SERVICES); do \
-        echo ">>> Starting $$srv"; \
-        cd $$srv && ../$$srv/.venv/bin/python -m uvicorn app.main:app --reload & \
-    done
+down:
+    @$(MAKE) -C $(INFRA) down
 
-# =============================================================================
-# FRONTEND
-# =============================================================================
-.PHONY: run-frontend
-run-frontend:
-    cd $(FRONTEND_DIR) && npm install && npm run dev
+logs:
+    @$(MAKE) -C $(INFRA) logs
 
-# =============================================================================
-# ALL SERVICES
-# =============================================================================
-.PHONY: up
-up: run-backend run-frontend
-    @echo ">>> All services started"
+restart:
+    @$(MAKE) -C $(INFRA) restart
 
-.PHONY: stop
-stop:
-    @echo ">>> Stopping Python services"
-    @pkill -f uvicorn || true
-    @echo ">>> Stopping frontend dev server"
-    @pkill -f "vite" || true
+# ---------------------------------------------------------
+# Local Kubernetes (Kind)
+# ---------------------------------------------------------
 
-# =============================================================================
-#   DOCKER
-# =============================================================================
-.PHONY: docker-build
-docker-build:
-    @for srv in $(DOCKER_SERVICES); do \
-        echo ">>> Building $$srv"; \
-        docker build -t $$srv:latest services/$$srv; \
-    done
+kind-up:
+    @$(MAKE) -C $(INFRA) kind-up
 
-.PHONY: docker-up
-docker-up:
-    docker compose up -d
+kind-down:
+    @$(MAKE) -C $(INFRA) kind-down
 
-.PHONY: docker-down
-docker-down:
-    docker compose down
+# ---------------------------------------------------------
+# Helm Deployment
+# ---------------------------------------------------------
 
-# =============================================================================
-# TESTS
-# =============================================================================
-.PHONY: test
-test:
-    @for srv in $(PY_SERVICES); do \
-        if [ -d $$srv/tests ]; then \
-            echo ">>> Running tests for $$srv"; \
-            $$srv/.venv/bin/pytest $$srv/tests; \
-        fi \
-    done
-
-# =============================================================================
-# LINT / FORMAT
-# =============================================================================
-.PHONY: format
-format:
-    @for srv in $(PY_SERVICES); do \
-        if [ -d $$srv/app ]; then \
-            echo ">>> Formatting $$srv"; \
-            $$srv/.venv/bin/black $$srv/app; \
-        fi \
-    done
-
-# =============================================================================
-# KUBERNETES / HELM
-# =============================================================================
-.PHONY: helm-deploy
 helm-deploy:
-    helm upgrade --install app $(HELM_CHART) -n $(K8S_NAMESPACE) --create-namespace
+    @$(MAKE) -C $(INFRA) helm-deploy
 
-.PHONY: helm-delete
 helm-delete:
-    helm uninstall app -n $(K8S_NAMESPACE)
+    @$(MAKE) -C $(INFRA) helm-delete
 
-# =============================================================================
-# ARGO CD
-# =============================================================================
-.PHONY: argocd-sync
-argocd-sync:
-    argocd app sync app
+# ---------------------------------------------------------
+# Argo CD Bootstrap
+# ---------------------------------------------------------
 
-.PHONY: argocd-status
-argocd-status:
-    argocd app get app
+argo-bootstrap:
+    @$(MAKE) -C $(INFRA) argo-bootstrap
+
+# ---------------------------------------------------------
+# Automatic .env generation
+# ---------------------------------------------------------
+
+generate-env:
+    @echo "Generating .env files for all services..."
+    @for svc in $(PY_SERVICES); do \
+        ENV_FILE="$(SERVICES_DIR)/$$svc/.env"; \
+        if [ ! -f $$ENV_FILE ]; then \
+            echo "→ Creating $$ENV_FILE"; \
+            echo "ENV=dev" > $$ENV_FILE; \
+            echo "DATABASE_URL=postgres://app:app@localhost:5432/appdb" >> $$ENV_FILE; \
+            echo "PORT=8000" >> $$ENV_FILE; \
+        else \
+            echo "→ $$ENV_FILE already exists"; \
+        fi \
+    done
+    @echo "→ Creating frontend .env"
+    @if [ ! -f $(FRONTEND_DIR)/.env ]; then \
+        echo "VITE_API_URL=http://localhost:8000" > $(FRONTEND_DIR)/.env; \
+    fi
+    @echo ".env generation complete."
+
+# ---------------------------------------------------------
+# Dependency Installation
+# ---------------------------------------------------------
+
+install-backend:
+    @echo "Installing backend dependencies via uv..."
+    @for svc in $(PY_SERVICES); do \
+        if [ -f $(SERVICES_DIR)/$$svc/requirements.txt ]; then \
+            echo "→ Installing for $$svc"; \
+            cd $(SERVICES_DIR)/$$svc && uv venv && uv pip install -r requirements.txt; \
+        fi \
+    done
+    @echo "Backend dependencies installed."
+
+install-frontend:
+    @echo "Ensuring correct Node version via nvm..."
+    @cd $(FRONTEND_DIR) && nvm install && nvm use
+    @echo "Installing frontend dependencies..."
+    cd $(FRONTEND_DIR) && npm install
+    @echo "Frontend dependencies installed."
+
+install-all: generate-env install-backend install-frontend
+    @echo "All dependencies installed."
+
+# ---------------------------------------------------------
+# Run Services Locally (NO DOCKER)
+# ---------------------------------------------------------
+
+run-backend:
+    @echo "Starting all backend services locally..."
+    @for svc in $(PY_SERVICES); do \
+        echo "→ Starting $$svc"; \
+        ( cd $(SERVICES_DIR)/$$svc && uv run python -m src.main ) & \
+    done
+    @echo "Backend services started."
+
+run:
+    @if [ -z "$(service)" ]; then \
+        echo "Usage: make run service=<name>"; \
+        echo "Available services: $(PY_SERVICES)"; \
+        exit 1; \
+    fi
+    @echo "Running service: $(service)"
+    @cd $(SERVICES_DIR)/$(service) && uv run python -m src.main
+
+run-frontend:
+    cd $(FRONTEND_DIR) && npm run dev
+
+# ---------------------------------------------------------
+# Health Checks
+# ---------------------------------------------------------
+
+health:
+    @echo "Checking service health..."
+    @for svc in $(PY_SERVICES); do \
+        URL="http://localhost:8000/health"; \
+        echo "→ Checking $$svc at $$URL"; \
+        curl -s $$URL || echo "Service $$svc is not responding"; \
+    done
+    @echo "Health check complete."
+
+# ---------------------------------------------------------
+# Pre-commit Hooks
+# ---------------------------------------------------------
+
+pre-commit-install:
+    @echo "Installing pre-commit hooks..."
+    uv tool install pre-commit
+    pre-commit install
+    @echo "Pre-commit hooks installed."
+
+pre-commit-run:
+    @echo "Running pre-commit on all files..."
+    pre-commit run --all-files
+
+pre-commit-update:
+    @echo "Updating pre-commit hooks..."
+    pre-commit autoupdate
+
+
+# ---------------------------------------------------------
+# Utility
+# ---------------------------------------------------------
+
+help:
+    @echo ""
+    @echo "Developer Onboarding Commands:"
+    @echo ""
+    @echo "  make install-all         - Install ALL dependencies"
+    @echo "  make generate-env        - Generate .env files"
+    @echo ""
+    @echo "  make run-backend         - Run ALL backend services locally"
+    @echo "  make run service=name    - Run ONE backend service locally"
+    @echo "  make run-frontend        - Run frontend locally"
+    @echo ""
+    @echo "  make up                  - Start Docker local stack"
+    @echo "  make down                - Stop Docker stack"
+    @echo "  make logs                - View logs"
+    @echo "  make restart             - Restart Docker stack"
+    @echo ""
+    @echo "  make kind-up             - Create Kind cluster"
+    @echo "  make kind-down           - Delete Kind cluster"
+    @echo ""
+    @echo "  make helm-deploy         - Deploy via Helm"
+    @echo "  make helm-delete         - Remove Helm release"
+    @echo ""
+    @echo "  make argo-bootstrap      - Bootstrap Argo CD app-of-apps"
+    @echo ""
+    @echo "  make health              - Check service health"
+    @echo ""
+    @echo "This Makefile is for onboarding convenience."
+    @echo "All infra logic lives in infra/Makefile."
+    @echo ""

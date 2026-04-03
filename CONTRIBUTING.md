@@ -1,10 +1,10 @@
-# Contributing to Qavex
+# Contributing
 
-Thank you for your interest in contributing!  
+Thank you for contributing to the project!
 
 We welcome pull requests, bug reports, feature suggestions, and documentation improvements.
 
-This document explains how to work with the repository and how to submit high‑quality contributions.
+This guide explains how to set up your environment, follow coding standards, and submit changes.
 
 ---
 
@@ -16,7 +16,20 @@ By participating in this project, you agree to follow the community standards de
 
 ---
 
-## 🛠 Development Setup
+## 🛠 Prerequisites
+
+- Python 3.11+
+- Node.js (managed via `nvm`)
+- Docker & Docker Compose
+- Kind (optional for Kubernetes testing)
+- `uv` for Python virtualenvs
+- `pre-commit`
+- `make`
+
+---
+
+
+## 🛠 Contributing workflow
 
 1. Fork the repository  
 2. Clone your fork  
@@ -27,31 +40,47 @@ By participating in this project, you agree to follow the community standards de
 
 ---
 
-## 🚀 Running the project locally
+## 🚀 Setup locally development environment
 
-### Using Docker Compose
-
-```bash
-docker-compose up --build
+### Install pre-commit hooks
+```
+make pre-commit-install
 ```
 
-### Using Makefile
-```bash
-make install
+## 🧩 Development Workflow
+
+### no Docker:
+
+#### 1. Run all services locally
 ```
-```bash
-make run SERVICE=api-gateway
+make run-backend
+make run-frontend
 ```
 
----
+#### 2. Run a single service (```api-gateway``` service as an example)
+```
+make run service=api-gateway
+```
 
-## 🧪 Tests
+### Docker:
+```
+cd infra
+make up
+```
+
+## 🧪 Testing
 
 Each service contains its own test suite.
 
 Run tests for a specific service:
 ```bash
 make test SERVICE=analytics
+```
+
+or 
+
+```
+cd services/<service> pytest
 ```
 
 ---
@@ -69,13 +98,34 @@ test: add unit tests for alert rules
 
 ---
 
+## 🧹 Code Quality
+Pre-commit hooks enforce:
+- ruff (linting)
+- ruff-format / black (formatting)
+- isort (imports)
+- mypy (typing)
+- prettier (frontend)
+- kubeconform (Kubernetes manifests)
+- service structure validation
+- secrets scanning
+
+Run manually:
+```
+make pre-commit-run
+```
+
+---
+
 ## 🔀 Pull Requests
-A good PR:
-- is small and focused
-- includes tests (if applicable)
-- updates documentation (if needed)
-- passes CI checks
-- has a clear description of the change
+1. Create a feature branch
+2. Ensure all tests pass
+3. Ensure pre-commit passes
+4. Submit a PR with a clear description which:
+    - is small and focused
+    - includes tests (if applicable)
+    - updates documentation (if needed)
+    - passes CI checks
+    - has a clear description of the change
 
 ---
 

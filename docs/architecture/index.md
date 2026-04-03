@@ -145,6 +145,15 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 
 ---
 
+## Shared components:
+- shared-proto  →  protobuf contracts for all services
+- shared-libs   →  common infrastructure code (logging, config, db, utils)
+
+## Deployment flow:
+- deploy/helm → Argo CD → Kubernetes cluster → Traefik ingress
+
+---
+
 ## 📦 Services
 
 - [Frontend](/frontend/README.md)

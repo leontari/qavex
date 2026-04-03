@@ -1,0 +1,87 @@
+# Use for local development
+version: "3.9"
+
+services:
+
+  devcontainer:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sleep infinity
+
+  db:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./db/migrations:/docker-entrypoint-initdb.d/migrations
+    ports:
+      - "5432:5432"
+
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: api-gateway
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app_db
+    depends_on:
+      - postgres
+      - analytics
+    ports:
+      - "8000:8000"
+
+  market-data:
+    build: ./services/market-data
+    container_name: market-data
+    environment:
+      DATABASE_URL: postgres://app:app@postgrs:5432/app_db
+    depends_on:
+      - postgres
+
+  analytics:
+    build: ./services/analytics
+    container_name: analytics
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app_db
+    depends_on:
+      - postgres
+
+  alert-service:
+    build: ./services/alert-service
+    container_name: alert-service
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app_db
+    depends_on:
+      - postgres
+
+  worker-service:
+    build: ./services/worker-service
+    container_name: worker-service
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app_db
+    depends_on:
+      - postgres
+
+  scheduler:
+    build: ./services/scheduler
+    container_name: scheduler
+    depends_on:
+      - worker-service
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "3000:80"
+
+volumes:
+  db_data:
