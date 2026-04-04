@@ -1,0 +1,29 @@
+[project]
+name = "qavex-monorepo"
+version = "0.1.0"
+requires-python = "==3.11.*"
+dependencies = [
+  # "pre-commit == 4.5.*",
+  "template-package == 0.1.0",
+  "template-service == 0.1.0",
+]
+
+[tool.uv.sources]
+template-package = { workspace = true }
+template-service = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+  "packages-shared/python-packages/*",
+  "services/*",
+]
+exclude = [
+  # "packages-shared/python-packages/template-package",
+  "services/alert-service",
+  "services/analytics",
+  "services/api-gateway",
+  "services/backend-api",
+  "services/market-data",
+  "services/scheduler",
+  "services/worker-service",
+]

@@ -10,23 +10,47 @@ This guide will help you get up to speed quickly and start contributing with con
 
 Please install the following:
 
+- [Git](https://git-scm.com/)
 - Docker + Docker Compose
-- Python 3.11
+- Python 3.11+
 - Node.js 18+
-- VS Code (рекомендуется)
+- VS Code or PyCharm/WebStorm
 - kubectl + k3d/k3s (for local Kubernetes development)
+- uv
+- make
 
 ---
 
 ## 2. Clone the Repository
 
-```bash
+```
 git clone https://github.com/leontari/qavex.git
 ```
 
 ---
 
-## 3. Local Development Setup
+## 3. Install virtual environment
+```
+cd qavex
+uv venv
+uv sync
+```
+
+## 4. Install the git hook scripts
+- run [pre-commit](https://pre-commit.com/) install via **uv** to set up the git hook scripts
+```
+uv pre-commit install
+pre-commit installed at .git/hooks/pre-commit
+```
+- now pre-commit will run automatically on git commit!
+
+- it's usually a good idea to run the hooks against all of the files when adding new hooks (usually pre-commit will only run on the changed files during git hooks)
+
+```
+uv pre-commit run --all-files
+```
+
+## 5. Local Development Setup
 
 ### Option 1 — Docker Compose
 
@@ -50,7 +74,7 @@ make run SERVICE=api-gateway
 
 ---
 
-## 4. Project Structure
+## 6. Project Structure
 ```
 services/       — backend microservices
 frontend/       — SPA application
@@ -62,7 +86,7 @@ helm/           — Helm chart
 
 ---
 
-## 5. Working With Services
+## 7. Working With Services
 
 ### Run a service
 
@@ -84,7 +108,7 @@ make build SERVICE=analytics
 
 ---
 
-## 6. CI/CD
+## 8. CI/CD
 
 The project uses GitHub Actions for:
 - linting
@@ -98,7 +122,7 @@ Workflow files are located in ```/github/workflows/```.
 
 ---
 
-## 7. Documentation
+## 9. Documentation
 
 - Architecture: `docs/architecture/index.md`
 - Diagrams: `docs/architecture/diagrams/`
@@ -106,7 +130,7 @@ Workflow files are located in ```/github/workflows/```.
 
 ---
 
-## 8. Contact & Support
+## 10. Contact & Support
 
 For questions, discussions, or contributions:
 - Open an issue:

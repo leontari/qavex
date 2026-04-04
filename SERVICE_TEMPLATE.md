@@ -9,13 +9,14 @@ Use this template when creating a new microservice.
 ```
 services/<service-name>/
 ├── src/
-│     └── main.py
+│   └── service_name/
+│       ├── __init__.py
+│       └── main.py
 ├── tests/
-├── requirements.txt
 ├── Dockerfile
 ├── Dockerfile.dev
 ├── README.md
-└── pyproject.toml (optional)
+└── pyproject.toml
 ```
 
 ---
