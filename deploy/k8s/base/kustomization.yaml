@@ -1,0 +1,9 @@
+resources:
+  - api-gateway
+  - market-data
+  - analytics
+  - alert-service
+  - worker-service
+  - scheduler
+  - frontend
+  - postgres

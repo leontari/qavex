@@ -321,17 +321,17 @@ docker-compose.override.yml
 # =============================================================================
 # Kubernetes / k8s
 # =============================================================================
-k8s/generated/
+k8s_/generated/
 *.kubeconfig
 *.yaml.tmp
 
 # =============================================================================
 # Helm
 # =============================================================================
-charts/**/charts/
-charts/**/tmpcharts/
-charts/**/Chart.lock
-charts/**/values.schema.json
+helm/**/charts/
+helm/**/tmpcharts/
+helm/**/Chart.lock
+helm/**/values.schema.json
 helmfile.lock
 
 # =============================================================================
