@@ -192,7 +192,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "template-package", editable = "packages-shared/python-packages/template-package" },
+    { name = "template-package", editable = "packages/py-packages/template-package" },
     { name = "template-service", editable = "services/template-service" },
 ]
 
@@ -227,7 +227,7 @@ wheels = [
 [[package]]
 name = "template-package"
 version = "0.1.0"
-source = { editable = "packages-shared/python-packages/template-package" }
+source = { editable = "packages/py-packages/template-package" }
 dependencies = [
     { name = "pydantic" },
     { name = "requests" },
@@ -252,7 +252,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi" },
-    { name = "template-package", editable = "packages-shared/python-packages/template-package" },
+    { name = "template-package", editable = "packages/py-packages/template-package" },
     { name = "uvicorn" },
 ]
 
