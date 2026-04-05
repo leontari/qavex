@@ -14,7 +14,7 @@ template-service = { workspace = true }
 
 [tool.uv.workspace]
 members = [
-  "packages-shared/python-packages/*",
+  "packages/py-packages/*",
   "services/*",
 ]
 exclude = [
@@ -25,5 +25,6 @@ exclude = [
   "services/backend-api",
   "services/market-data",
   "services/scheduler",
+  # "services/template-service",
   "services/worker-service",
 ]

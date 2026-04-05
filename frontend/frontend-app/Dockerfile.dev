@@ -1,0 +1,12 @@
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/frontend-app ./frontend/frontend-app
+COPY packages/js-packages ./packages/js-packages
+
+RUN npm install -g pnpm
+RUN pnpm install
+
+CMD ["pnpm", "--filter", "frontend-app", "dev", "--host", "0.0.0.0"]

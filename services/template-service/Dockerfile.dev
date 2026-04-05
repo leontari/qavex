@@ -1,19 +1,18 @@
-# services/backend-api/Dockerfile.dev
 FROM python:3.11-slim
 
-# Устанавливаем uv
+# install uv
 RUN pip install uv
 
 WORKDIR /app
 
-# Копируем только lockfile + workspace метаданные
+# copy only lockfile + workspace metadata
 COPY pyproject.toml uv.lock ./
 COPY packages ./packages
 COPY services/backend-api ./services/backend-api
 
-# Устанавливаем зависимости ТОЛЬКО для backend-api
+# install deps ONLY for backend-api
 RUN uv sync --frozen --no-dev --package backend-api
 
-# Запуск с hot reload
+# Start with hot reload
 CMD ["uv", "run", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
 

@@ -1,0 +1,8 @@
+{
+  "name": "qavex-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend/*",
+    "packages/js-packages/*"
+  ]
+}

@@ -156,7 +156,7 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 
 ## 📦 Services
 
-- [Frontend](/frontend/README.md)
+- [Frontend](/ui/README.md)
 - [Database](/db/README.md)
 - [API Gateway](/services/api-gateway/README.md)
 - [Market Data Service](/services/market-data/README.md)

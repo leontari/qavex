@@ -6,11 +6,12 @@ readme = "README.md"
 dependencies = [
     "fastapi",
     "uvicorn",
+
     "template-package",
 ]
 
-[tool.uv.sources]
-template-package = { workspace = true}
-
 [project.scripts]
 template-service = "template_service.main:main"
+
+[tool.uv.sources]
+template-package = { workspace = true}

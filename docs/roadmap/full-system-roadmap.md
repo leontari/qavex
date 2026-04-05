@@ -97,7 +97,7 @@
 
 # 📚 Related Documents
 
-- [Frontend TODO](/frontend/TODO.md)
+- [Frontend TODO](/ui/TODO.md)
 - [DB TODO](/db/TODO.md)
 - [Api-Gateway TODO](/services/api-gateway/TODO.md)
 - [Market-Data-Service TODO](/services/market-data/TODO.md)
