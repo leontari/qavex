@@ -4,14 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 dependencies = [
-    "fastapi",
-    "uvicorn",
+  "fastapi == 0.135.*",
+  "uvicorn == 0.44.*",
 
-    "template-package",
+  # shared packages
+  "template-package == 0.1.0",
 ]
 
 [project.scripts]
 template-service = "template_service.main:main"
-
-[tool.uv.sources]
-template-package = { workspace = true}
