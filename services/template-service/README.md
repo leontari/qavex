@@ -1,1 +1,0 @@
-# Service directory template

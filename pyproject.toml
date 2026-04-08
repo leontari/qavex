@@ -1,30 +1,78 @@
 [project]
-name = "qavex-monorepo"
+name = "qavex"
 version = "0.1.0"
-requires-python = "==3.11.*"
-dependencies = [
-  # "pre-commit == 4.5.*",
-  "template-package",
-  "template-service",
-]
+description = "Monorepo workspace"
+requires-python = ">=3.11"
+dependencies = []
 
-[tool.uv.sources]
-template-package = { workspace = true }
-template-service = { workspace = true }
+# =============================================================================
+#    UV
+# =============================================================================
+[dependency-groups]
+dev = [
+    "mypy>=1.20.1",
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.10",
+]
 
 [tool.uv.workspace]
 members = [
-  "packages/py-packages/*",
-  "services/*",
+    "backend/template-app",
+    "backend/market-data",
 ]
-exclude = [
-  # "packages-shared/python-packages/template-package",
-  "services/alert-service",
-  "services/analytics",
-  "services/api-gateway",
-  "services/backend-api",
-  "services/market-data",
-  "services/scheduler",
-  # "services/template-service",
-  "services/worker-service",
+
+# =============================================================================
+#    MYPY
+# =============================================================================
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["venv", ".venv", "alembic",]
+plugins = []
+strict = true
+
+# =============================================================================
+#    RUFF
+# =============================================================================
+# --- Ruff - Global Options ---------------------------------------------------
+[tool.ruff]
+line-length = 79
+indent-width = 4
+preview = false               # Switch to Ruff's experimental features
+include = []
+# https://docs.astral.sh/ruff/settings/#exclude
+exclude = ["venv", ".venv", "alembic",]
+
+# --- Ruff - Formatter --------------------------------------------------------
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true      # https://docs.python.org/3/library/doctest.html
+line-ending = "lf"                # PEP8: Unix-style end of line symbol
+skip-magic-trailing-comma = false # correlates to linter.isort.split-on-trailing-comma
+
+# --- Ruff - Linter -----------------------------------------------------------
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG001", # unused arguments in functions
+    "T201",   # print statements are not allowed
 ]
+ignore = [
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "W191",   # indentation contains tabs
+    "B904",   # Allow raising exceptions without from e, for HTTPException
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true

@@ -76,7 +76,7 @@ make run SERVICE=api-gateway
 
 ## 6. Project Structure
 ```
-services/       — backend microservices
+backend/        — backend microservices
 frontend/       — SPA application
 db/             — database schema & migrations
 docs/           — architecture * documentation

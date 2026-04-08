@@ -9,19 +9,19 @@ It includes backend services, a frontend application, shared libraries, protobuf
 ## 📁 Repository Structure
 ```
 repo/
-├── db/                    # Migrations and database schema
-├── deploy/                # Helm charts, Traefik, Kubernetes configs
-├── docs/                  # Arhitecture docs
-├── frontend/              # SPA (Vue/Svelte)
-├── infra/                 # Local development environment (Docker, Kind, Makefile)
-├── scripts/               # Utility scripts for CI, automation, validation
-├── services/              # Backend microservices
+├── backend/               # Backend microservices
 │   ├── api-gateway/
 │   ├── market-data/
 │   ├── analytics/
 │   ├── alert-service/
 │   ├── worker-service/
 │   └── scheduler/
+├── db/                    # Migrations and database schema
+├── deploy/                # Helm charts, Traefik, Kubernetes configs
+├── docs/                  # Arhitecture docs
+├── frontend/              # SPA (Vue/Svelte)
+├── infra/                 # Local development environment (Docker, Kind, Makefile)
+├── scripts/               # Utility scripts for CI, automation, validation
 │
 ├── shared-libs/           # Reusable libraries for Python and Node
 └── shared-proto/          # Protobuf contracts for inter-service communication
@@ -98,12 +98,12 @@ make run SERVICE=api-gateway
 
 | Сервис                                               | Описание                      |
 |------------------------------------------------------|-------------------------------|
-| [API Gateway](/services/api-gateway/README.md)       | REST API for the frontend     |
-| [Market Data](/services/market-data/README.md)       | Market data ingestion         |
-| [Analytics](/services/analytics/README.md)           | Indicators, signals, patterns |
-| [Alert Service](/services/alert-service/README.md)   | Rules and notifications       |
-| [Worker Service](/services/worker-service/README.md) | Heavy tasks, reports          |
-| [Scheduler](/services/scheduler/README.md)           | CronJobs                      |
+| [API Gateway](/backend/api-gateway/README.md)       | REST API for the frontend     |
+| [Market Data](/backend/market-data/README.md)       | Market data ingestion         |
+| [Analytics](/backend/analytics/README.md)           | Indicators, signals, patterns |
+| [Alert Service](/backend/alert-service/README.md)   | Rules and notifications       |
+| [Worker Service](/backend/worker-service/README.md) | Heavy tasks, reports          |
+| [Scheduler](/backend/scheduler/README.md)           | CronJobs                      |
 
 ---
 
