@@ -43,7 +43,7 @@ COPY ${APP_DIR}/src /app/${APP_DIR}/src
 #    RUNTIME STAGE: debug version as the prod version doesn't have shell
 # =============================================================================
 # Use an image that has a minimum set of deps
-FROM gcr.io/distroless/cc:debug-nonroot
+FROM gcr.io/distroless/cc:debug-nonroot@sha256:55dd32378f7562c890342098a04726f4ef386bb86c87bec3db6ed4eef27d99fb
 
 # Use `/app` as the working directory.
 WORKDIR /app

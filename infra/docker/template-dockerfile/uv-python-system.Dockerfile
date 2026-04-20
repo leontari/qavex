@@ -2,7 +2,7 @@
 #    BUILD STAGE: create the apllication using the system Python verion
 # =============================================================================
 # Use an officeal Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim@sha256:4f5d923c9dcea037f57bda425dd209f3ec643da2f0b74227f68d09dab0b3bb36 AS builder
 
 ENV APP_NAME=template-app
 ENV APP_DIR=backend/${APP_NAME}
@@ -45,7 +45,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Use an final debian base image without uv.
 # It is important to use the image that matches the builder, as the path to the
 # Python executable must be the same.
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim-bookworm@sha256:9c6f90801e6b68e772b7c0ca74260cbf7af9f320acec894e26fccdaccfbe3b47
 
 # Setup a non-root user
 RUN groupadd --system --gid 999 nonroot \
