@@ -1,0 +1,23 @@
+services:
+  api:
+    build: .
+    healthcheck: # marked unhealthy after 3 times in a row, configure the orchestrator to restart unhealthy containers automatically
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    logging: # handle log rotation so the logs don't fill up the disk, consider sending logs to a service like CludWatch, Datadog or ELR stack
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy: # scaling: one process for container and scaling at the container level
+      replicas: 4
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False

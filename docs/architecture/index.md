@@ -158,12 +158,12 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 
 - [Frontend](/ui/README.md)
 - [Database](/db/README.md)
-- [API Gateway](/services/api-gateway/README.md)
-- [Market Data Service](/services/market-data/README.md)
-- [Analytics Service](/services/analytics/README.md)
-- [Alert Service](/services/alert-service/README.md)
-- [Worker Service](/services/worker-service/README.md)
-- [Scheduler](/services/scheduler/README.md)
+- [API Gateway](/backend/api-gateway/README.md)
+- [Market Data Service](/backend/market-data/README.md)
+- [Analytics Service](/backend/analytics/README.md)
+- [Alert Service](/backend/alert-service/README.md)
+- [Worker Service](/backend/worker-service/README.md)
+- [Scheduler](/backend/scheduler/README.md)
 
 ---
 

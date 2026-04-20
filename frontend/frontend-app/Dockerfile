@@ -1,28 +1,34 @@
-FROM node:20-alpine AS build
-
+# Build stage
+FROM node:18-slim AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-COPY . .
-RUN npm run build
+# Production stage
+FROM node:18-slim
 
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# Create non-root user with specific UID
+RUN groupadd --gid 10001 appgroup && \
+    useradd --uid 10001 --gid appgroup --shell /bin/bash --create-home appuser
 
+# Create necessary directories
+RUN mkdir -p /app/logs && chown -R appuser:appgroup /app
 
+WORKDIR /app
 
-#FROM node:20-slim AS builder
+# Copy from builder with correct ownership
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup . .
 
-#WORKDIR /app
+# Use non-privileged port
+ENV PORT=8080
+EXPOSE 8080
 
-#COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-#COPY services/frontend ./services/frontend
-#COPY packages ./packages
+# Switch to non-root user
+USER appuser
 
-#RUN npm install -g pnpm
-#RUN pnpm install
-#RUN pnpm --filter frontend build
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:8080/health || exit 1
 
-#FROM nginx:alpine
-#COPY --from=builder /app/services/frontend/build /usr/share/nginx/html
+CMD ["node", "server.js"]

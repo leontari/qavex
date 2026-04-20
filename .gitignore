@@ -221,6 +221,14 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env.*.local
+.env.local
+.env.*.secret
+*.secret.env
+
+# But keep example/template files
+!.env.example
+!.env.template
 
 # Rope project settings
 .ropeproject
