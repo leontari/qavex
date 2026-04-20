@@ -16,15 +16,18 @@ By participating in this project, you agree to follow the community standards de
 
 ---
 
-## 🛠 Prerequisites
+## 🛠 Project requirements
 
-- Python 3.11+
+- [**Make 4.4+**](https://www.gnu.org/software/make/)
+- [**Python 3.11+**](https://www.python.org/)
+- [**UV** 0.11.+](https://docs.astral.sh/uv/)  
+- [**pre-commit 4.5**](https://pre-commit.com/)
+- [**Docker & Docker Compose**](https://www.docker.com/)
 - Node.js (managed via `nvm`)
-- Docker & Docker Compose
 - Kind (optional for Kubernetes testing)
-- `uv` for Python virtualenvs
-- `pre-commit`
-- `make`
+
+
+
 
 ---
 
@@ -40,11 +43,16 @@ By participating in this project, you agree to follow the community standards de
 
 ---
 
-## 🚀 Setup locally development environment
+## 🚀 Setup  local development environment
 
-### Install pre-commit hooks
-```
-make pre-commit-install
+1. Install project requirements  
+2. Sync your virtual environment with the project.
+
+Run from within `/qavex` directory:
+
+``` bash
+make sync
+make install-pre-commit
 ```
 
 ## 🧩 Development Workflow
@@ -59,7 +67,7 @@ make run-frontend
 
 #### 2. Run a single service (```api-gateway``` service as an example)
 ```
-make run service=api-gateway
+make uvicorn SERVICE=api-gateway
 ```
 
 ### Docker:
@@ -77,7 +85,7 @@ Run tests for a specific service:
 make test SERVICE=analytics
 ```
 
-or 
+or
 
 ```
 cd services/<service> pytest
@@ -151,7 +159,7 @@ Please describe:
 - alternatives considered
 - potential impact
 
---- 
+---
 
 ## 🤝 Thank You
 Your contributions help make this project better for everyone.
