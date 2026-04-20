@@ -40,10 +40,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY ${APP_DIR}/src /app/${APP_DIR}/src
 
 # =============================================================================
-#    RUNTIME STAGE: prod version
+#    RUNTIME STAGE: debug version as the prod version doesn't have shell
 # =============================================================================
 # Use an image that has a minimum set of deps
-FROM gcr.io/distroless/cc:nonroot@sha256:8f960b7fc6a5d6e28bb07f982655925d6206678bd9a6cde2ad00ddb5e2077d78
+FROM gcr.io/distroless/cc:debug-nonroot@sha256:55dd32378f7562c890342098a04726f4ef386bb86c87bec3db6ed4eef27d99fb
 
 # Use `/app` as the working directory.
 WORKDIR /app
@@ -55,9 +55,10 @@ COPY --from=builder --chown=nonroot:nonroot /app /app
 
 # Activate venv by placing its binary direcotry at the front of the path.
 ENV PATH="/app/.venv/bin:$PATH"
-
-# Distroless images use nonroot user with UID:65532 and GID:65532 by default.
+# NOTE: Distroless images use nonroot user with UID:65532 and GID:65532 by default.
 USER nonroot
+# Disable the base image's dafault busybox/sh entrypoint.
+ENTRYPOINT []
 
 # Run the application.
 CMD ["fastapi", "run", "backend/template-app/src/main.py", "--host", "0.0.0.0", "--port", "8000"]
