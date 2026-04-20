@@ -1,7 +1,7 @@
 # =============================================================================
 #    BUILD STAGE: create the applicatin in the virtual environment
 # =============================================================================
-# Use a debian image with uv pre-installed and no-Python
+# Use an officeal uv debian image with uv pre-installed and no-Python
 FROM ghcr.io/astral-sh/uv:bookworm-slim@sha256:22334efe746f1b69217d455049b484d7b8cacfb2d5f42555580b62415a98e0a3 AS builder
 
 ENV APP_NAME=template-app
@@ -25,9 +25,11 @@ WORKDIR /app
 RUN --mount=type=bind,source=.python-version,target=.python-version \
     uv python install
 
-# Install and cache a workspace member's dependencies.
-# NOTE: CI checks guaranty that the lockfile is up to date. Asserting the lockfile
-# reqruieres all workspace members to be at place. Here we can only install from the lockfile.
+# Install and cache the workspace member's dependencies.
+# NOTE:
+#   CI checks guaranty that the lockfile is up to date.
+#   Asserting the lockfile reqruieres all workspace members to be at place.
+#   Here we can only install from the lockfile.
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
@@ -38,10 +40,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY ${APP_DIR}/src /app/${APP_DIR}/src
 
 # =============================================================================
-#    RUNTIME STAGE: creat the application
+#    RUNTIME STAGE: prod version
 # =============================================================================
 # Use an image that has a minimum set of deps
-FROM gcr.io/distroless/cc:debug-nonroot
+FROM gcr.io/distroless/cc:nonroot@sha256:8f960b7fc6a5d6e28bb07f982655925d6206678bd9a6cde2ad00ddb5e2077d78
 
 # Use `/app` as the working directory.
 WORKDIR /app
@@ -53,10 +55,9 @@ COPY --from=builder --chown=nonroot:nonroot /app /app
 
 # Activate venv by placing its binary direcotry at the front of the path.
 ENV PATH="/app/.venv/bin:$PATH"
+
 # Distroless images use nonroot user with UID:65532 and GID:65532 by default.
 USER nonroot
-# Disable the base image's dafault entrypoint
-ENTRYPOINT []
 
 # Run the application.
 CMD ["fastapi", "run", "backend/template-app/src/main.py", "--host", "0.0.0.0", "--port", "8000"]
