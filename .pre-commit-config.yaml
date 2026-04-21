@@ -2,8 +2,7 @@ minimum_pre_commit_version: "4.5.1"
 fail_fast: false     # set to <true> to stop pre-commit after the first failure
 exclude: _vendor|vendored
 repos:
-# --- Universal File Checks ---------------------------------------------------
-  # .py files are skipped here since they are checked by RUFF
+  # --- Universal File Checks ---------------------------------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -11,20 +10,22 @@ repos:
     - id: check-toml
     - id: check-json
     - id: check-xml
+    # This check follows the definition of a text file in POSIX: IEEE Std 1003.1-2017
+    # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_403
+    # Rule: a text file shall end with a <newline> character '\n'.
     - id: end-of-file-fixer
-      exclude: .*\.py
+    - id: mixed-line-ending
+      args: [ --fix=lf ]
     - id: trailing-whitespace
-      # trailing whitespace has meaning in markdown
-      # https://www.markdownguide.org/hacks/#indent-tab
-      exclude: .*\.py|.*\.md
+      args: [--markdown-linebreak-ext=md]
     - id: check-added-large-files
       args: [ "--maxkb=200" ]
     - id: detect-private-key
 
-# --- Project Requirements ----------------------------------------------------
-# Check whether uv.lock file is in actual state and sync .venv
-# in case the deps were changed directly in pyproject.toml.
+  # --- Project Requirements ----------------------------------------------------
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.11.7
+    # Check whether uv.lock file is in actual state in case the deps were changed
+    # directly in pyproject.toml.
     hooks:
       - id: uv-lock
