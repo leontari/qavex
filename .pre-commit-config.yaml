@@ -1,31 +1,64 @@
 minimum_pre_commit_version: "4.5.1"
-fail_fast: false     # set to <true> to stop pre-commit after the first failure
-exclude: _vendor|vendored
 repos:
-  # --- Universal File Checks ---------------------------------------------------
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-    - id: check-yaml
-    - id: check-toml
+    - id: check-added-large-files
+      args: [ "--maxkb=200" ]
     - id: check-json
+    - id: check-merge-conflict
+      args: [--assume-in-merge]
+    - id: check-toml
     - id: check-xml
+    - id: check-yaml
+    - id: detect-private-key
     # This check follows the definition of a text file in POSIX: IEEE Std 1003.1-2017
     # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_403
     # Rule: a text file shall end with a <newline> character '\n'.
+    # Keep this check in sync with .gitattributes and ruff settings.
     - id: end-of-file-fixer
     - id: mixed-line-ending
       args: [ --fix=lf ]
     - id: trailing-whitespace
       args: [--markdown-linebreak-ext=md]
-    - id: check-added-large-files
-      args: [ "--maxkb=200" ]
-    - id: detect-private-key
 
-  # --- Project Requirements ----------------------------------------------------
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.1
+    hooks:
+      - id: check-github-workflows
+        args: ["--verbose"]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        args: [ "--write-changes" ]
+
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: "v2.21.1"
+    hooks:
+      - id: pyproject-fmt
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.15.11"
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [ "--fix", "--unsafe-fixes", "--exit-non-zero-on-fix" ]
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.24.1
+    hooks:
+      - id: zizmor
+        args: [ "--min-severity", "high" ]
+
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.11.7
-    # Check whether uv.lock file is in actual state in case the deps were changed
-    # directly in pyproject.toml.
     hooks:
       - id: uv-lock
+
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes

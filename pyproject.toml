@@ -3,6 +3,10 @@ name = "qavex"
 version = "0.1.0"
 description = "Monorepo workspace"
 requires-python = ">=3.11"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+]
 
 [dependency-groups]
 dev = [
@@ -22,7 +26,7 @@ type = [
   { include-group = "test" },
 ]
 lint = [
-    "pre-commit-uv>=4.2.1",
+  "pre-commit-uv>=4.2.1",
 ]
 pkg-meta = [
   "check-wheel-contents>=0.6.3",
@@ -30,43 +34,35 @@ pkg-meta = [
   "uv>=0.11",
 ]
 
-# =============================================================================
-#    UV
-# =============================================================================
 [tool.uv]
-required-version = "==0.11.7"  # upgade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
-
-[tool.uv.workspace]
-members = [
-    "backend/template-app",
-    "backend/market-data",
+required-version = "==0.11.7"  # upgrade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
+workspace.members = [
+  "backend/market-data",
+  "backend/template-app",
 ]
 
-# =============================================================================
-#    RUFF
-# =============================================================================
 [tool.ruff]
 line-length = 79
-format.preview = true               # Switch to Ruff's experimental features
+format.preview = true  # Switch to Ruff's experimental features
+format.indent-style = "space"
+format.line-ending = "lf"  # PEP8: Unix-style end of line symbol
 format.docstring-code-line-length = 78
 format.docstring-code-format = true
 format.quate-style = "double"
-format.indent-style = "space"
-format.line-ending = "lf"           # PEP8: Unix-style end of line symbol
 lint.select = [
   "ALL",
 ]
 lint.ignore = [
-  "ANN101",  # no type annotation for self
-  "ANN401",  # allow Any as type annotation
-  "COM812",  # Conflict with formatter
-  "CPY",     # No copyright statements
-  "D203",    # 'one-blank-line-befor-class' and 'no-blank-line-before-class' (D211) are incompatible
-  "D212",    # 'multi-line-summary-first-line' (D212) and 'multi-line-summary-second-line' (D213) are incompatible
-  "DOC501",  # not working with Sphinx
-  "ISC001",  # Conflict with formatter
-  "RUF067",  # '__init__' module should only contain docstrings and re-exports
-  "S104",    # Possible binding to all interfaces
+  "ANN101", # no type annotation for self
+  "ANN401", # allow Any as type annotation
+  "COM812", # Conflict with formatter
+  "CPY",    # No copyright statements
+  "D203",   # 'one-blank-line-befor-class' and 'no-blank-line-before-class' (D211) are incompatible
+  "D212",   # 'multi-line-summary-first-line' (D212) and 'multi-line-summary-second-line' (D213) are incompatible
+  "DOC501", # not working with Sphinx
+  "ISC001", # Conflict with formatter
+  "RUF067", # '__init__' module should only contain docstrings and re-exports
+  "S104",   # Possible binding to all interfaces
 ]
 lint.per-file-ignores."tests/**/*.py" = [
   "D",       # don't care about documentation in tests
@@ -85,7 +81,7 @@ lint.isort = { known-first-party = [], required-imports = [
 lint.preview = true
 
 [tool.codespell]
-builtin = "clear,usage,en-GB_to_en_US"
+builtin = "clear,usage,en-GB_to_en-US"
 count = true
 
 [tool.pyproject-fmt]
