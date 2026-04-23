@@ -27,11 +27,11 @@ help:
 	@echo " >>> make help                            :show this help                      "
 	@echo "                                                                               "
 	@echo " --- Dev Tools --------------------------------------------------------------- "
-	@echo " >>> make sync                            :install|update global .venv uv.lock "
-	@echo " >>> make lock <service>                  :create/update service's uv.lock     "
+	@echo " >>> make sync                            :install all deps using lockfile     "
+	@echo " >>> make lock                            :discover deps and update uv.lock    "
 	@echo " >>> make export <service>                :export requirements.txt             "
 	@echo "                                                                               "
-	@echo " >>> make install-pre-commit              :git pre-commit and pre-push hooks   "
+	@echo " >>> make install-pre-commit              :install pre-commit hooks            "
 	@echo " >>> make run-pre-commit                  :run pre-commit checks               "
 	@echo "                                                                               "
 	@echo " >>> make uvicorn <service>               :run service locally via uvicorn     "
@@ -67,9 +67,10 @@ export:
 
 # -----------------------------------------------------------------------------
 install-pre-commit:
-	@echo "Installing pre-commit hooks..."
+	@echo "Installing pre-commit globally on the system..."
+	uv tool install pre-commit==4.5.1 --with pre-commit-uv --force-reinstall
+	@echo "Installing hooks for the current repo..."
 	uv run pre-commit install
-	uv run pre-commit install --hook-type pre-push
 	@echo "pre-commit hooks installed successfully."
 
 run-pre-commit:
