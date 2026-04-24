@@ -1,111 +1,92 @@
 name: CI
-run-name: CI checks for ${{ github.ref_name }} 🚀
+run-name: "CI for PR #${{ github.event.pull_request.number }} — ${{ github.ref_name }} 🚀"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions: {}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   lint:
-    name: Lint
+    name: 🧹 Lint
     runs-on: ubuntu-latest
 
     env:
-      RUNNER: ${{ runner.os }}
-      REPO: ${{ github.repository }}
-      BRANCH: ${{ github.ref }}
-      BRANCH_NAME: ${{ github.ref_name }}
-      EVENT: ${{ github.event_name }}
-      WORKSPACE: ${{ github.workspace }}
       PRECOMMIT_CACHE: ~/.cache/pre-commit
-      UV_CACHE: ~/.cache/uv
-      PRECOMMIT_VERSION: "4.5.1"
+      UV_CACHE_DIR: /tmp/.uv-cache
 
     steps:
-      - name: 🛰 Meta info
-        run: |
-          echo "🐧 Runner: this job is now running on a $RUNNER server hosted by GitHub!"
-          echo "💡 Repository: $REPO"
-          echo "🔎 Branch: $BRANCH"
-          echo "🎉 Event: the job was automatically triggered by a $EVENT event."
-
       - name: 📥 Checkout the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - name: 📂 List files in the repository
-        run: |
-          echo "💡 The $REPO repository has been cloned to the runner."
-          ls -alh ${{ github.workspace }}
-          echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: 🔧 Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version-file: ".python-version"
 
-      - name: 🛠 Install uv, Python version and create venv
-        id: setup-uv
+      - name: 🔧 Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          version-file: ".python-version"
-          activate-environment: "true"
-          cache-dependency-glob: |
-            **/.python-version
-            **/pyproject.toml
-            **/uv.lock
-          restore-cache: "true"
-          save-cache: "true"
-          prune-cache: "true"
+          version-file: "pyproject.toml"
 
-      - name: 💾 Compute Python version hash
+      - name: 📦 Restore uv cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: /tmp/.uv-cache
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+            uv-${{ runner.os }}
+
+      - name: 🔧 Install venv
+        run: uv sync --frozen --group dev
+
+      - name: 📦 Compute Python version hash
         run: echo "PY=$(python -VV | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
 
-      - name: 💾 Cache pre-commit environments
+      - name: 📦 Cache pre-commit environments
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - name: 🛠 Install pre-commit
-        run: uv tool install pre-commit==${{ env.PRECOMMIT_VERSION }} --with pre-commit-uv --force-reinstall
 
       - name: 🔍 Run pre-commit checks # only check the changed files
         run: uv run pre-commit run --from-ref origin/HEAD --to-ref HEAD
 
       - name: 🧾 Environment summary
         run: |
-          echo "🖥 OS:"; uname -a; echo ""
-          echo "🧰 UV:"; which uv; uv --version; echo ""
-          echo "🐍 PYTHON:"; which python; python --version; echo ""
-          echo "📦 PRE-COMMIT:"; which pre-commit || echo "not installed"; pre-commit --version || true; echo ""
-          echo "📚 INSTALLED DEPENDENCIES:"; uv pip list; echo ""
-          echo "📁 VENV SIZE:"; du -sh .venv || echo ".venv not found"; echo ""
-          echo "🧹 UV CACHE:"; uv cache dir; du -sh ~/.cache; du -sh ~/.cache/uv; echo ""
-          echo "🧾 LIST CACHE:"; ls -Rlh ~/.cache/uv; echo ""
-          echo "🔧 ENV VARS (filtered):"; env | grep -E 'UV|PYTHON|VIRTUAL|PATH'; echo ""
+          echo "🖥 OS:"; uname -a ; echo
+          echo "🧰 UV:"; uv --version ; which uv ; echo
+          echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" echo
+          echo "🐍 PYTHON:"; uv run python --version ; which uv run python ; echo
+          echo "🐍 PYTHON .venv SIZE:"; du -sh .venv ; echo
+          echo "🐍 VENV DEPENDENCIES:"; uv run pip list ; echo
+          echo "📦 PRE-COMMIT:"; uv run pre-commit --version ; which uv run pre-commit ;  echo
+          echo "📦 PRE-COMMIT CACHE:"; du -sh ${{ env.PRECOMMIT_CACHE }} ; echo
 
-      - name: The job's status
-        run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: 📦 Minimize uv cache
+        run: uv cache prune --ci
 
-  check-tests-pass:
-    name: Check tests pass
+      - name: 🧾 UV cache size
+        run: |
+          echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" ; echo
+
+  pipeline-status:
+    name: ❕ Verify that all required jobs succeeded
     if: always()
-    needs:
-      - lint
+    needs: [lint]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Decide whether the needed jobs succeeded or failed
+      - name: 🏁 Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
         with:
           jobs: ${{ toJSON(needs) }}
