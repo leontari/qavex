@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RUNNER: ${{ runner.os }}
       REPO: ${{ github.repository }}
       BRANCH: ${{ github.ref }}
       BRANCH_NAME: ${{ github.ref_name }}
@@ -36,6 +35,8 @@ jobs:
 
     steps:
       - name: 🛰 Meta info
+        env:
+          RUNNER: ${{ runner.os }}
         run: |
           echo "🐧 Runner: this job is now running on a $RUNNER server hosted by GitHub!"
           echo "💡 Repository: $REPO"
