@@ -7,7 +7,6 @@ We welcome pull requests, bug reports, feature suggestions, and documentation im
 This guide explains how to set up your environment, follow coding standards, and submit changes.
 
 ---
-
 ## 🧱 Code of Conduct
 
 By participating in this project, you agree to follow the community standards described in:
@@ -15,23 +14,20 @@ By participating in this project, you agree to follow the community standards de
 [**CODE_OF_CONDUCT.md**](/CONTRIBUTING.md)
 
 ---
+## 🛠 Development Environment Requirements
 
-## 🛠 Project requirements
-
-- [**Make 4.4+**](https://www.gnu.org/software/make/)
-- [**Python 3.11+**](https://www.python.org/)
-- [**UV** 0.11.+](https://docs.astral.sh/uv/)  
-- [**pre-commit 4.5**](https://pre-commit.com/)
-- [**Docker & Docker Compose**](https://www.docker.com/)
-- Node.js (managed via `nvm`)
-- Kind (optional for Kubernetes testing)
-
-
-
+- [**GNU Make 4.4+**](https://www.gnu.org/software/make/) - used for automation and development workflows
+- [**UV 0.11+**](https://docs.astral.sh/uv/) -  Python package and environment manager  
+- [**Docker & Docker Compose**](https://www.docker.com/) - for containerized development and testing
+- Node.js - managed via `nvm` (on windows)
+- Kind (optional for Kubernetes testing) - for running local Kubernetes-based tests
 
 ---
+## 🚀 Getting started
 
+For detailed setup instructions and guidance on preparing your local virtual environment, refer to [onboarding.md](/docs/onboarding.md)
 
+---
 ## 🛠 Contributing workflow
 
 1. Fork the repository  
@@ -42,19 +38,6 @@ By participating in this project, you agree to follow the community standards de
 6. Submit a Pull Request
 
 ---
-
-## 🚀 Setup  local development environment
-
-1. Install project requirements  
-2. Sync your virtual environment with the project.
-
-Run from within `/qavex` directory:
-
-``` bash
-make sync
-make install-pre-commit
-```
-
 ## 🧩 Development Workflow
 
 ### no Docker:
@@ -119,11 +102,10 @@ Pre-commit hooks enforce:
 
 Run manually:
 ```
-make pre-commit-run
+make run-pre-commit
 ```
 
 ---
-
 ## 🔀 Pull Requests
 1. Create a feature branch
 2. Ensure all tests pass
@@ -136,7 +118,6 @@ make pre-commit-run
     - has a clear description of the change
 
 ---
-
 ## 🐛 Reporting Bugs
 
 Please include:
