@@ -59,7 +59,10 @@ jobs:
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: 🔍 Run pre-commit checks # only check the changed files
-        run: uv run pre-commit run --from-ref origin/HEAD --to-ref HEAD
+        # TODO: change it to check all files after ci lint job is set up
+        run: |
+          git remote set-head origin --auto
+          uv run pre-commit run --from-ref origin/HEAD --to-ref HEAD
 
       - name: 🧾 Environment summary
         run: |
