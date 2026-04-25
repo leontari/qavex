@@ -68,7 +68,7 @@ export:
 # -----------------------------------------------------------------------------
 install-pre-commit:
 	@echo "Installing pre-commit globally on the system..."
-	uv tool install pre-commit==4.5.1 --with pre-commit-uv --force-reinstall
+	uv tool install pre-commit --with pre-commit-uv --force-reinstall
 	@echo "Installing hooks for the current repo..."
 	uv run pre-commit install
 	@echo "pre-commit hooks installed successfully."
