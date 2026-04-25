@@ -31,7 +31,7 @@ help:
 	@echo " >>> make lock                            :discover deps and update uv.lock    "
 	@echo " >>> make export <service>                :export requirements.txt             "
 	@echo "                                                                               "
-	@echo " >>> make install-pre-commit              :install pre-commit hooks            "
+	@echo " >>> make install-git-hooks               :install 'pre-commit' scripts        "
 	@echo " >>> make run-pre-commit                  :run pre-commit checks               "
 	@echo "                                                                               "
 	@echo " >>> make uvicorn <service>               :run service locally via uvicorn     "
@@ -66,15 +66,10 @@ export:
 	uv export --no-hashes --format requirements.txt --package $(SERVICE) --output-file backend/$(SERVICE)/requirements.txt
 
 # -----------------------------------------------------------------------------
-install-pre-commit:
-	@echo "Installing pre-commit globally on the system..."
-	uv tool install pre-commit --with pre-commit-uv --force-reinstall
-	@echo "Installing hooks for the current repo..."
+install-git-hooks:
 	uv run pre-commit install
-	@echo "pre-commit hooks installed successfully."
 
 run-pre-commit:
-	echo "Running pre-commit checks..."
 	uv run pre-commit run --all-files
 
 # -----------------------------------------------------------------------------
