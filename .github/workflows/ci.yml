@@ -75,7 +75,7 @@ jobs:
           echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)"
           echo "🐍 PYTHON:"; uv run python --version ; uv run which python
           echo "🐍 PYTHON .venv SIZE:"; du -sh .venv
-          echo "🐍 VENV DEPENDENCIES:"; uv run pip list
+          echo "🐍 VENV DEPENDENCIES:"; uv pip list
           echo "📦 PRE-COMMIT:"; uv run pre-commit --version ; uv run which pre-commit
           echo "📦 PRE-COMMIT CACHE:"; du -sh ${{ env.PRECOMMIT_CACHE }}
 
