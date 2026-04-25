@@ -7,7 +7,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
-permissions: {}
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -62,10 +64,11 @@ jobs:
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: 🔍 Run pre-commit checks # only check the changed files
-        # TODO: change it to check all files after ci lint job is set up
+        # TODO: change this to check all files
         run: |
-          git remote set-head origin --auto
-          uv run pre-commit run --from-ref origin/HEAD --to-ref HEAD
+          uv run pre-commit run \
+          --from-ref "${{ github.event.pull_request.base.sha }}" \
+          --to-ref   "${{ github.event.pull_request.head.sha }}"
 
       - name: 🧾 Environment summary
         run: |
