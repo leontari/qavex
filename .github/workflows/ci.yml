@@ -79,7 +79,7 @@ jobs:
           echo "📦 PRE-COMMIT:"; uv run pre-commit --version ; uv run which pre-commit
           echo "📦 PRE-COMMIT CACHE:"; du -sh ${{ env.PRECOMMIT_CACHE }}
 
-      - name: 📦 Minimize uv cache
+      - name: 🔧 Minimize uv cache
         run: uv cache prune --ci
 
       - name: 📝 UV cache size
