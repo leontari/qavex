@@ -76,10 +76,10 @@ jobs:
           echo "🖥 OS:"; uname -a ; echo
           echo "🧰 UV:"; uv --version ; which uv ; echo
           echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" ; echo
-          echo "🐍 PYTHON:"; uv run python --version ; which uv run python ; echo
+          echo "🐍 PYTHON:"; uv run python --version ; uv run which python ; echo
           echo "🐍 PYTHON .venv SIZE:"; du -sh .venv ; echo
           echo "🐍 VENV DEPENDENCIES:"; uv run pip list ; echo
-          echo "📦 PRE-COMMIT:"; uv run pre-commit --version ; which uv run pre-commit ;  echo
+          echo "📦 PRE-COMMIT:"; uv run pre-commit --version ; uv run which pre-commit ;  echo
           echo "📦 PRE-COMMIT CACHE:"; du -sh ${{ env.PRECOMMIT_CACHE }} ; echo
 
       - name: 📦 Minimize uv cache
