@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   lint:
-    name: 🧹 Lint
+    name: 🔍 Lint
     runs-on: ubuntu-latest
 
     env:
@@ -90,7 +90,7 @@ jobs:
           echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" ; echo
 
   pipeline-status:
-    name: ❕ Verify that all required jobs succeeded
+    name: 🔍 Verify (jobs)
     if: always()
     needs: [lint]
     runs-on: ubuntu-latest
