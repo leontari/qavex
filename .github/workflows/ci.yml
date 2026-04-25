@@ -75,7 +75,7 @@ jobs:
         run: |
           echo "🖥 OS:"; uname -a ; echo
           echo "🧰 UV:"; uv --version ; which uv ; echo
-          echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" echo
+          echo "🧰 UV CACHE DIR:"; du -sh "$(uv cache dir)" ; echo
           echo "🐍 PYTHON:"; uv run python --version ; which uv run python ; echo
           echo "🐍 PYTHON .venv SIZE:"; du -sh .venv ; echo
           echo "🐍 VENV DEPENDENCIES:"; uv run pip list ; echo
