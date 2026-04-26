@@ -1,12 +1,14 @@
 # Python dependency management  
 
 ## Package dependencies
+
 ### 1. Your shared package needs a library from PyPi or other registry:
+
 - declare this, example
 
   ```
   # qavex/packages/<my-package>/pyproject.toml
-   
+
   [project]
   name = "my-package"
   version = "0.1.0"
@@ -19,11 +21,12 @@
 ## Service dependencies
 
 ### 2. Your backend service needs <my-package> from above:
+
 - declare this, example:
 
   ```
   # qavex/backend/<my-service>/pyproject.toml
-   
+
   [project]
   name = "my-service"
   version = "0.1.0"
@@ -32,12 +35,12 @@
   ]
   ```
 
----
-
-# CONFIGURE `UV` 
+# CONFIGURE `UV`
 
 ### 3. You are going to ```"import <my-package>"``` somewhere in ```<my-service>```:
-- declare ```<my-package>``` dependency, example:     
+
+- declare ```<my-package>``` dependency, example:  
+
 
 ```
 # qavex/pyproject.toml
@@ -53,8 +56,10 @@ dependencies = [
 
 ### 4. Declare from where <my-code> should be taken  
 
-#### 4.1. installation from local folder 
+#### 4.1. installation from local folder
+
 - include the following section :
+
 
 ```
 # qavex/.pyproject.toml
@@ -64,7 +69,8 @@ my-service = { workspace = true }
 my-package = { workspace = true }
 ```
 
-#### 4.2. installation from external source 
+#### 4.2. installation from external source
+
 - include  something like this example:
 
 ```
@@ -76,7 +82,8 @@ my-service = { git = "https://github.com/<my-service>/<my-service>" }
 ```
 
 
-### 5. Discover workspace members 
+### 5. Discover workspace members
+
 - include the following section
 
 ```
@@ -92,6 +99,7 @@ members = [
 This setting will guide the UV how to make the graph of all deps needed
 
 ### 6. Final config file
+
 ```
 # qavex/pyproject.toml
 
@@ -115,24 +123,28 @@ members = [
 ]
 
 exclude = []
-
 ```
 
-## Create virtual envyronment 
-Run within `/qavex` (project's root folder): 
+## Create virtual envyronment
+
+Run within `/qavex` (project's root folder):
+
 ```
-uv venv 
+uv venv
 uv sync
 ```
-or 
+
+or
+
 ```
 uv sync
 ```
 
 After this:
-- uv will make `qavex/.venv` 
-- uv will make a graph of all deps needed via `[tool.uv.workspace]` 
-- uv will install everything from `[project.dependencies]` into `qavex/.venv` in an editable mode 
+
+- uv will make `qavex/.venv`
+- uv will make a graph of all deps needed via `[tool.uv.workspace]`
+- uv will install everything from `[project.dependencies]` into `qavex/.venv` in an editable mode
 - it almost equals to `pip install -e .`
 - uv will use code's sources from  [tool.uv.sources] section
 - uv will create `qavex/uv.lock` file that will keep in sync all the dependencies
@@ -146,6 +158,4 @@ After this:
   - deps are installed in .venv
   - deps are included in workspace `qavex/pyproject.toml`
   - imports are working:
-    - !!! deps are absent in the main source of truth - `qavex/<my-service>/pyproject.toml` 
-
-
+    - !!! deps are absent in the main source of truth - `qavex/<my-service>/pyproject.toml`

@@ -1,7 +1,7 @@
 # =============================================================================
-#    BUILD STAGE: create the applicatin in the virtual environment
+#    BUILD STAGE: create the application in the virtual environment
 # =============================================================================
-# Use an officeal uv debian image with uv pre-installed and no-Python
+# Use an official uv debian image with uv pre-installed and no-Python
 FROM ghcr.io/astral-sh/uv:bookworm-slim@sha256:22334efe746f1b69217d455049b484d7b8cacfb2d5f42555580b62415a98e0a3 AS builder
 
 ENV APP_NAME=template-app
@@ -53,11 +53,11 @@ COPY --from=builder /python /python
 # Copy the application from the builder as nonroot user.
 COPY --from=builder --chown=nonroot:nonroot /app /app
 
-# Activate venv by placing its binary direcotry at the front of the path.
+# Activate venv by placing its binary directory at the front of the path.
 ENV PATH="/app/.venv/bin:$PATH"
 # NOTE: Distroless images use nonroot user with UID:65532 and GID:65532 by default.
 USER nonroot
-# Disable the base image's dafault busybox/sh entrypoint.
+# Disable the base image's default busybox/sh entrypoint.
 ENTRYPOINT []
 
 # Run the application.

@@ -1,7 +1,7 @@
 # =============================================================================
-#    BUILD STAGE: create the apllication using the system Python verion
+#    BUILD STAGE: create the application using the system Python version
 # =============================================================================
-# Use an officeal Python image with uv pre-installed
+# Use an official Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim@sha256:4f5d923c9dcea037f57bda425dd209f3ec643da2f0b74227f68d09dab0b3bb36 AS builder
 
 ENV APP_NAME=template-app

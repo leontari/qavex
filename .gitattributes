@@ -3,7 +3,7 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Make LF the default file's line ending on checkuout 
+# Make LF the default file's line ending on checkuout
 # if a contributor's core.autocrlf isn't configured.
 # -----------------------------------------------------------------------------
 * text eol=lf
@@ -148,7 +148,7 @@ MANIFEST.in     text
 *.vb            text eol=crlf
 
 # =============================================================================
-# FILES THAT ARE TRULY BINARY AND SHOULD NOT BE MODIFIED 
+# FILES THAT ARE TRULY BINARY AND SHOULD NOT BE MODIFIED
 # =============================================================================
 # --- Executable --------------------------------------------------------------
 *.app       binary
@@ -306,7 +306,7 @@ MANIFEST.in     text
 *.tmp       binary
 
 # =============================================================================
-# GitHub Linguist Rules
+# GITHUB LINGSUIST RULES
 # =============================================================================
 # --- Ignore external deps in the GitHub's statistics -------------------------
 external-deps/**/* linguist-generated=true

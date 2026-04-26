@@ -3,11 +3,10 @@
 This document provides a high-level overview of the entire system, including all services, their responsibilities, interactions, and data flow.  
 Each service has its own dedicated README.md, TODO.md and the architecture diagram file, but this index serves as the central reference point.
 
----
-
 # 🧩 System Components
 
 ## 1. Frontend (Vue or Svelte + Lightweight Charts)
+
 **Responsibilities:**
 - UI rendering
 - Charting (candles, indicators, signals)
@@ -18,9 +17,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 **Interactions:**
 - Communicates only with `backend-api` via REST
 
----
-
 ## 2. API Gateway / Backend API (FastAPI)
+
 **Responsibilities:**
 - Authentication / authorization
 - REST API for frontend
@@ -31,9 +29,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Reads from DB (`candles`, `indicators`, `signals`)
 - Calls analytics-service and market-data service via HTTP/gRPC
 
----
-
 ## 3. Market Data Service
+
 **Responsibilities:**
 - Connect to external REST/WebSocket sources
 - Normalize incoming data
@@ -43,9 +40,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Writes to `candles` and `trades` tables
 - Provides internal API for last N candles/trades
 
----
-
 ## 4. Analytics Service
+
 **Responsibilities:**
 - Calculate indicators
 - Generate signals
@@ -57,9 +53,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Writes `indicators` and `signals`
 - Provides REST/gRPC for API-service
 
----
-
 ## 5. Alert Service
+
 **Responsibilities:**
 - Evaluate alert rules
 - Trigger alerts based on indicators/signals
@@ -70,9 +65,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Writes to `alerts` table
 - Sends notifications externally
 
----
-
 ## 6. Worker Service (Optional)
+
 **Responsibilities:**
 - Heavy tasks (tests, reports, periodic calculations)
 - Triggered by queue or CronJob
@@ -81,9 +75,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Writes results to DB
 - Triggers analytics or alert tasks
 
----
-
 ## 7. Scheduler / Cron System
+
 **Responsibilities:**
 - Periodic tasks (daily indicators, cleanup, reports)
 - Managed via Kubernetes CronJobs
@@ -91,9 +84,8 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 **Interactions:**
 - Triggers worker-service or analytics-service
 
----
-
 ## 8. DB Service (Postgres / Timescale / ClickHouse)
+
 **Responsibilities:**
 - Store candles, trades, indicators, signals, alerts
 - Store users and settings
@@ -103,11 +95,7 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Written by market-data, analytics, alert, worker services
 - Read by API-service and analytics-service
 
----
-
 # 🔗 Data Flow Overview
-
----
 
 ```
                 ┌──────────────────────┐
@@ -143,16 +131,14 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
                 └──────────────────────┘
 ```
 
----
-
 ## Shared components:
+
 - shared-proto  →  protobuf contracts for all services
 - shared-libs   →  common infrastructure code (logging, config, db, utils)
 
 ## Deployment flow:
-- deploy/helm → Argo CD → Kubernetes cluster → Traefik ingress
 
----
+- deploy/helm → Argo CD → Kubernetes cluster → Traefik ingress
 
 ## 📦 Services
 
@@ -165,8 +151,6 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - [Worker Service](/backend/worker-service/README.md)
 - [Scheduler](/backend/scheduler/README.md)
 
----
-
 ## 📚 Diagrams
 
 - [Alert Flow](diagrams/alert-flow.md)
@@ -176,13 +160,9 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - [Sequence Diagrams](diagrams/sequence-diagrams.md)
 - [System Data Flow Overview](diagrams/system-data-flow-overview.md)
 
----
-
 ## 🗺 Roadmap
 
 - [Full System Roadmap](/docs/roadmap/full-system-roadmap.md)
-
----
 
 ## 🧱 Core Architecture Principles
 
@@ -191,7 +171,3 @@ Each service has its own dedicated README.md, TODO.md and the architecture diagr
 - Clear domain separation
 - Kubernetes-oriented infrastructure
 - Monorepo for development convenience
-
-
-
-

@@ -1,10 +1,8 @@
 # 📦 Deployment & Kubernetes Infrastructure
 
-This directory contains everything required to deploy the platform and manage its Kubernetes environment. 
+This directory contains everything required to deploy the platform and manage its Kubernetes environment.
 
 It is intentionally separated from application code to keep the repository clean, modular, and easy to maintain.
-
----
 
 ## What’s Included
 

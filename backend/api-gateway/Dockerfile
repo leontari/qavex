@@ -11,4 +11,3 @@ COPY src/ ./src
 
 # Run (uvicorn for FastAPI)
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

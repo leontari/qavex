@@ -1,7 +1,7 @@
 # =============================================================================
-#    BUILD STAGE: create the applicatin in the virtual environment
+#    BUILD STAGE: create the application in the virtual environment
 # =============================================================================
-# Use an officeal uv debian image with uv pre-installed and no-Python
+# Use an official uv debian image with uv pre-installed and no-Python
 FROM ghcr.io/astral-sh/uv:bookworm-slim@sha256:22334efe746f1b69217d455049b484d7b8cacfb2d5f42555580b62415a98e0a3 AS builder
 
 ENV APP_NAME=template-app
@@ -54,7 +54,7 @@ COPY --from=builder /python /python
 # Copy the application from the builder
 COPY --from=builder --chown=nonroot:nonroot /app /app
 
-# Activate the project virtual environment by placing its binary direcotry at the front of the path.
+# Activate the project virtual environment by placing its binary directory at the front of the path.
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Use the non-root user to run our application.
