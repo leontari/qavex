@@ -8,8 +8,6 @@ Everything related to local development is kept inside the `infra/` directory:
 
 Keeping these files inside `infra/` helps keep the repository root clean and organized.
 
----
-
 ## How to Use the infra/ Environment
 
 ### 1. Local Development
@@ -28,7 +26,7 @@ This launches all services using Docker Compose.
 Create a local Kind cluster:
 
 ```bash
-cd infra 
+cd infra
 make kind-up
 ```
 

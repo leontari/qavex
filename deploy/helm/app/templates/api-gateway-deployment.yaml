@@ -1,26 +1,25 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api-gateway
-  labels:
-    app: api-gateway
-spec:
-  replicas: {{ .Values.apiGateway.replicas }}
-  selector:
-    matchLabels:
-      app: api-gateway
-  template:
-    metadata:
-      labels:
-        app: api-gateway
-    spec:
-      containers:
-        - name: api-gateway
-          image: {{ .Values.apiGateway.image }}
-          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
-          ports:
-            - containerPort: 8000
-          env:
-            - name: DATABASE_URL
-              value: "postgres://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres:5432/{{ .Values.postgres.db }}"
-
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: api-gateway
+#  labels:
+#    app: api-gateway
+#spec:
+#  replicas: {{ .Values.apiGateway.replicas }}
+#  selector:
+#    matchLabels:
+#      app: api-gateway
+#  template:
+#    metadata:
+#      labels:
+#        app: api-gateway
+#    spec:
+#      containers:
+#        - name: api-gateway
+#          image: {{ .Values.apiGateway.image }}
+#          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+#          ports:
+#            - containerPort: 8000
+#          env:
+#            - name: DATABASE_URL
+#              value: "postgres://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres:5432/{{ .Values.postgres.db }}"

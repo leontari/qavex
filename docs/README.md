@@ -1,12 +1,11 @@
 # Qavex
 
-This repository contains a modular microservices architecture designed for scalability, reliability, and developer productivity. 
+This repository contains a modular microservices architecture designed for scalability, reliability, and developer productivity.
 
 It includes backend services, a frontend application, shared libraries, protobuf definitions, infrastructure tooling, and Kubernetes deployment configurations.
 
----
-
 ## 📁 Repository Structure
+
 ```
 repo/
 ├── backend/               # Backend microservices
@@ -18,7 +17,7 @@ repo/
 │   └── scheduler/
 ├── db/                    # Migrations and database schema
 ├── deploy/                # Helm charts, Traefik, Kubernetes configs
-├── docs/                  # Arhitecture docs
+├── docs/                  # Architecture docs
 ├── frontend/              # SPA (Vue/Svelte)
 ├── infra/                 # Local development environment (Docker, Kind, Makefile)
 ├── scripts/               # Utility scripts for CI, automation, validation
@@ -27,11 +26,10 @@ repo/
 └── shared-proto/          # Protobuf contracts for inter-service communication
 ```
 
----
-
 ## 🧩 Core Concepts
 
 ### **Microservices**
+
 Each service is isolated, independently deployable, and follows a consistent structure:
 - `src/` — application code  
 - `Dockerfile` / `Dockerfile.dev`  
@@ -39,10 +37,12 @@ Each service is isolated, independently deployable, and follows a consistent str
 - `README.md`  
 
 ### **Shared Protobuf**
+
 `shared-proto/` contains all `.proto` files used for gRPC and event schemas.  
 This ensures consistent contracts across all services.
 
 ### **Shared Libraries**
+
 `shared-libs/` provides reusable infrastructure code:
 - logging  
 - configuration  
@@ -51,6 +51,7 @@ This ensures consistent contracts across all services.
 - retry/backoff logic  
 
 ### **Infrastructure**
+
 `infra/` contains everything for local development:
 - Docker Compose  
 - Kind cluster configs  
@@ -58,14 +59,13 @@ This ensures consistent contracts across all services.
 - helper scripts  
 
 ### **Deployment**
+
 `deploy/` contains:
 - Helm charts  
 - Traefik ingress  
 - Argo CD GitOps configuration  
 
----
-
-## 🚀 Getting Started 
+## 🚀 Getting Started
 
 ### Run services locally (Docker-Compose)
 
@@ -75,12 +75,14 @@ make up
 ````
 
 ### Run services locally (no Docker)
+
 ```bash
 make run-backend
 make run-frontend
 ````
 
 ### Run services in Kubernetes (Kind)
+
 ```
 cd infra
 make kind-up
@@ -92,20 +94,16 @@ make kind-up
 make run SERVICE=api-gateway
 ```
 
----
-
 ## 🧱 Services
 
-| Сервис                                               | Описание                      |
-|------------------------------------------------------|-------------------------------|
+| Сервис                                              | Описание                      |
+|-----------------------------------------------------|-------------------------------|
 | [API Gateway](/backend/api-gateway/README.md)       | REST API for the frontend     |
 | [Market Data](/backend/market-data/README.md)       | Market data ingestion         |
 | [Analytics](/backend/analytics/README.md)           | Indicators, signals, patterns |
 | [Alert Service](/backend/alert-service/README.md)   | Rules and notifications       |
 | [Worker Service](/backend/worker-service/README.md) | Heavy tasks, reports          |
 | [Scheduler](/backend/scheduler/README.md)           | CronJobs                      |
-
----
 
 ## 📚 Documentations
 
@@ -115,15 +113,12 @@ make run SERVICE=api-gateway
 - [DFD](/docs/architecture/diagrams/dfd.md)
 - [Sequence Diagrams](/docs/architecture/diagrams/sequence-diagrams.md)
 
----
-
 ## 📦 Contributing
+
 - [Onboarding guide](/docs/onboarding.md)
 - [Contribution guide](/CONTRIBUTING.md)
 - [Code of conduct](/CODE_OF_CONDUCT.md)
 - [Security policy](/SECURITY.md)
-
----
 
 ## 🛠 CI/CD
 
@@ -136,15 +131,12 @@ GitHub Actions handles:
 
 Configuration: `.github/workflows/*.yml`
 
----
-
 ## 🛠 Tooling
+
 - **uv** for Python virtualenvs
 - **nvm** for Node version management
 - **pre‑commit** for formatting, linting, and validation
 - **kubeconform** for Kubernetes schema validation
-
----
 
 ## 📄 License
 
