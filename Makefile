@@ -1,11 +1,3 @@
-.PHONY: help \
-        sync lock export \
-        install-pre-commit run-pre-commit \
-        uvicorn fastapi test lint fmt \
-        build run sh log stop \
-        build-run build-git push \
-        %
-
 # =============================================================================
 #    ROOT MAKEFILE: service utilities
 # =============================================================================
@@ -20,6 +12,7 @@ TAG ?= latest
 # =============================================================================
 #    HELP
 # =============================================================================
+.PHONY: help
 help:
 	@echo " ============================================================================= "
 	@echo "     AVAILABLE COMMANDS:                                                       "
@@ -29,9 +22,9 @@ help:
 	@echo " --- Dev Tools --------------------------------------------------------------- "
 	@echo " >>> make sync                            :install all deps using lockfile     "
 	@echo " >>> make lock                            :discover deps and update uv.lock    "
-	@echo " >>> make export <service>                :export requirements.txt             "
+	@echo " >>> make export-deps <service>           :export requirements.txt             "
 	@echo "                                                                               "
-	@echo " >>> make install-pre-commit              :install pre-commit hooks            "
+	@echo " >>> make install-git-hooks               :install 'pre-commit' scripts        "
 	@echo " >>> make run-pre-commit                  :run pre-commit checks               "
 	@echo "                                                                               "
 	@echo " >>> make uvicorn <service>               :run service locally via uvicorn     "
@@ -55,45 +48,50 @@ help:
 # =============================================================================
 #    DEV COMMANDS
 # =============================================================================
+.PHONY: sync
 sync:
 	uv sync --locked --all-packages
 
+.PHONY: lock
 lock:
 	uv lock
 
-export:
-	@if "$(SERVICE)"=="" ( echo Usage: make export ^<service^> exit 1 )
+.PHONY: export-deps
+export-deps:
+	@if "$(SERVICE)"=="" ( echo Usage: make export-deps ^<service^> exit 1 )
 	uv export --no-hashes --format requirements.txt --package $(SERVICE) --output-file backend/$(SERVICE)/requirements.txt
 
 # -----------------------------------------------------------------------------
-install-pre-commit:
-	@echo "Installing pre-commit globally on the system..."
-	uv tool install pre-commit==4.5.1 --with pre-commit-uv --force-reinstall
-	@echo "Installing hooks for the current repo..."
+.PHONY: install-git-hooks
+install-git-hooks:
 	uv run pre-commit install
-	@echo "pre-commit hooks installed successfully."
 
+.PHONY: run-pre-commit
 run-pre-commit:
-	echo "Running pre-commit checks..."
 	uv run pre-commit run --all-files
 
 # -----------------------------------------------------------------------------
+.PHONY: uvicorn
 uvicorn:
-	@if "$(SERVICE)"=="" ( echo Usage: make run ^<service^> & exit 1 )
+	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
 	uv run uvicorn $(PACKAGE).main:app --reload --reload-dir backend/$(SERVICE) --log-level debug --host 127.0.0.1 --port 8000 --app-dir $(SRC_DIR)
 
+.PHONY: fastapi
 fastapi:
 	@if "$(SERVICE)"=="" ( echo Usage: make fastapi ^<service-name^> & exit 1 )
 	uv run fastapi dev --reload-dir backend/$(SERVICE) backend/$(SERVICE)/src/$(PACKAGE)/main.py
 
+.PHONY: test
 test:
 	@if "$(SERVICE)"=="" ( echo Usage: make test ^<service^> & exit 1 )
 	uv run pytest $(SRC_DIR) -q
 
+.PHONY: lint
 lint:
 	@if "$(SERVICE)"=="" ( echo Usage: make lint ^<service^> & exit 1 )
 	uv run ruff check $(SRC_DIR)
 
+.PHONY: fmt
 fmt:
 	@if "$(SERVICE)"=="" ( echo Usage: make fmt ^<service^> & exit 1 )
 	uv run ruff format $(SRC_DIR)
@@ -101,40 +99,44 @@ fmt:
 # =============================================================================
 #    DOCKER COMMANDS
 # =============================================================================
+.PHONY: build
 build:
 	@if "$(SERVICE)" == "" ( echo Usage: make build ^<service^> TAG=^<tag^> & exit 1 )
 	docker build -t $(SERVICE):$(TAG) -f backend/$(SERVICE)/Dockerfile .
 
+.PHONY: run
 run:
 	@if "$(SERVICE)" == "" ( echo Usage: make run ^<service^> TAG=^<tag^> & exit 1 )
 	docker run --rm -p 8000:8000 $(SERVICE):$(TAG)
 
+.PHONY: sh
 sh:
 	@if "$(SERVICE)" == "" ( echo Usage: make sh ^<service^> & exit 1 )
 	docker run --rm -it $(SERVICE) sh
 
+.PHONY: log
 log:
 	@if "$(SERVICE)" == "" ( echo Usage: make logs ^<service^> & exit 1 )
 	docker logs -f $(SERVICE)
 
-stop:  # stop container
+.PHONY: stop
+stop:
 	@if "$(SERVICE)" == "" ( echo Usage: make stop ^<service^> & exit 1 )
 	docker stop $(SERVICE)
 
 # -----------------------------------------------------------------------------
+.PHONY: build-run
 build-run:
 	@if "$(SERVICE)" == "" ( echo Usage: make build-run ^<service^> TAG=^<tag^> & exit 1 )
 	docker build -t $(SERVICE):$(TAG) -f backend/$(SERVICE)/Dockerfile .
 	docker run --rm -p 8000:8000 $(SERVICE):$(TAG)
 
+.PHONY: build-git
 build-git:
 	@if "$(SERVICE)" == "" ( echo Usage: make build-git ^<service^> & exit 1 )
 	docker build -t $(SERVICE):$(GIT_TAG) -f backend/$(SERVICE)/Dockerfile .
 
+.PHONY: push
 push:
 	@if "$(SERVICE)" == "" ( echo Usage: make push ^<service^> TAG=^<tag^> & exit 1 )
 	docker push $(SERVICE):$(TAG)
-
-# -----------------------------------------------------------------------------
-%:
-	@:
