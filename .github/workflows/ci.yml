@@ -91,7 +91,7 @@ jobs:
           activate-environment: "false"
           enable-cache: "true"
           restore-cache: "true"
-          save-cache: "true"
+          save-cache: ${{ github.ref == 'refs/heads/main' }} # sets <save-cache: "true"> only for merge in main
           cache-suffix: ""  # Suffix for the cache key
           cache-local-path: ${{ env.UV_CACHE_DIR }}
           prune-cache: "false"
