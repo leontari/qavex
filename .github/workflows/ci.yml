@@ -91,7 +91,7 @@ jobs:
           activate-environment: "false"
           enable-cache: "true"
           restore-cache: "true"
-          save-cache: "true"
+          save-cache: ${{ github.ref == 'refs/heads/main' }} # sets <save-cache: "true"> only for merge in main
           cache-suffix: ""  # Suffix for the cache key
           cache-local-path: ${{ env.UV_CACHE_DIR }}
           prune-cache: "false"
@@ -118,7 +118,8 @@ jobs:
 
       - name: 💾 Save pre-commit cache
         id: save-pre-commit-cache
-        if: steps.restore-pre-commit-cache.outputs.cache-hit != 'true'
+        if: github.ref == 'refs/heads/main' &&
+          steps.restore-pre-commit-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.PRE_COMMIT_HOME }}
