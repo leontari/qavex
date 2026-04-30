@@ -6,6 +6,9 @@ requires-python = ">=3.11"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 [dependency-groups]
@@ -83,9 +86,6 @@ lint.preview = true
 [tool.codespell]
 builtin = "clear,usage,en-GB_to_en-US"
 count = true
-
-[tool.pyproject-fmt]
-max_supported_python = "3.11"
 
 [tool.ty]
 environment.python-version = "3.11"
