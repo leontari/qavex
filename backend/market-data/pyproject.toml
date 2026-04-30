@@ -9,9 +9,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
-dependencies = [
-  "requests>=2.33.1",
-]
+dependencies = []
 
 [tool.fastapi]
 entrypoint = "src.market_data.main:app"
