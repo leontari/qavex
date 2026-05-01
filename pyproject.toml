@@ -46,15 +46,18 @@ workspace.members = [
 
 [tool.ruff]
 line-length = 79
+exclude = [
+  "backend/template-app",
+  "shared/py/db",
+  "shared/py/logger",
+]
 format.preview = true  # Switch to Ruff's experimental features
 format.indent-style = "space"
 format.quote-style = "double"
 format.line-ending = "lf"  # PEP8: Unix-style end of line symbol
 format.docstring-code-line-length = 78
 format.docstring-code-format = true
-lint.select = [
-  "ALL",
-]
+lint.select = [ "ALL" ]
 lint.ignore = [
   "ANN101", # no type annotation for self
   "ANN401", # allow Any as type annotation
