@@ -6,6 +6,9 @@ requires-python = ">=3.11"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 [dependency-groups]
@@ -43,17 +46,19 @@ workspace.members = [
 
 [tool.ruff]
 line-length = 79
+exclude = [
+  "backend/template-app",
+  "shared/py/db",
+  "shared/py/logger",
+]
 format.preview = true  # Switch to Ruff's experimental features
 format.indent-style = "space"
+format.quote-style = "double"
 format.line-ending = "lf"  # PEP8: Unix-style end of line symbol
 format.docstring-code-line-length = 78
 format.docstring-code-format = true
-format.quate-style = "double"
-lint.select = [
-  "ALL",
-]
+lint.select = [ "ALL" ]
 lint.ignore = [
-  "ANN101", # no type annotation for self
   "ANN401", # allow Any as type annotation
   "COM812", # Conflict with formatter
   "CPY",    # No copyright statements
@@ -83,9 +88,6 @@ lint.preview = true
 [tool.codespell]
 builtin = "clear,usage,en-GB_to_en-US"
 count = true
-
-[tool.pyproject-fmt]
-max_supported_python = "3.11"
 
 [tool.ty]
 environment.python-version = "3.11"

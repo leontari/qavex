@@ -833,12 +833,6 @@ wheels = [
 name = "market-data"
 version = "0.1.0"
 source = { virtual = "backend/market-data" }
-dependencies = [
-    { name = "requests" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "requests", specifier = ">=2.33.1" }]
 
 [[package]]
 name = "markupsafe"
