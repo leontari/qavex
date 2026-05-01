@@ -48,10 +48,10 @@ workspace.members = [
 line-length = 79
 format.preview = true  # Switch to Ruff's experimental features
 format.indent-style = "space"
+format.quote-style = "double"
 format.line-ending = "lf"  # PEP8: Unix-style end of line symbol
 format.docstring-code-line-length = 78
 format.docstring-code-format = true
-format.quate-style = "double"
 lint.select = [
   "ALL",
 ]

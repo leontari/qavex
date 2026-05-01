@@ -27,13 +27,13 @@ repos:
     rev: 0.37.1
     hooks:
       - id: check-github-workflows
-        args: ["--verbose"]
+        args: [ "--verbose" ]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.2
     hooks:
       - id: codespell
-        args: [ "--write-changes" ]
+        args: [ "--write-changes", "--ignore-words=.codespell-ignore-words" ]
 
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: "v2.21.1"
