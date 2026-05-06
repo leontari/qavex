@@ -225,7 +225,7 @@ Dockerfile           text
 *.inf                text
 *.ini                text
 *.lektorproject      text
-*.lock               text
+*.lock               text -diff
 MANIFEST.in          text
 Makefile             text
 makefile             text

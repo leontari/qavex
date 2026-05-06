@@ -12,8 +12,6 @@ repos:
     - id: check-added-large-files
       args: [ "--maxkb=200" ]
     - id: check-json
-    - id: check-merge-conflict
-      args: [--assume-in-merge]
     - id: check-toml
     - id: check-xml
     - id: check-yaml
@@ -37,21 +35,23 @@ repos:
         entry: uv run codespell --write-changes --ignore-words=.codespell-ignore-words
         language: unsupported
         require_serial: true
+        pass_filenames: true
         types_or: [ text ]
 
       - id: local-check-github-workflows
         name: check GitHub workflows
         entry: uv run check-jsonschema --verbose --builtin-schema vendor.github-workflows
         language: unsupported
+        require_serial: true
         pass_filenames: true
         files: ^\.github/workflows/.*\.ya?ml$
-
 
       - id: local-ruff-check
         name: ruff check
         entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
         require_serial: true
         language: unsupported
+        pass_filenames: true
         types: [ python ]
 
       - id: local-ruff-format
@@ -59,6 +59,7 @@ repos:
         entry: uv run ruff format --force-exclude --exit-non-zero-on-format
         require_serial: true
         language: unsupported
+        pass_filenames: true
         types: [ python ]
 
       - id: local-mypy
@@ -66,15 +67,16 @@ repos:
         entry: uv run mypy
         require_serial: true
         language: unsupported
-        pass_filenames: false
+        pass_filenames: true
+        types: [ python ]
 
       - id: local-pyproject-fmt
         name: pyproject-fmt
-        entry: uv run python tools/ci/python/format_pyproject_toml.py
-        language: system
+        entry: uv run pyproject-fmt
+        language: unsupported
+        require_serial: true
         pass_filenames: true
         files: ^(.*/)?pyproject\.toml$
-
 
 #      - id: local-ty
 #        name: ty check
@@ -88,12 +90,13 @@ repos:
         entry: uv run uv lock --check
         language: unsupported
         pass_filenames: false
+        require_serial: false
         always_run: true
 
       - id: local-zizmor
         name: zizmor
         language: python
         entry: uv run zizmor .
-        files: ^\.github\/workflows\/
         require_serial: true
         pass_filenames: false
+        files: ^\.github\/workflows\/
