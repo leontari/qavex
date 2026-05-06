@@ -1,5 +1,11 @@
-minimum_pre_commit_version: "4.5.1"
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# See https://prek.j178.dev/builtin/ for prek setup
 repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -12,6 +18,8 @@ repos:
     - id: check-toml
     - id: check-xml
     - id: check-yaml
+      args:
+        - --unsafe
     - id: detect-private-key
     # This check follows the definition of a text file in POSIX: IEEE Std 1003.1-2017
     # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_403
@@ -23,44 +31,70 @@ repos:
     - id: trailing-whitespace
       args: [--markdown-linebreak-ext=md]
 
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.1
+  - repo: local
     hooks:
-      - id: check-github-workflows
-        args: [ "--verbose" ]
+      - id: local-codespell
+        name: codespell
+        entry: uv run codespell --write-changes --ignore-words=.codespell-ignore-words
+        language: unsupported
+        require_serial: true
+        types_or: [ text ]
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
-    hooks:
-      - id: codespell
-        args: [ "--write-changes", "--ignore-words=.codespell-ignore-words" ]
+      - id: local-check-github-workflows
+        name: check GitHub workflows
+        entry: uv run check-jsonschema --verbose --builtin-schema vendor.github-workflows
+        language: unsupported
+        pass_filenames: true
+        files: ^\.github/workflows/.*\.ya?ml$
 
-  - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.21.1"
-    hooks:
-      - id: pyproject-fmt
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.11"
-    hooks:
-      - id: ruff-format
-      - id: ruff
-        args: [ "--fix", "--unsafe-fixes", "--exit-non-zero-on-fix" ]
+      - id: local-ruff-check
+        name: ruff check
+        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+        require_serial: true
+        language: unsupported
+        types: [ python ]
 
-  - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.24.1
-    hooks:
-      - id: zizmor
-        args: [ "--min-severity", "high" ]
+      - id: local-ruff-format
+        name: ruff format
+        entry: uv run ruff format --force-exclude --exit-non-zero-on-format
+        require_serial: true
+        language: unsupported
+        types: [ python ]
 
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.11.7
-    hooks:
-      - id: uv-lock
+      - id: local-mypy
+        name: mypy check
+        entry: uv run mypy
+        require_serial: true
+        language: unsupported
+        pass_filenames: false
+
+      - id: local-pyproject-fmt
+        name: pyproject-fmt
+        entry: uv run python tools/ci/python/format_pyproject_toml.py
+        language: system
+        pass_filenames: true
+        files: ^(.*/)?pyproject\.toml$
+
+
+#      - id: local-ty
+#        name: ty check
+#        entry: uv run ty check fastapi
+#        require_serial: true
+#        language: unsupported
+#        pass_filenames: false
+
+      - id: local-uv-lock
+        name: uv lock check
+        entry: uv run uv lock --check
+        language: unsupported
         pass_filenames: false
         always_run: true
 
-  - repo: meta
-    hooks:
-      - id: check-hooks-apply
-      - id: check-useless-excludes
+      - id: local-zizmor
+        name: zizmor
+        language: python
+        entry: uv run zizmor .
+        files: ^\.github\/workflows\/
+        require_serial: true
+        pass_filenames: false

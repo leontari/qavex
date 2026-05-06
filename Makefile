@@ -24,8 +24,8 @@ help:
 	@echo " >>> make lock                            :discover deps and update uv.lock    "
 	@echo " >>> make export-deps <service>           :export requirements.txt             "
 	@echo "                                                                               "
-	@echo " >>> make install-git-hooks               :install 'pre-commit' scripts        "
-	@echo " >>> make run-pre-commit                  :run pre-commit checks               "
+	@echo " >>> make install-git-hooks               :install pre-commit git hooks        "
+	@echo " >>> make check                           :run prek checks                     "
 	@echo "                                                                               "
 	@echo " >>> make uvicorn <service>               :run service locally via uvicorn     "
 	@echo " >>> make fastapi <service>               :run service locally via fastapi dev "
@@ -64,22 +64,22 @@ export-deps:
 # -----------------------------------------------------------------------------
 .PHONY: install-git-hooks
 install-git-hooks:
-	uv run pre-commit install
+	prek install -f
 
-.PHONY: run-pre-commit
-run-pre-commit:
-	uv run pre-commit run --all-files
+.PHONY: check
+check:
+	uv run prek run --all-files
 
 # -----------------------------------------------------------------------------
 .PHONY: uvicorn
 uvicorn:
 	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
-	uv run uvicorn $(PACKAGE).main:app --reload --reload-dir backend/$(SERVICE) --log-level debug --host 127.0.0.1 --port 8000 --app-dir $(SRC_DIR)
+	uv run watchfiles "uv run uvicorn $(PACKAGE).main:app --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)" $(SRC_DIR)
 
 .PHONY: fastapi
 fastapi:
 	@if "$(SERVICE)"=="" ( echo Usage: make fastapi ^<service-name^> & exit 1 )
-	uv run fastapi dev --reload-dir backend/$(SERVICE) backend/$(SERVICE)/src/$(PACKAGE)/main.py
+	uv run fastapi dev --reload-dir backend/$(SERVICE) backend/$(SERVICE)/src/main.py
 
 .PHONY: test
 test:
@@ -140,3 +140,8 @@ build-git:
 push:
 	@if "$(SERVICE)" == "" ( echo Usage: make push ^<service^> TAG=^<tag^> & exit 1 )
 	docker push $(SERVICE):$(TAG)
+
+# --- Scripts -----------------------------------------------------------------
+.PHONE: tree
+tree:
+	python tools/dev/python/generate_tree.py $(filter-out $@,$(MAKECMDGOALS))
