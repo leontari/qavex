@@ -110,7 +110,6 @@ jobs:
           echo "📝 UV_CACHE_DIR:"; du -sh "${{ env.UV_CACHE_DIR }}"
           echo "📝 PYTHON:"; uv run python --version ; uv run which python
           echo "📝 PYTHON .venv SIZE:"; du -sh .venv
-          echo "📝 PRE-COMMIT:"; uv run pre-commit --version ; uv run which pre-commit
           echo "📝 PRE_COMMIT_HOME CACHE DIR:"; du -sh "${{ env.PRE_COMMIT_HOME }}"
 
       - name: 💾 Save pre-commit cache
