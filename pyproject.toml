@@ -14,24 +14,30 @@ classifiers = [
 [dependency-groups]
 dev = [
   "watchfiles>=1.1.1",
+  { include-group = "ci" },
   { include-group = "lint" },
   { include-group = "pkg-meta" },
   { include-group = "test" },
+  { include-group = "type" },
 ]
 test = [
   "covdefaults>=2.3",
   "pytest>=8.4.2",
   "pytest-cov>=7",
   "pytest-mock>=3.15.1",
+]
+type = [
+  "mypy>=1.20.2",
+  "pydantic>=2.13.1",
+  "pydantic-settings>=2.14",
   "ty>=0.0.17",
+]
+ci = [
+  "prek>=0.3.11",
 ]
 lint = [
   "check-jsonschema>=0.37.2",
   "codespell>=2.4.2",
-  "mypy>=1.20.2",
-  "prek>=0.3.11",
-  "pydantic>=2.13.1",
-  "pydantic-settings>=2.14",
   "pyproject-fmt>=2.21.1",
   "pyyaml>=6.0.3",
   "ruff>=0.15.12",
@@ -44,6 +50,9 @@ pkg-meta = [
 
 [tool.uv]
 required-version = "==0.11.11"  # upgrade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
+workspace.members = [
+  "backend/template-app",
+]
 
 [tool.ruff]
 line-length = 79
@@ -91,9 +100,6 @@ builtin = "clear,usage,en-GB_to_en-US"
 count = true
 
 [tool.mypy]
-files = [
-  "backend/template-app/src",
-]
 plugins = [
   "pydantic.mypy",
 ]
