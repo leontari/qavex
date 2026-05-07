@@ -1,6 +1,5 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-# See https://prek.j178.dev/builtin/ for prek setup
+# See https://pre-commit.com/hooks.html for more pre-commit hooks
+# See https://prek.j178.dev/builtin/ for more prek hooks and prek setup
 repos:
   - repo: meta
     hooks:

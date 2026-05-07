@@ -34,10 +34,7 @@ env:
   FORCE_COLOR: 3 # Request colored output from tools (e.g. eslint, prettier, markdownlint) supporting FORCE_COLOR
   PRE_COMMIT_COLOR: always
   UV_COLOR: always
-
   UV_CACHE_DIR: /tmp/.uv-cache
-  PRE_COMMIT_HOME: /tmp/.pre-commit-cache
-
 
 permissions:
   contents: read
@@ -56,28 +53,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-
-      - name: 🧮 Create cache prefix
-        run: |
-            OS_NAME=$(uname -s)
-            OS_ARCH=$(uname -m)
-            OS_KERNEL=$(uname -r)
-            OS_BUILD=$(uname -v | awk '{print $1}')
-
-            echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
-            echo "OS_ARCH=$OS_ARCH" >> $GITHUB_ENV
-            echo "OS_KERNEL=$OS_KERNEL" >> $GITHUB_ENV
-            echo "OS_BUILD=$OS_BUILD" >> $GITHUB_ENV
-
-            echo "CACHE_PREFIX=${OS_NAME}-${OS_ARCH}-${OS_KERNEL}-${OS_BUILD}" >> $GITHUB_ENV
-
-      - name: 💾 Restore pre-commit cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: restore-pre-commit-cache
-        with:
-          path: ${{ env.PRE_COMMIT_HOME }}
-          key: pre-commit-${{ env.CACHE_PREFIX }}-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: pre-commit-
 
       - name: 🔧 Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -110,16 +85,6 @@ jobs:
           echo "📝 UV_CACHE_DIR:"; du -sh "${{ env.UV_CACHE_DIR }}"
           echo "📝 PYTHON:"; uv run python --version ; uv run which python
           echo "📝 PYTHON .venv SIZE:"; du -sh .venv
-          echo "📝 PRE_COMMIT_HOME CACHE DIR:"; du -sh "${{ env.PRE_COMMIT_HOME }}"
-
-      - name: 💾 Save pre-commit cache
-        id: save-pre-commit-cache
-        if: github.ref == 'refs/heads/main' &&
-          steps.restore-pre-commit-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ${{ env.PRE_COMMIT_HOME }}
-          key: ${{ steps.restore-pre-commit-cache.outputs.cache-primary-key }}
 
   check:  # This job does nothing and is only used for the branch protection
     name: 🏁 Check
