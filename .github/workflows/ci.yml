@@ -74,9 +74,23 @@ jobs:
       - name: 🔧 Setup .venv
         run: uv sync --frozen --group dev
 
-      # TODO: change this to check all files
-      - name: 🧪 Run prek
-        run: uv run prek run
+      - name: 🧪 Run prek checks
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Running prek on PR diff"
+            uv run prek run \
+              --from-ref "${{ github.event.pull_request.base.sha }}" \
+              --to-ref "${{ github.sha }}"
+          elif [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            echo "Running prek on merge queue diff"
+            uv run prek run --last-commit
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Running prek on push diff"
+            uv run prek run --last-commit
+          else
+            echo "Running prek on all files (fallback)"
+            uv run prek run --all-files
+          fi
 
       - name: 📝 Print environment summary
         run: |
