@@ -13,5 +13,6 @@ classifiers = [
 ]
 dependencies = [
   "fastapi>=0.136.1",
+  "psutil>=7.2.2",
   "uvicorn>=0.46",
 ]

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from .health import router as health_router
-from .metrics import router as metrics_router
+from template_app.observability.health import router as health_router
+from template_app.observability.metrics import router as metrics_router
 
 observability_router = APIRouter(include_in_schema=False)
 
