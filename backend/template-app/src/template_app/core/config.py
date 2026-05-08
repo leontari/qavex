@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 
-class Settings(BaseSettings):
+class Config(BaseSettings):
     env: str = "dev"
     host: str = "127.0.0.1"
     port: int = 8000
@@ -13,4 +13,4 @@ class Settings(BaseSettings):
         env_prefix = "APP_"
 
 
-settings = Settings()
+config = Config()

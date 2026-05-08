@@ -9,6 +9,15 @@ SRC_DIR := backend/$(SERVICE)/src
 APP_PATH := $(SRC_DIR)/$(PACKAGE)/main.py
 TAG ?= latest
 
+# Detect OS
+OS := $(shell uname 2>/dev/null || echo Windows)
+
+ifeq ($(OS), Windows)
+    SET_PYTHONPATH = set PYTHONPATH=$(SRC_DIR) &&
+else
+    SET_PYTHONPATH = PYTHONPATH=$(SRC_DIR)
+endif
+
 # =============================================================================
 #    HELP
 # =============================================================================
@@ -74,7 +83,10 @@ check:
 .PHONY: uvicorn
 uvicorn:
 	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
-	uv run watchfiles "uv run uvicorn $(PACKAGE).main:app --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)" $(SRC_DIR)
+	uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)
+
+# uv run watchfiles "uv run uvicorn $(PACKAGE):app --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)" $(SRC_DIR)
+#$(SET_PYTHONPATH) uv run uvicorn template_app.main:app --reload --host 127.0.0.1 --port 8000
 
 .PHONY: fastapi
 fastapi:

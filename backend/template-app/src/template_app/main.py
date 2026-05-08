@@ -1,45 +1,47 @@
 """
 Development entry point.
 
-This file is used ONLY when running the app locally.
-Command to start the app form the project root folder:
+This module is intended ONLY for local development.
+It allows running the application directly from an IDE or via Python.
+Example command from the project root source folder:
     python backend/template-app/src/template_app/main.py
 
-Production must use:
-    uvicorn ingestor:app --host 0.0.0.0 --port 8000 --log-config path/to/logging.json
+Production environments must use an external ASGI runner, for example:
+    uvicorn template_app:app --host 0.0.0.0 --port 8000 --log-config path/to/logging.json
 
+Note:
+    'template_app:app' is interpreted by uvicorn as:
+        from template_app import app
+    which is equivalent to:
+        from template_app.main import app
 """
-
+import logging
 from fastapi import FastAPI
-from core.config import settings
-from core.logging import setup_logging
-# from api.router import api_router
-# from observability.router import observability_router
+from template_app.core.logging import setup_logging
 
 
 def create_app() -> FastAPI:
-    app: FastAPI = FastAPI()
 
-    #app.include_router(api_router)
-    #app.include_router(observability_router)
+    logger = logging.getLogger(__name__)
+    logger.info(f"Application starting...")
+    app = FastAPI()
+
+
+
+
 
     return app
-
+print("\033[31mRED\033[0m")
 
 app = create_app()
 
-
 if __name__ == "__main__":
     import uvicorn
-    import logging
-
-    setup_logging(settings.log_level)
-    logging.info("Starting application")
 
     uvicorn.run(
         app,
-        host=settings.host,
-        port=settings.port,
-        reload=settings.reload,
-        log_level=settings.log_level,
+        host="127.0.0.1",
+        port=8000,
+        log_config="../template_app/config/logging.yaml",
+
     )

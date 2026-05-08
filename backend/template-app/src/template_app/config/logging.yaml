@@ -1,0 +1,43 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  colored:
+    class: template_app.core.logging.ColorFormatter
+    format: '%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-20s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: colored
+    stream: ext://sys.stdout
+
+loggers:
+  uvicorn:
+    handlers: [console]
+    level: INFO
+    propagate: false
+
+  uvicorn.error:
+    handlers: [console]
+    level: INFO
+    propagate: false
+
+  uvicorn.access:
+    handlers: [console]
+    level: INFO
+    propagate: false
+
+  fastapi:
+    handlers: [console]
+    level: INFO
+    propagate: false
+
+  template_app:
+    handlers: [console]
+    level: DEBUG
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [console]
