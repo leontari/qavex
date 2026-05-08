@@ -7,7 +7,7 @@ Example command from the project root source folder:
     python backend/template-app/src/template_app/main.py
 
 Production environments must use an external ASGI runner, for example:
-    uvicorn template_app:app --host 0.0.0.0 --port 8000 --log-config path/to/logging.json
+    uvicorn template_app:app --host 0.0.0.0 --port 8000 --log-config path/to/logging.yaml
 
 Note:
     'template_app:app' is interpreted by uvicorn as:
@@ -15,22 +15,11 @@ Note:
     which is equivalent to:
         from template_app.main import app
 """
-import logging
-from fastapi import FastAPI
-from template_app.core.app.logging import setup_logging
-
-
-def create_app() -> FastAPI:
-
-    logger = logging.getLogger(__name__)
-
-    app = FastAPI()
-    logger.info(f"Application starting...")
-
-    return app
+from template_app.core.app.factory import create_app
 
 
 app = create_app()
+
 
 if __name__ == "__main__":
     import uvicorn

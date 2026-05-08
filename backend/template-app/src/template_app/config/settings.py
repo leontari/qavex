@@ -8,8 +8,6 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    debug: bool = False
-    database_url: str
-    redis_url: str
+    log_level: str = "INFO"
 
 settings = Settings()

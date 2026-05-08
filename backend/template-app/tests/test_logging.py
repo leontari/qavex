@@ -1,5 +1,5 @@
 import logging
-from template_app.core.logging import ColorFormatter
+from template_app.core.app.logger import ColorFormatter
 
 
 def test_color_formatter(caplog):
