@@ -26,12 +26,8 @@ def create_app() -> FastAPI:
     logger.info(f"Application starting...")
     app = FastAPI()
 
-
-
-
-
     return app
-print("\033[31mRED\033[0m")
+
 
 app = create_app()
 
@@ -43,5 +39,4 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=8000,
         log_config="../template_app/config/logging.yaml",
-
     )
