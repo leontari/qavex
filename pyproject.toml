@@ -114,9 +114,6 @@ disallow_untyped_defs = true
 environment.python-version = "3.11"
 
 [tool.pytest]
-pythonpath = "src"
-testpaths = "tests"
-addopts = "-q"
 ini_options.testpaths = [
   "tests",
 ]
