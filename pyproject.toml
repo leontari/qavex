@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Monorepo workspace"
 requires-python = ">=3.11"
 classifiers = [
+  "Private :: Do Not Upload",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
