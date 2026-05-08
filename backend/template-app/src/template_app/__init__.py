@@ -14,9 +14,6 @@ Explanation:
         from template_app.main import app
 """
 from template_app.main import app
-from template_app.core.logging import setup_logging
-
-setup_logging()
 
 __version__ = "0.1.0"
 __all__ = ["app"]

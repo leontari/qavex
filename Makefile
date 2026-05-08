@@ -80,13 +80,11 @@ check:
 	uv run prek run --all-files
 
 # -----------------------------------------------------------------------------
+#$(SET_PYTHONPATH) uv run uvicorn template_app.main:app --reload --host 127.0.0.1 --port 8000
 .PHONY: uvicorn
 uvicorn:
 	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
 	uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
-
-# uv run watchfiles "uv run uvicorn $(PACKAGE):app --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)" $(SRC_DIR)
-#$(SET_PYTHONPATH) uv run uvicorn template_app.main:app --reload --host 127.0.0.1 --port 8000
 
 .PHONY: fastapi
 fastapi:

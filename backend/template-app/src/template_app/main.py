@@ -17,14 +17,15 @@ Note:
 """
 import logging
 from fastapi import FastAPI
-from template_app.core.logging import setup_logging
+from template_app.core.app.logging import setup_logging
 
 
 def create_app() -> FastAPI:
 
     logger = logging.getLogger(__name__)
-    logger.info(f"Application starting...")
+
     app = FastAPI()
+    logger.info(f"Application starting...")
 
     return app
 

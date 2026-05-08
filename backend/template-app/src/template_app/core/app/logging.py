@@ -7,27 +7,27 @@ import yaml
 import logging
 
 LEVEL_COLORS = {
-    "DEBUG": "\033[34m",      # blue
-    "INFO": "\033[32m",       # green
-    "WARNING": "\033[33m",    # yellow
-    "ERROR": "\033[31m",      # red
-    "CRITICAL": "\033[1;31m", # bright red
+    "DEBUG": "\033[34m",         # blue
+    "INFO": "\033[32m",          # green
+    "WARNING": "\033[33m",       # yellow
+    "ERROR": "\033[31m",         # red
+    "CRITICAL": "\033[1;31m",    # bright red
 }
 
 COLUMN_COLORS = {
-    "time": "\033[36m",       # cyan
-    "logger": "\033[35m",     # magenta
-    "lineno": "\033[90m",     # gray
+    "time": "\033[36m",          # cyan
+    "logger": "\033[35m",        # magenta
+    "lineno": "\033[90m",        # gray
     "reset": "\033[0m",
 }
 
 ACCESS_COLORS = {
-    "client": "\033[36m",   # cyan
-    "method": "\033[33m",   # yellow
-    "path": "\033[32m",     # green
-    "status_2xx": "\033[32m",
-    "status_3xx": "\033[33m",
-    "status_4xx": "\033[31m",
+    "client": "\033[36m",        # cyan
+    "method": "\033[33m",        # yellow
+    "path": "\033[32m",          # green
+    "status_2xx": "\033[32m",    # green
+    "status_3xx": "\033[33m",    # yellow
+    "status_4xx": "\033[31m",    # red
     "status_5xx": "\033[1;31m",
     "reset": "\033[0m",
 }
