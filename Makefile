@@ -79,12 +79,18 @@ install-git-hooks:
 check:
 	uv run prek run --all-files
 
+.PHONY: dist
+dist:
+	@if "$(SERVICE)"=="" ( echo Usage: make pack ^<service-name^> exit 1 )
+	uv build --project backend/$(SERVICE)
+
 # -----------------------------------------------------------------------------
 #$(SET_PYTHONPATH) uv run uvicorn template_app.main:app --reload --host 127.0.0.1 --port 8000
 .PHONY: uvicorn
 uvicorn:
 	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
 	uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
+#uv run --project backend/template-app uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
 
 .PHONY: fastapi
 fastapi:

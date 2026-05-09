@@ -1,7 +1,7 @@
 [project]
 name = "qavex"
 version = "0.1.0"
-description = "Monorepo workspace"
+description = "The monorepo's workspace configuration"
 requires-python = ">=3.11"
 classifiers = [
   "Private :: Do Not Upload",
@@ -18,20 +18,15 @@ dev = [
   { include-group = "ci" },
   { include-group = "lint" },
   { include-group = "pkg-meta" },
+  { include-group = "release" },
   { include-group = "test" },
-  { include-group = "type" },
+  { include-group = "typing" },
 ]
 test = [
   "covdefaults>=2.3",
   "pytest>=8.4.2",
   "pytest-cov>=7",
   "pytest-mock>=3.15.1",
-]
-type = [
-  "mypy>=1.20.2",
-  "pydantic>=2.13.1",
-  "pydantic-settings>=2.14",
-  "ty>=0.0.17",
 ]
 ci = [
   "prek>=0.3.11",
@@ -47,6 +42,16 @@ lint = [
 pkg-meta = [
   "check-wheel-contents>=0.6.3",
   "twine>=6.2",
+]
+release = [
+  "pygithub>=2",
+  "towncrier>=23.11",
+]
+typing = [
+  "mypy>=1.20.2",
+  "pydantic>=2.13.1",
+  "pydantic-settings>=2.14",
+  "ty>=0.0.17",
 ]
 
 [tool.uv]
@@ -105,6 +110,12 @@ plugins = [
   "pydantic.mypy",
 ]
 follow_imports = "silent"
+# follow_imports = "normal"
+# ignore_missing_imports = true
+# pretty = true
+# show_column_numbers = true
+# show_error_codes = true
+# warn_no_return = false
 warn_redundant_casts = true
 warn_unused_ignores = true
 disallow_any_generics = true

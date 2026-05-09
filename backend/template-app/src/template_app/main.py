@@ -1,22 +1,22 @@
 """
-Development entry point.
+The application's entry point.
 
-This module is intended ONLY for local development.
-It allows running the application directly from an IDE or via Python.
-Example command from the project root source folder:
+This module:
+  * can be used directly ONLY within local development
+  * allows to run the application from an IDE or Python
+
+Command to run the application from the workspace root folder:
     python backend/template-app/src/template_app/main.py
 
-Production environments must use an external ASGI runner, for example:
-    uvicorn template_app:app --host 0.0.0.0 --port 8000 --log-config path/to/logging.yaml
-
 Note:
-    'template_app:app' is interpreted by uvicorn as:
-        from template_app import app
-    which is equivalent to:
-        from template_app.main import app
-"""
-from template_app.core.app.factory import create_app
+Production environments must use an external ASGI runner, for example:
+    uvicorn template_app:app --host 0.0.0.0 --port 8000
 
+"""
+
+from __future__ import annotations
+
+from template_app.core.app.factory import create_app
 
 app = create_app()
 
