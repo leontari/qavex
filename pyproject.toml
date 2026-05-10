@@ -14,7 +14,6 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  "watchfiles>=1.1.1",
   { include-group = "ci" },
   { include-group = "lint" },
   { include-group = "pkg-meta" },
@@ -63,7 +62,9 @@ workspace.members = [
 [tool.ruff]
 line-length = 79
 exclude = [
-  "backend/template-app",
+  "**/_version.py",
+  "**/build/",
+  "**/dict/",
   "shared/py/db",
   "shared/py/logger",
 ]
@@ -85,7 +86,7 @@ lint.ignore = [
   "RUF067", # '__init__' module should only contain docstrings and re-exports
   "S104",   # Possible binding to all interfaces
 ]
-lint.per-file-ignores."tests/**/*.py" = [
+lint.per-file-ignores."**/tests/**/*.py" = [
   "D",       # don't care about documentation in tests
   "FBT",     # don't care about booleans as positional arguments in tests
   "INP001",  # no implicit namespace
@@ -96,7 +97,9 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S",       # 'subprocess' call: check for execution of untrusted input
   "S101",    # asserts allowed in tests...
 ]
-lint.isort = { known-first-party = [], required-imports = [
+lint.isort = { known-first-party = [
+  "template_app",
+], required-imports = [
   "from __future__ import annotations",
 ] }
 lint.preview = true
@@ -106,29 +109,32 @@ builtin = "clear,usage,en-GB_to_en-US"
 count = true
 
 [tool.mypy]
-plugins = [
-  "pydantic.mypy",
-]
-follow_imports = "silent"
+mypy_path = "backend/**/src"
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+explicit_package_bases = true
+no_implicit_reexport = true
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
 # follow_imports = "normal"
-# ignore_missing_imports = true
 # pretty = true
 # show_column_numbers = true
 # show_error_codes = true
 # warn_no_return = false
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-no_implicit_reexport = true
-disallow_untyped_defs = true
+plugins = [
+  "pydantic.mypy",
+]
 
 [tool.ty]
 environment.python-version = "3.11"
 
 [tool.pytest]
-ini_options.testpaths = [
-  "tests",
-]
+ini_options.testpaths = [ "tests" ]
 
 [tool.coverage]
 run.parallel = true

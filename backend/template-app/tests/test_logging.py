@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import logging
+
 from template_app.core.app.logger import ColorFormatter
 
 
 def test_color_formatter(caplog):
     logger = logging.getLogger("template_app")
     handler = logging.StreamHandler()
-    handler.setFormatter(ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s"))
+    handler.setFormatter(
+        ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s")
+    )
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
@@ -18,7 +23,9 @@ def test_color_formatter(caplog):
 def test_color_formatter_basic(caplog):
     logger = logging.getLogger("template_app.test")
     handler = logging.StreamHandler()
-    handler.setFormatter(ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s %(message)s"))
+    handler.setFormatter(
+        ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s %(message)s")
+    )
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
@@ -46,7 +53,9 @@ def test_color_formatter_alignment(caplog):
 
     lines = caplog.text.splitlines()
     assert len(lines) == 2
-    assert lines[0].index("template_app.align") == lines[1].index("template_app.align")
+    assert lines[0].index("template_app.align") == lines[1].index(
+        "template_app.align"
+    )
 
 
 def test_uvicorn_access_logger(caplog):

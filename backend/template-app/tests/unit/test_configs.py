@@ -1,7 +1,12 @@
+from __future__ import annotations
+
+
 def test_color_formatter():
     logger = logging.getLogger("template_app.test")
     handler = logging.StreamHandler()
-    handler.setFormatter(ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s"))
+    handler.setFormatter(
+        ColorFormatter("%(levelname_color)s%(levelname)s%(reset)s")
+    )
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 

@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from __future__ import annotations
+
 import time
+
 import psutil
+from fastapi import APIRouter
 
 router = APIRouter()
 

@@ -1,5 +1,7 @@
-import sys
+from __future__ import annotations
+
 import os
+import sys
 
 
 def test_import_app():

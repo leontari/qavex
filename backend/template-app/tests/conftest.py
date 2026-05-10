@@ -1,5 +1,8 @@
-import pytest
+from __future__ import annotations
+
 import logging
+
+import pytest
 from fastapi.testclient import TestClient
 from template_app.main import app
 
