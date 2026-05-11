@@ -94,10 +94,36 @@ class UvicornAccessFormatter(logging.Formatter):
         return super().format(record)
 
 
+def list_all_loggers():
+    logger_dict = logging.Logger.manager.loggerDict
+    result = []
+    for name, logger in logger_dict.items():
+        if isinstance(logger, logging.Logger):
+            handlers = [h.__class__.__name__ for h in logger.handlers]
+            result.append((name, logging.getLevelName(logger.level), handlers))
+    return result
+
+
+#
+# for name, level, handlers in list_all_loggers():
+#     print(f"{name:30} | level={level:8} | handlers={handlers}")
+
+
 def setup_logging() -> None:
     """Load logging configuration from YAML file."""
+    import os
+
+    root = logging.getLogger()
+
+    # если логирование уже настроено - ничего не делаем
+    if root.hasHandlers():
+        return
+
+    env = os.getenv("APP_ENV", "dev").lower()
+    config_name = "logger.prod.yaml" if env == "prod" else "logger.dev.yaml"
+
     base_dir = Path(__file__).resolve().parent.parent.parent  # template_app/
-    config_path = base_dir / "config" / "logger.yaml"
+    config_path = base_dir / "config" / config_name
 
     if not config_path.exists():
         msg = f"Logging config not found: {config_path}"
