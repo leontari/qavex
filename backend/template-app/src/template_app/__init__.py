@@ -1,21 +1,21 @@
 """
-Package root.
+Application package entry point.
 
-This module:
-  * exposes the application instance for external runners
-  * enables running the application by the next command:
-        uvicorn template_app:app
+This module exposes the ASGI application instance so that external ASGI
+servers (such as Uvicorn or Gunicorn) can import and run the service
+without executing any development-only code.
 
-Note:
-    Due to this module the import performed by uvicorn:
-        template_app:app
-    is equivalent to:
-        from template_app.main import app
+It enables commands like:
 
+    uvicorn template_app:app
+
+The actual application construction and configuration are defined in
+`template_app.asgi`, which provides a clean separation between the
+runtime entry point and the application factory.
 """
 
 from __future__ import annotations
 
-from template_app.main import app
+from template_app.asgi import app
 
 __all__ = ["app"]
