@@ -96,14 +96,14 @@ class UvicornAccessFormatter(logging.Formatter):
 
 def setup_logging() -> None:
     """Load logging configuration from YAML file."""
-    base_dir = Path(__file__).resolve().parent.parent  # template_app/
-    print(base_dir)
-    config_path = base_dir / "config" / "logging.yaml"
-    print(config_path)
-    if not config_path.exists():
-        raise FileNotFoundError(f"Logging config not found: {config_path}")
+    base_dir = Path(__file__).resolve().parent.parent.parent  # template_app/
+    config_path = base_dir / "config" / "logger.yaml"
 
-    with open(config_path, "r") as f:
+    if not config_path.exists():
+        msg = f"Logging config not found: {config_path}"
+        raise FileNotFoundError(msg)
+
+    with Path(config_path).open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     logging.config.dictConfig(config)
