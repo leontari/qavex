@@ -89,7 +89,8 @@ dist:
 .PHONY: uvicorn
 uvicorn:
 	@if "$(SERVICE)"=="" ( echo Usage: make uvicorn ^<service^> & exit 1 )
-	uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
+	uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR)
+#uv run uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
 #uv run --project backend/template-app uvicorn $(PACKAGE):app --reload --reload-dir $(SRC_DIR) --host 127.0.0.1 --port 8000 --log-level debug --app-dir $(SRC_DIR) --log-config $(SRC_DIR)/$(PACKAGE)/config/logging.yaml
 
 .PHONY: fastapi
