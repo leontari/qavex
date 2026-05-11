@@ -38,6 +38,31 @@ from __future__ import annotations
 
 from pathlib import Path
 
+IGNORE_DIRS = {"__pycache__", ".git", ".venv", ".idea", ".mypy_cache"}
+IGNORE_EXT = {".pyc", ".pyo", ".pyd", ".DS_Store"}
+
+
+def should_ignore(entry: Path) -> bool:
+    """
+    Determine whether a filesystem entry should be excluded from the tree.
+
+    Parameters
+    ----------
+    entry : Path
+        A filesystem object (file or directory) that should be evaluated
+        against the ignore rules.
+
+    Returns
+    -------
+    bool
+        True if the entry must be ignored and excluded from the output.
+        False if the entry should be included.
+
+    """
+    if entry.name in IGNORE_DIRS:
+        return True
+    return entry.suffix in IGNORE_EXT
+
 
 def build_tree(root: Path, prefix: str = "") -> str:
     """
@@ -63,8 +88,10 @@ def build_tree(root: Path, prefix: str = "") -> str:
 
     """
     entries = sorted(
-        root.iterdir(), key=lambda p: (p.is_file(), p.name.lower())
+        (e for e in root.iterdir() if not should_ignore(e)),
+        key=lambda p: (p.is_file(), p.name.lower()),
     )
+
     lines = []
 
     for index, entry in enumerate(entries):
