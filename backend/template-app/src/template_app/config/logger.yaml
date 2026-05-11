@@ -4,7 +4,7 @@ disable_existing_loggers: false
 formatters:
   colored:
     class: template_app.core.app.logger.ColorFormatter
-    format: '%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-20s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(message)s'
+    format: '%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-35s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(message)s'
 
   uvicorn_access:
     class: template_app.core.app.logger.UvicornAccessFormatter
