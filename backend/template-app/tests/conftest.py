@@ -1,15 +1,81 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import pytest
-from fastapi.testclient import TestClient
-from template_app.main import app
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+
+from template_app.core.app.factory import create_app
+from template_app.core.database import get_session
+from template_app.core.dependencies import (
+    get_user_repository,
+    get_user_service,
+)
+from template_app.services.repositories.user_repository import UserRepository
+from template_app.services.user_service import UserService
+from template_app.models.sqlalchemy_base import Base
+
+
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
+async def test_engine():
+    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    await engine.dispose()
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+async def test_session(test_engine) -> AsyncSession:
+    async_session = async_sessionmaker(
+        test_engine,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
+    async with async_session() as session:
+        yield session
+
+
+@pytest.fixture
+def app(test_session):
+    app = create_app()
+
+    async def override_get_session():
+        yield test_session
+
+    def override_user_repo():
+        return UserRepository(test_session)
+
+    def override_user_service():
+        return UserService(UserRepository(test_session))
+
+    app.dependency_overrides[get_session] = override_get_session
+    app.dependency_overrides[get_user_repository] = override_user_repo
+    app.dependency_overrides[get_user_service] = override_user_service
+
+    return app
+
+
+@pytest.fixture
+async def client(app):
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
 
 
 @pytest.fixture
