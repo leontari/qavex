@@ -22,5 +22,7 @@ side effect free.
 from __future__ import annotations
 
 from template_app.core.app.factory import create_app
+from template_app.core.app.logger import setup_logging
 
+setup_logging()
 app = create_app()
