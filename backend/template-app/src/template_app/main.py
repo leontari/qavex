@@ -18,20 +18,7 @@ side effects and rely on a clean, import-based ASGI entry point.
 
 from __future__ import annotations
 
+import uvicorn
+
 if __name__ == "__main__":
-    import pathlib
-
-    import uvicorn
-
-    # Resolve logging config relative to this file
-    BASE_DIR = pathlib.Path(__file__).resolve().parent  # /template-app
-    CONFIG_PATH = BASE_DIR / "config" / "logger.yaml"
-
-    uvicorn.run(
-        "template_app:app",
-        host="127.0.0.1",
-        port=8000,
-        log_config=str(CONFIG_PATH),
-        reload=True,
-        reload_dirs=str(BASE_DIR),
-    )
+    uvicorn.run("template_app:app", host="127.0.0.1", port=8000)
