@@ -1,63 +1,72 @@
 version = 1
 disable_existing_loggers = false
 
-[formatters.colored]
-class = "template_app.core.app.logger.ColorFormatter"
-format = "%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-35s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(message)s"
+###########################
+# FILTERS
+###########################
 
-[formatters.uvicorn_access]
-class = "template_app.core.app.logger.UvicornAccessFormatter"
-format = "%(client_color)s%(client)s%(reset)s - \"%(method_color)s%(method)s%(reset)s %(path_color)s%(path)s%(reset)s\" %(status_color)s%(status)s%(reset)s"
+[filters.request_context]
+"()" = "template_app.core.logging.filters.RequestContextFilter"
+
+###########################
+# FORMATTERS
+###########################
+
+[formatters.json]
+class = "pythonjsonlogger.jsonlogger.JsonFormatter"
+
+format = """
+%(asctime)s
+%(levelname)s
+%(name)s
+%(message)s
+%(request_id)s
+%(method)s
+%(path)s
+"""
 
 ###########################
 # HANDLERS
 ###########################
 
-[handlers.console]
+[handlers.stdout]
 class = "logging.StreamHandler"
-formatter = "colored"
+formatter = "json"
 stream = "ext://sys.stdout"
-
-[handlers.uvicorn_access]
-class = "logging.StreamHandler"
-formatter = "uvicorn_access"
-stream = "ext://sys.stdout"
-
 
 ###########################
 # LOGGERS
 ###########################
 
 [loggers.uvicorn]
-handlers = ["console"]
+handlers = ["stdout"]
 level = "INFO"
 propagate = false
 
 [loggers."uvicorn.error"]
-handlers = ["console"]
+handlers = ["stdout"]
 level = "INFO"
 propagate = false
 
 [loggers."uvicorn.access"]
-handlers = ["uvicorn_access"]
+handlers = ["stdout"]
 level = "INFO"
 propagate = false
 
 [loggers.fastapi]
-handlers = ["console"]
+handlers = ["stdout"]
 level = "INFO"
 propagate = false
 
 [loggers.template_app]
-handlers = ["console"]
-level = "DEBUG"
+handlers = ["stdout"]
+level = "INFO"
 propagate = false
 
-
 ###########################
-# ROOT LOGGER
+# ROOT
 ###########################
 
 [root]
+handlers = ["stdout"]
 level = "INFO"
-handlers = ["console"]
