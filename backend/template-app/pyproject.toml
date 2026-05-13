@@ -4,7 +4,7 @@ requires = [ "setuptools>=80", "setuptools-scm>=8" ]
 
 [project]
 name = "template-app"
-description = "Template microservice"
+description = "Microservice Runtime Framework"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"

@@ -21,8 +21,18 @@ side effect free.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from template_app.core.app.factory import create_app
 from template_app.core.app.logger import setup_logging
 
-setup_logging()
-app = create_app()
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+
+
+def __get_app_instance() -> FastAPI:
+    setup_logging()
+    return create_app()
+
+
+app: FastAPI = __get_app_instance()
