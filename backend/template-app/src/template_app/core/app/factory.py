@@ -10,6 +10,7 @@ local development, Docker, and wheel-based installations.
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
@@ -23,6 +24,16 @@ from template_app.api.health import (
 )
 from template_app.config.app import config
 from template_app.config.settings import settings
+from template_app.core.lifecycle.manager import LifecycleManager
+
+lifecycle = LifecycleManager()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await lifecycle.startup(app)
+    yield
+    await lifecycle.shutdown(app)
 
 
 def create_app() -> FastAPI:
@@ -47,6 +58,8 @@ def create_app() -> FastAPI:
         openapi_url=config.OPENAPI_URL,
         # environment-driven application settings
         debug=settings.DEBUG,
+        # lifecycle engine injection
+        lifespan=lifespan,
     )
 
     logger.info("The application is created")

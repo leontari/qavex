@@ -17,6 +17,23 @@ The application factory and logging setup are delegated to the core
 infrastructure modules to keep the ASGI entry point lightweight and
 side effect free.
 
+asgi.py
+  ↓
+create_app()
+  ↓
+FastAPI(lifespan)
+  ↓
+LifecycleManager
+  ↓
+┌──────────────────────┐
+│ startup              │
+│  ├── db              │
+│  ├── cache           │
+│  ├── health system   │
+│  ├── bg tasks        │
+│  └── ready state     │
+└──────────────────────┘
+
 """
 
 from __future__ import annotations
