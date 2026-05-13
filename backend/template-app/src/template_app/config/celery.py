@@ -1,1 +1,0 @@
-# if Celery is used

@@ -1,0 +1,1 @@
+"""If Celery is used."""
