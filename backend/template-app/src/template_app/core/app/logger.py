@@ -273,7 +273,7 @@ def setup_logging() -> None:
     config_name = "logger.prod.toml" if env == "prod" else "logger.dev.toml"
 
     base_dir = Path(__file__).resolve().parent.parent.parent
-    config_path = base_dir / "config" / config_name
+    config_path = base_dir / "config" / "logging" / config_name
 
     if not config_path.exists():
         msg = f"Logging config not found: {config_path}"

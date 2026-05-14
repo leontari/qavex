@@ -1,35 +1,65 @@
 """
-Shutdown orchestration.
+Application shutdown orchestration.
 
-Shutdown guarantees:
-* graceful stop of tasks
-* DB pool закрыт
-* background tasks canceled
-* no dangling async loops
-*metrics flushed
+This module coordinates graceful shutdown of runtime-managed resources and
+background orchestration systems.
 
+Shutdown responsibilities include:
+
+- stopping background schedulers
+- closing HTTP clients
+- stopping Kafka producers
+- closing Redis connections
+- disposing SQLAlchemy engines
+- task cancellation
 """
 
-# core/lifecycle/shutdown.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import logging
 
-if TYPE_CHECKING:
-    from template_app.core.lifecycle.state import AppState
+from fastapi import FastAPI
+
+from template_app.core.lifecycle.state import (
+    LifecycleStage,
+)
+from template_app.health.scheduler.loop import (
+    HealthScheduler,
+)
+
+logger = logging.getLogger(__name__)
 
 
-async def shutdown_all(app, state: AppState) -> None:
-    # 1. Stop background tasks
-    for task in state.background_tasks:
-        task.cancel()
+async def shutdown(
+    app: FastAPI,
+) -> None:
+    """
+    Execute graceful application shutdown.
 
-    # 2. Close DB
-    if state.db:
-        await app.state.db.dispose()
+    Args:
+        app:
+            FastAPI application instance.
+    """
+    runtime_state = app.state.runtime_state
 
-    # 3. Close redis
-    if state.redis:
-        await state.redis.close()
+    runtime_state.stage = LifecycleStage.STOPPING
 
-    state.startup_complete = False
+    logger.info(
+        "Application shutdown initiated.",
+    )
+
+    scheduler: HealthScheduler = app.state.health_scheduler
+
+    await scheduler.stop()
+
+    task_manager = app.state.task_manager
+
+    await task_manager.shutdown()
+
+    runtime_state.stage = LifecycleStage.STOPPED
+
+    runtime_state.shutdown_complete = True
+
+    logger.info(
+        "Application shutdown completed.",
+    )

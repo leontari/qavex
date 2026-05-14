@@ -1,17 +1,23 @@
 """
-Application package entry point.
+Template App package entry point.
 
-This module exposes the ASGI application instance so that external ASGI
-servers (such as Uvicorn or Gunicorn) can import and run the service
-without executing any development-only code.
+This module exposes the ASGI application instance for production-grade
+import-based execution.
 
-It enables commands like:
+Supported runtimes include:
 
+- Uvicorn
+- Gunicorn + Uvicorn workers
+- Kubernetes deployments
+- Docker containers
+- wheel installations
+
+Example:
     uvicorn template_app:app
 
-The actual application construction and configuration are defined in
-`template_app.asgi`, which provides a clean separation between the
-runtime entry point and the application factory.
+The actual application construction is delegated to `template_app.asgi`
+to keep the package entry point lightweight and side effect free.
+
 """
 
 from __future__ import annotations

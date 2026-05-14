@@ -1,18 +1,23 @@
 """
 Local development entry point.
 
-This module exists solely to support running the application directly
-via Python or an IDE during development. It initializes logging,
-constructs the FastAPI application, and starts an Uvicorn server when
-executed as a script.
+This module exists exclusively for local development and IDE execution.
 
-Production environments must not use this module. Instead, an external
-ASGI server should import the application from `template_app`, for example:
+Responsibilities:
 
-    uvicorn template_app:app --host 0.0.0.0 --port 8000
+- local Uvicorn execution
+- development-only runtime bootstrap
 
-This separation ensures that production deployments avoid development-only
-side effects and rely on a clean, import-based ASGI entry point.
+Production environments MUST use import-based ASGI execution instead:
+
+    uvicorn template_app:app
+
+or:
+
+    gunicorn template_app:app -k uvicorn.workers.UvicornWorker
+
+This separation prevents accidental production usage of development-only
+runtime logic.
 
 """
 
@@ -20,5 +25,17 @@ from __future__ import annotations
 
 import uvicorn
 
+
+def main() -> None:
+    """Run the local development server."""
+    uvicorn.run(
+        "template_app:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        log_config=None,
+    )
+
+
 if __name__ == "__main__":
-    uvicorn.run("template_app.asgi:app", host="127.0.0.1", port=8000)
+    main()

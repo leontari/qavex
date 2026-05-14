@@ -1,25 +1,66 @@
 """
-Application State.
+Runtime lifecycle state models.
 
-Core idea:
-* single source of runtime truth
+This module defines shared runtime state used during application startup,
+shutdown, and long-running orchestration management.
 
+The lifecycle subsystem coordinates:
+
+- infrastructure initialization
+- async background task management
+- graceful shutdown orchestration
+- scheduler runtime state
+- dependency startup ordering
 """
 
-# core/lifecycle/state.py
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any
 
 
-@dataclass
-class AppState:
-    db: Any | None = None
-    redis: Any | None = None
-    kafka: Any | None = None
+class LifecycleStage(StrEnum):
+    """
+    Application lifecycle stages.
+    """
 
-    health_ready: bool = False
+    INITIALIZING = "initializing"
+
+    STARTING = "starting"
+
+    RUNNING = "running"
+
+    STOPPING = "stopping"
+
+    STOPPED = "stopped"
+
+    FAILED = "failed"
+
+
+@dataclass(slots=True)
+class RuntimeState:
+    """
+    Global runtime application state.
+
+    Attributes:
+        stage:
+            Current lifecycle stage.
+
+        resources:
+            Initialized infrastructure resources.
+
+        startup_complete:
+            Indicates startup completion.
+
+        shutdown_complete:
+            Indicates graceful shutdown completion.
+    """
+
+    stage: LifecycleStage = LifecycleStage.INITIALIZING
+
+    resources: dict[str, Any] = field(default_factory=dict)
+
     startup_complete: bool = False
 
-    background_tasks: set = field(default_factory=set)
+    shutdown_complete: bool = False

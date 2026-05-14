@@ -53,3 +53,84 @@ def __get_app_instance() -> FastAPI:
 
 
 app: FastAPI = __get_app_instance()
+
+# """
+# Production ASGI application entry point.
+#
+# This module is responsible for:
+#
+# - logging initialization
+# - lifecycle manager initialization
+# - FastAPI application creation
+# - startup/shutdown orchestration wiring
+#
+# The module intentionally contains no development-only execution logic.
+#
+# Production servers should import the `app` object directly:
+#
+#     uvicorn template_app.asgi:app
+#
+# or:
+#
+#     uvicorn template_app:app
+# """
+
+# from __future__ import annotations
+#
+# from contextlib import asynccontextmanager
+# from typing import AsyncIterator
+#
+# from fastapi import FastAPI
+#
+# from template_app.api.router import api_router
+# from template_app.config.app import config
+# from template_app.config.settings import settings
+# from template_app.core.app.logger import (
+#     setup_logging,
+# )
+# from template_app.core.lifecycle import (
+#     LifecycleManager,
+# )
+#
+# setup_logging()
+#
+# lifecycle_manager = LifecycleManager()
+#
+#
+# @asynccontextmanager
+# async def lifespan(
+#     app: FastAPI,
+# ) -> AsyncIterator[None]:
+#     """
+#     FastAPI application lifespan manager.
+#
+#     This lifecycle context coordinates:
+#
+#     - runtime startup orchestration
+#     - scheduler initialization
+#     - background task management
+#     - graceful shutdown
+#
+#     Args:
+#         app:
+#             FastAPI application instance.
+#     """
+#     await lifecycle_manager.startup(app)
+#
+#     yield
+#
+#     await lifecycle_manager.shutdown(app)
+#
+#
+# app = FastAPI(
+#     title=config.APP_TITLE,
+#     description=config.APP_DESCRIPTION,
+#     version=config.APP_VERSION,
+#     docs_url=config.DOCS_URL,
+#     redoc_url=config.REDOC_URL,
+#     openapi_url=config.OPENAPI_URL,
+#     debug=settings.DEBUG,
+#     lifespan=lifespan,
+# )
+#
+# app.include_router(api_router)

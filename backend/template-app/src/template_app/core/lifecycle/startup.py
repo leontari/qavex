@@ -1,42 +1,61 @@
-"""Startup orchestration.
+"""
+Application startup orchestration.
 
-Startup guarantees:
-* DB pool создан
-* Redis/Kafka (если есть) инициализированы
-* health subsystem запущен
-* cached probes прогреты
-* circuit breakers инициализированы
-* observability активирована
+This module coordinates initialization of runtime infrastructure and
+background orchestration systems.
 
+Startup responsibilities include:
+
+- database initialization
+- Redis initialization
+- Kafka initialization
+- scheduler startup
+- health runtime warmup
+- runtime state transitions
 """
 
-# core/lifecycle/startup.py
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI
-from template_app.core.lifecycle.state import AppState
+
+from template_app.core.lifecycle.state import (
+    LifecycleStage,
+)
+from template_app.health.scheduler.loop import (
+    HealthScheduler,
+)
+
+logger = logging.getLogger(__name__)
 
 
-engine = create_db_engine(settings)
+async def startup(
+    app: FastAPI,
+) -> None:
+    """
+    Execute application startup sequence.
 
-session_factory = create_session_factory(engine)
+    Args:
+        app:
+            FastAPI application instance.
+    """
+    runtime_state = app.state.runtime_state
 
-app.state.db_engine = engine
-app.state.session_factory = session_factory
+    runtime_state.stage = LifecycleStage.STARTING
 
+    logger.info(
+        "Application startup initiated.",
+    )
 
-async def startup_all(app: FastAPI, state: AppState) -> None:
-    # 1. DB
-    state.db = app.state.db_engine
+    scheduler: HealthScheduler = app.state.health_scheduler
 
-    # 2. Redis (если есть)
-    if hasattr(app.state, "redis"):
-        state.redis = app.state.redis
+    await scheduler.start()
 
-    # 3. Warmup health system
-    await warmup_health_checks(state)
+    runtime_state.stage = LifecycleStage.RUNNING
 
-    # 4. Background tasks
-    await start_background_tasks(app, state)
+    runtime_state.startup_complete = True
 
-    state.startup_complete = True
+    logger.info(
+        "Application startup completed.",
+    )
