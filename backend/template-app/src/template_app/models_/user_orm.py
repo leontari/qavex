@@ -11,8 +11,8 @@ from __future__ import annotations
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from template_app.models.sqlalchemy_base import Base
-from template_app.models.mixins import TimestampMixin
+from template_app.models_.sqlalchemy_base import Base
+from template_app.models_.mixins import TimestampMixin
 
 
 class UserORM(TimestampMixin, Base):

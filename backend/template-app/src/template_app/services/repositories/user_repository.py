@@ -12,8 +12,8 @@ from typing import Optional, List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from template_app.models.user import User, UserCreate, UserUpdate
-from template_app.models.user_orm import UserORM
+from template_app.models_.user import User, UserCreate, UserUpdate
+from template_app.models_.user_orm import UserORM
 
 
 class UserRepository:

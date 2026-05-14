@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from template_app.core.dependencies import get_auth_service, get_user_service
+from template_app.core_.dependencies import get_auth_service, get_user_service
 from template_app.services.auth_service import AuthService
 from template_app.services.user_service import UserService
 

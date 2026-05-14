@@ -24,7 +24,7 @@ from fastapi import FastAPI
 # )
 from template_app.config.app import config
 from template_app.config.settings import settings
-from template_app.core.lifecycle.manager import LifecycleManager
+from template_app.core_.lifecycle.manager import LifecycleManager
 
 lifecycle = LifecycleManager()
 

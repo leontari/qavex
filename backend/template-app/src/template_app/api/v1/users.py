@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from template_app.core.dependencies import get_user_service
-from template_app.models.user import User, UserCreate, UserUpdate
+from template_app.core_.dependencies import get_user_service
+from template_app.models_.user import User, UserCreate, UserUpdate
 from template_app.services.user_service import UserService
 
 router = APIRouter()

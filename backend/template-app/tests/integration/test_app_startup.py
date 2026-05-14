@@ -25,6 +25,6 @@ def test_uvicorn_import():
     assert hasattr(module, "app")
 
 
-from template_app.core.app.factory import create_app
+from template_app.core_.app_.factory import create_app
 # тест фабрики приложения
 # убедиться, что create_app() не падает без специфичных локальных путей

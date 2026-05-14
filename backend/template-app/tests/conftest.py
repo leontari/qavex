@@ -11,15 +11,15 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from template_app.core.app.factory import create_app
-from template_app.core.database import get_session
-from template_app.core.dependencies import (
+from template_app.core_.app_.factory import create_app
+from template_app.core_.database import get_session
+from template_app.core_.dependencies import (
     get_user_repository,
     get_user_service,
 )
 from template_app.services.repositories.user_repository import UserRepository
 from template_app.services.user_service import UserService
-from template_app.models.sqlalchemy_base import Base
+from template_app.models_.sqlalchemy_base import Base
 
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -82,3 +82,17 @@ async def client(app):
 def caplog_info(caplog):
     with caplog.at_level(logging.INFO):
         yield caplog
+
+
+
+
+
+from template_app.bootstrap.testing import (
+    bootstrap_testing_application,
+)
+
+@pytest.fixture
+def app():
+    context = bootstrap_testing_application()
+
+    return context.app

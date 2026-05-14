@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Optional, List
 
-from template_app.models.user import User, UserCreate, UserUpdate
+from template_app.models_.user import User, UserCreate, UserUpdate
 from template_app.services.repositories.user_repository import UserRepository
 
 

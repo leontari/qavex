@@ -36,21 +36,23 @@ Architecture overview:
 
 The lifecycle layer acts as the runtime control plane for the entire
 microservice and coordinates all long-lived infrastructure components.
+
+runtime orchestration.
 """
 
 from __future__ import annotations
 
-from template_app.core.lifecycle.manager import (
+from template_app.core_.lifecycle.manager import (
     LifecycleManager,
 )
-from template_app.core.lifecycle.registry import (
+from template_app.core_.lifecycle.registry import (
     LifecycleRegistry,
 )
-from template_app.core.lifecycle.state import (
+from template_app.core_.lifecycle.state import (
     LifecycleStage,
     RuntimeState,
 )
-from template_app.core.lifecycle.tasks import (
+from template_app.core_.lifecycle.tasks import (
     BackgroundTaskManager,
 )
 

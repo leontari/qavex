@@ -40,16 +40,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.core.app.factory import create_app
-from template_app.core.app.logger import setup_logging
+from template_app.bootstrap.runtime import bootstrap_application
+from template_app.core_.app_.factory import create_app
+from template_app.core_.app_.logger import setup_logging
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-setup_logging()
+# setup_logging()
 
-app: FastAPI = create_app()
+context = bootstrap_application()
+
+app: FastAPI = context.app
 
 
 # """

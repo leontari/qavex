@@ -20,7 +20,7 @@ import logging
 
 from fastapi import FastAPI
 
-from template_app.core.lifecycle.state import (
+from template_app.core_.lifecycle.state import (
     LifecycleStage,
 )
 from template_app.health.scheduler.loop import (
