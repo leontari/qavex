@@ -47,12 +47,10 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def __get_app_instance() -> FastAPI:
-    setup_logging()
-    return create_app()
+setup_logging()
 
+app: FastAPI = create_app()
 
-app: FastAPI = __get_app_instance()
 
 # """
 # Production ASGI application entry point.

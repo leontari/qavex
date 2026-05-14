@@ -16,21 +16,11 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.core.lifecycle.registry import (
-    LifecycleRegistry,
-)
-from template_app.core.lifecycle.shutdown import (
-    shutdown,
-)
-from template_app.core.lifecycle.startup import (
-    startup,
-)
-from template_app.core.lifecycle.state import (
-    RuntimeState,
-)
-from template_app.core.lifecycle.tasks import (
-    BackgroundTaskManager,
-)
+from template_app.core.lifecycle.registry import LifecycleRegistry
+from template_app.core.lifecycle.shutdown import shutdown
+from template_app.core.lifecycle.startup import startup
+from template_app.core.lifecycle.state import RuntimeState
+from template_app.core.lifecycle.tasks import BackgroundTaskManager
 
 
 class LifecycleManager:

@@ -24,9 +24,9 @@ from fastapi import FastAPI
 # )
 from template_app.config.app import config
 from template_app.config.settings import settings
-# from template_app.core.lifecycle.manager import LifecycleManager
+from template_app.core.lifecycle.manager import LifecycleManager
 
-# lifecycle = LifecycleManager()
+lifecycle = LifecycleManager()
 
 
 # @asynccontextmanager
@@ -64,6 +64,7 @@ def create_app() -> FastAPI:
 
     logger.info("The application is created")
 
+    # routes
     # Register routers
     # app.include_router(api_router, prefix="/api")
     # app.include_router(observability_router, prefix="/observability")
@@ -72,4 +73,9 @@ def create_app() -> FastAPI:
     # app.include_router(health_router)
     # app.include_router(metrics_router)
 
+    # middleware registration
+
+    # exception handlers
+
+    # dependency wiring
     return app

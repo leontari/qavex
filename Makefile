@@ -160,4 +160,4 @@ push:
 # --- Scripts -----------------------------------------------------------------
 .PHONE: tree
 tree:
-	python tools/dev/python/generate_tree.py $(filter-out $@,$(MAKECMDGOALS))
+	python scripts/dev/python/generate_tree.py $(filter-out $@,$(MAKECMDGOALS))

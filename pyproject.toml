@@ -61,13 +61,7 @@ workspace.members = [
 
 [tool.ruff]
 line-length = 79
-exclude = [
-  "**/_version.py",
-  "**/build/",
-  "**/dict/",
-  "shared/py/db",
-  "shared/py/logger",
-]
+exclude = [ "**/_version.py", "**/build/", "**/dict/", "**/tests/", "shared/py/db", "shared/py/logger" ]
 format.preview = true  # Switch to Ruff's experimental features
 format.indent-style = "space"
 format.quote-style = "double"
@@ -110,6 +104,8 @@ count = true
 
 [tool.mypy]
 mypy_path = "backend/**/src"
+# files = [ "src" ]
+exclude = "(^|/)(tests|migrations|scripts)/"
 check_untyped_defs = true
 disallow_untyped_defs = true
 disallow_any_generics = true

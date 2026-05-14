@@ -72,9 +72,7 @@ class BackgroundTaskManager:
         return task
 
     async def shutdown(self) -> None:
-        """
-        Gracefully stop all background tasks.
-        """
+        """Gracefully stop all background tasks."""
         if not self._tasks:
             return
 
