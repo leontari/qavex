@@ -68,3 +68,28 @@ Infrastructure Adapters:
 - ClickHouse
 - SMTP
 - REST clients
+
+
+## Architecture
+
+Current architecture:
+
+```
+FastAPI runtime kernel
+        ↓
+Dynamic module registry
+        ↓
+Pluggable application modules
+        ↓
+Infrastructure adapters
+```
+
+This is the foundation for:
+
+- plugin loading
+- feature flags
+- runtime capability discovery
+- dynamic module enabling/disabling
+- background runtime services
+- event-driven orchestration
+- service runtime platform

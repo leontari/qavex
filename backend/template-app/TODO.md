@@ -1,5 +1,5 @@
 1. [x] Module bootstrap protocol
-2. [ ] Dynamic module registry
+2. [x] Dynamic module registry
 3. [ ] Unified lifecycle registry
 4. [ ] Infrastructure providers
 5. [ ] Event bus abstraction

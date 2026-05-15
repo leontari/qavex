@@ -21,6 +21,7 @@ def bootstrap_application() -> ApplicationContext:
 
     container = Container()
 
+    # TODO: recheck this
     app.state.container = container
 
     for module in MODULES:

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from fastapi import FastAPI
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
-from template_app.bootstrap.container import Container
+    from template_app.bootstrap.container import Container
 
 
 class ModuleProtocol(Protocol):
