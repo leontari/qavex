@@ -132,6 +132,7 @@ environment.python-version = "3.11"
 [tool.pytest]
 ini_options.testpaths = [ "**/backend/**/tests" ]
 ini_options.xfail_strict = true
+ini_options.addopts = [ "-ra", "-q" ]
 # ini_options.addopts = ["-ra", "--strict-config", "--strict-markers", "-p", "vcs_versioning.test_api"]
 ini_options.markers = [
   "issue(id): reference to github issue",
