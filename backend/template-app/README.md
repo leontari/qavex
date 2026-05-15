@@ -69,22 +69,9 @@ Infrastructure Adapters:
 - SMTP
 - REST clients
 
+## This is the foundation for
 
-## Architecture
-
-Current architecture:
-
-```
-FastAPI runtime kernel
-        ↓
-Dynamic module registry
-        ↓
-Pluggable application modules
-        ↓
-Infrastructure adapters
-```
-
-This is the foundation for:
+The target to get as a result:
 
 - plugin loading
 - feature flags
@@ -93,3 +80,31 @@ This is the foundation for:
 - background runtime services
 - event-driven orchestration
 - service runtime platform
+
+## Target system design
+
+`template-app` is a `Application Runtime Kernel`
+
+where:
+
+- FastAPI = transport adapter;
+- lifespan = runtime adapter;
+- services/modules = plugins;
+- infrastructure = adapters/providers;
+- runtime = orchestration layer.
+
+## Current Architecture
+
+Current architecture design:
+
+```
+FastAPI runtime kernel
+        ↓
+Dynamic module registry
+        ↓
+Unified lifecycle registry
+        ↓
+Pluggable application modules
+        ↓
+Infrastructure adapters
+```
