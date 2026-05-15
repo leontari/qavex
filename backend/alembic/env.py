@@ -12,7 +12,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from template_app.config.settings import settings
+from template_app.config_.settings import settings
 from template_app.models_.sqlalchemy_base import Base
 
 # Import all ORM models so Alembic can detect them
