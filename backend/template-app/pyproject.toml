@@ -1,0 +1,44 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [ "setuptools>=80", "setuptools-scm>=8" ]
+
+[project]
+name = "template-app"
+description = "Reusable plugin-oriented microservice platform template"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+classifiers = [
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dynamic = [ "version" ]
+dependencies = [
+  "fastapi>=0.136.1",
+  "psutil>=7.2.2",
+  "sqlalchemy>=2.0.49",
+  "uvicorn>=0.46",
+]
+
+[dependency-groups]
+dev = [
+  { include-group = "test" },
+]
+test = [
+  "httpx>=0.28.1",
+]
+
+[tool.setuptools]
+package-data.setuptools_scm = [ ".git_archival.txt" ]
+
+[tool.setuptools_scm]
+root = "../../"
+version_file = "src/template_app/_version.py"
+version_scheme = "towncrier-fragments"
+tag_regex = "^template-app-(?P<version>v?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
+fallback_version = "0.0.0"
+scm.git.describe_command = [ "git", "describe", "--dirty", "--tags", "--long", "--match", "template-app-*" ]
