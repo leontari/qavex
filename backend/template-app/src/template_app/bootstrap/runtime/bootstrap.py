@@ -34,7 +34,7 @@ def bootstrap_application() -> ApplicationContext:
     # TODO: recheck this
     app.state.container = container
     app.state.lifecycle_registry = lifecycle_registry
-    app.state.lifecycle_registry = lifecycle_manager
+    app.state.lifecycle_manager = lifecycle_manager
 
     for module in MODULES:
         module.setup(app, container)

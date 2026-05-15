@@ -1,15 +1,8 @@
 from __future__ import annotations
 
-from template_app.bootstrap.runtime.hooks import (
-    LifecycleHook,
-)
-from template_app.bootstrap.runtime.manager import (
-    LifecycleManager,
-)
-from template_app.bootstrap.runtime.registry import (
-    LifecycleRegistry,
-)
-
+from template_app.bootstrap.runtime.hooks import LifecycleHook
+from template_app.bootstrap.runtime.manager import LifecycleManager
+from template_app.bootstrap.runtime.registry import LifecycleRegistry
 
 async def test_lifecycle_manager_executes_hooks() -> None:
     registry = LifecycleRegistry()

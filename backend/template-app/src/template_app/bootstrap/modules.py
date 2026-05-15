@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     from template_app.bootstrap.container import Container
     from template_app.bootstrap.protocols import ModuleProtocol
+    from template_app.bootstrap.runtime.registry import LifecycleRegistry
 
 
 class HealthModule:
@@ -64,7 +65,7 @@ class RuntimeModule:
             ),
         )
 
-        lifecycle_registry.register_shutdwon(
+        lifecycle_registry.register_shutdown(
             LifecycleHook(
                 name="runtime_shutdown",
                 handler=self.shutdown_hook,
