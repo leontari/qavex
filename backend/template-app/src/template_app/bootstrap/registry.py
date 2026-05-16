@@ -23,17 +23,11 @@ class ModuleRegistry:
     def __init__(self) -> None:
         self._modules: list[ModuleProtocol] = []
 
-    def register(
-        self,
-        module: ModuleProtocol,
-    ) -> None:
+    def register(self, module: ModuleProtocol) -> None:
         """Register application module."""
         self._modules.append(module)
 
-    def extend(
-        self,
-        modules: Iterable[ModuleProtocol],
-    ) -> None:
+    def extend(self, modules: Iterable[ModuleProtocol]) -> None:
         """Register multiple modules."""
         self._modules.extend(modules)
 

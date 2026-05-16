@@ -50,6 +50,14 @@ Runtime Kernel:
 - Event Bus
 - Task Scheduler
 
+```
+RuntimeKernel
+    ├── transport orchestration
+    ├── module orchestration
+    ├── infrastructure orchestration
+    └── lifecycle orchestration
+```
+
 Plugins / Modules:
 
 - UserService
@@ -112,16 +120,17 @@ will be on the same `kernel`
 Current architecture design:
 
 ```
-RuntimeKernel
-    ├── ApplicationContext
-    │       ├── FastAPI transport
-    │       └── RuntimeState
-    │
-    ├── lifecycle orchestration
-    ├── module orchestration
-    ├── infrastructure orchestration
-    └── runtime coordination
+FastAPI = transport;
+providers = infrastructure adapters;
+modules = business plugins;
+lifecycle = orchestration engine;
+kernel = runtime platform.
+```
 
-FastAPI
-    └── transport adapter only
+which is close to:
+```text
+Temporal worker runtime;
+internal platform runtimes;
+microservice kernels;
+plugin-based enterprise systems.
 ```

@@ -9,7 +9,16 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class RuntimeKernel:
-    """Central application runtime kernel."""
+    """
+    Central application runtime kernel.
+
+    RuntimeKernel is responsible for:
+      - transport orchestration;
+      - module orchestration;
+      - infrastructure orchestration;
+      - lifecycle orchestration.
+
+    """
 
     context: ApplicationContext
 
