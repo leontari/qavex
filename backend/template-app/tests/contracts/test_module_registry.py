@@ -2,9 +2,15 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from template_app.bootstrap.modules import MODULES
 from template_app.bootstrap.container import Container
 from template_app.bootstrap.protocols import ModuleProtocol
 from template_app.bootstrap.registry import ModuleRegistry
+
+
+def test_modules_registered() -> None:
+    assert len(MODULES) >0
+
 
 
 class FakeModule:

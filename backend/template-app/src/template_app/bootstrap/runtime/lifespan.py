@@ -9,16 +9,18 @@ if TYPE_CHECKING:
 
     from fastapi import FastAPI
 
-    from template_app.bootstrap.application import ApplicationContext
+    from template_app.bootstrap.runtime.kernel import RuntimeKernel
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Unified application lifespan."""
-    context: ApplicationContext = app.state.context
+def create_lifespan(kernel: RuntimeKernel):
+    """Create application lifespan closure."""
 
-    await context.runtime.lifecycle_manager.startup()
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        await kernel.startup()
 
-    yield
+        yield
 
-    await context.runtime.lifecycle_manager.shutdown()
+        await kernel.shutdown()
+
+    return lifespan

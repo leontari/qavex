@@ -9,6 +9,8 @@ from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-context = bootstrap_application()
+    from template_app.bootstrap.runtime.kernel import RuntimeKernel
 
-app: FastAPI = context.app
+kernel: RuntimeKernel = bootstrap_application()
+
+app: FastAPI = kernel.context.app

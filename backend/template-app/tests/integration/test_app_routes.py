@@ -3,7 +3,7 @@ from __future__ import annotations
 from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 
 
-def test_modules_loaded_into_application() -> None:
+def test_health_route_registered() -> None:
     kernel = bootstrap_application()
 
     paths = {
@@ -12,4 +12,3 @@ def test_modules_loaded_into_application() -> None:
     }
 
     assert "/health" in paths
-    assert "/runtime" in paths

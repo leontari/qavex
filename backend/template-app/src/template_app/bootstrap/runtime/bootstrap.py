@@ -5,26 +5,17 @@ from fastapi import FastAPI
 from template_app.bootstrap.application import ApplicationContext
 from template_app.bootstrap.container import Container
 from template_app.bootstrap.modules import MODULES
-from template_app.bootstrap.runtime.lifespan import lifespan
+from template_app.bootstrap.runtime.kernel import RuntimeKernel
+from template_app.bootstrap.runtime.lifespan import create_lifespan
 from template_app.bootstrap.runtime.manager import LifecycleManager
 from template_app.bootstrap.runtime.registry import LifecycleRegistry
 from template_app.bootstrap.runtime.state import RuntimeState
 
 
-def bootstrap_application() -> ApplicationContext:
-    """
-    Create fully configured application runtime.
+def bootstrap_application() -> RuntimeKernel:
+    """Bootstrap application runtime kernel."""
 
-    Returns:
-        ApplicationContext: the fully configured application instance
-
-    """
     lifecycle_registry: LifecycleRegistry = LifecycleRegistry()
-
-    app: FastAPI = FastAPI(
-        title="template-app",
-        lifespan=lifespan,
-    )
 
     container: Container = Container()
 
@@ -38,14 +29,24 @@ def bootstrap_application() -> ApplicationContext:
         lifecycle_manager=lifecycle_manager,
     )
 
+    temporary_app: FastAPI = FastAPI()
+
     context: ApplicationContext = ApplicationContext(
-        app=app,
+        app=temporary_app,
         runtime=runtime,
     )
 
-    app.state.context = context
+    # TODO: check and maybe set default values to be able inject latter
+    kernel: RuntimeKernel = RuntimeKernel(context=context)
+
+    app = FastAPI(
+        title="template-app",
+        lifespan=create_lifespan(kernel),
+    )
+
+    context.app = app
 
     for module in MODULES:
         module.setup(context)
 
-    return context
+    return kernel

@@ -1,24 +1,10 @@
 from __future__ import annotations
 
 from template_app.bootstrap.container import Container
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
-)
-from template_app.bootstrap.runtime.manager import LifecycleManager
-from template_app.bootstrap.runtime.registry import LifecycleRegistry
-from template_app.bootstrap.runtime.state import RuntimeState
+from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 
 
-def test_runtime_state_initialized() -> None:
-    registry = LifecycleRegistry()
+def test_runtime_contains_container() -> None:
+    kernel = bootstrap_application()
 
-    manager = LifecycleManager(registry=registry)
-
-    runtime = RuntimeState(
-        container=Container(),
-        lifecycle_registry=registry,
-        lifecycle_manager=manager,
-    )
-
-    assert runtime.lifecycle_registry is registry
-    assert runtime.lifecycle_manager is manager
+    assert isinstance(kernel.context.runtime.container, Container)

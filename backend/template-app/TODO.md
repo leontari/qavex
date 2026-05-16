@@ -1,6 +1,7 @@
 1. [x] Module bootstrap protocol
 2. [x] Dynamic module registry
 3. [x] Unified lifecycle registry
+    - redesigning: Hexagonal Runtime Architecture
 4. [ ] Infrastructure providers
 5. [ ] Event bus abstraction
 6. [ ] Command/query execution layer

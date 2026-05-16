@@ -1,10 +1,19 @@
 """Tests for local development entrypoint."""
-
 from __future__ import annotations
 
 from unittest.mock import patch
 
 from template_app.main import main
+
+
+def test_main_starts_uvicorn() -> None:
+
+    from template_app.main import main
+
+    with patch("uvicorn.run") as mocked:
+        main()
+
+    mocked.assert_called_once()
 
 
 def test_main_runs_uvicorn() -> None:

@@ -83,6 +83,8 @@ The target to get as a result:
 
 ## Target system design
 
+Hexagonal Runtime Architecture
+
 `template-app` is a `Application Runtime Kernel`
 
 where:
@@ -93,18 +95,33 @@ where:
 - infrastructure = adapters/providers;
 - runtime = orchestration layer.
 
+This will allow the change FastApi itself:
+For example:
+```text
+HTTP adapter
+gRPC adapter
+Kafka consumer runtime
+CLI runtime
+Worker runtime
+Scheduler runtime
+```
+will be on the same `kernel`
+
 ## Current Architecture
 
 Current architecture design:
 
 ```
-FastAPI runtime kernel
-        ↓
-Dynamic module registry
-        ↓
-Unified lifecycle registry
-        ↓
-Pluggable application modules
-        ↓
-Infrastructure adapters
+RuntimeKernel
+    ├── ApplicationContext
+    │       ├── FastAPI transport
+    │       └── RuntimeState
+    │
+    ├── lifecycle orchestration
+    ├── module orchestration
+    ├── infrastructure orchestration
+    └── runtime coordination
+
+FastAPI
+    └── transport adapter only
 ```
