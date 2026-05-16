@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class ApplicationContext:
-    """Runtime application context."""
+    """Application runtime context."""
 
-    app: FastAPI
     runtime: RuntimeState
+    app: FastAPI | None = None

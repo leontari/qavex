@@ -22,9 +22,10 @@ if TYPE_CHECKING:
 
 
 def bootstrap_application() -> RuntimeKernel:
-    """Bootstrap application runtime kernel."""
+    """Bootstrap runtime kernel."""
 
     lifecycle_registry: LifecycleRegistry = LifecycleRegistry()
+
     infrastructure_registry: InfrastructureRegistry = (
         bootstrap_infrastructure()
     )
@@ -35,21 +36,15 @@ def bootstrap_application() -> RuntimeKernel:
         registry=lifecycle_registry,
     )
 
-    runtime = RuntimeState(
+    runtime: RuntimeState = RuntimeState(
         container=container,
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
         infrastructure_registry=infrastructure_registry,
     )
 
-    temporary_app: FastAPI = FastAPI()
+    context: ApplicationContext = ApplicationContext(runtime=runtime)
 
-    context: ApplicationContext = ApplicationContext(
-        app=temporary_app,
-        runtime=runtime,
-    )
-
-    # TODO: check and maybe set default values to be able inject latter
     kernel: RuntimeKernel = RuntimeKernel(context=context)
 
     app = FastAPI(
@@ -63,7 +58,6 @@ def bootstrap_application() -> RuntimeKernel:
     for module in MODULES:
         module.setup(context)
 
-    # TODO: check shutdown hook and a better way
     # integrate infrastructure providers
     for provider in infrastructure_registry.providers:
         lifecycle_registry.register_startup(
