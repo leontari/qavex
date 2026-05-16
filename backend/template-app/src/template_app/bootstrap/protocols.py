@@ -3,9 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI
-
-    from template_app.bootstrap.container import Container
+    from template_app.bootstrap.application import ApplicationContext
 
 
 class ModuleProtocol(Protocol):
@@ -21,12 +19,8 @@ class ModuleProtocol(Protocol):
     - background tasks
 
     Modules must NOT create infrastructure resources directly.
-    They receive them through the application container.
+    They receive them through the application context container.
     """
 
-    def setup(
-        self,
-        app: FastAPI,
-        container: Container,
-    ) -> None:
-        """Configure module inside application runtime."""
+    def setup(self, context: ApplicationContext) -> None:
+        """Configure module inside application context runtime."""

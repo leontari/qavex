@@ -8,6 +8,7 @@ from template_app.bootstrap.modules import MODULES
 from template_app.bootstrap.runtime.lifespan import lifespan
 from template_app.bootstrap.runtime.manager import LifecycleManager
 from template_app.bootstrap.runtime.registry import LifecycleRegistry
+from template_app.bootstrap.runtime.state import RuntimeState
 
 
 def bootstrap_application() -> ApplicationContext:
@@ -31,15 +32,20 @@ def bootstrap_application() -> ApplicationContext:
         registry=lifecycle_registry,
     )
 
-    # TODO: recheck this
-    app.state.container = container
-    app.state.lifecycle_registry = lifecycle_registry
-    app.state.lifecycle_manager = lifecycle_manager
+    runtime = RuntimeState(
+        container=container,
+        lifecycle_registry=lifecycle_registry,
+        lifecycle_manager=lifecycle_manager,
+    )
+
+    context: ApplicationContext = ApplicationContext(
+        app=app,
+        runtime=runtime,
+    )
+
+    app.state.context = context
 
     for module in MODULES:
-        module.setup(app, container)
+        module.setup(context)
 
-    return ApplicationContext(
-        app=app,
-        container=container,
-    )
+    return context

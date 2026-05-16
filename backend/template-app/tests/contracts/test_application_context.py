@@ -1,24 +1,28 @@
 from __future__ import annotations
 
+from fastapi import FastAPI
+
+from template_app.bootstrap.application import ApplicationContext
 from template_app.bootstrap.container import Container
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
-)
 from template_app.bootstrap.runtime.manager import LifecycleManager
 from template_app.bootstrap.runtime.registry import LifecycleRegistry
 from template_app.bootstrap.runtime.state import RuntimeState
 
 
-def test_runtime_state_initialized() -> None:
+def test_application_context_created() -> None:
     registry = LifecycleRegistry()
-
-    manager = LifecycleManager(registry=registry)
 
     runtime = RuntimeState(
         container=Container(),
         lifecycle_registry=registry,
-        lifecycle_manager=manager,
+        lifecycle_manager=LifecycleManager(
+            registry=registry,
+        ),
     )
 
-    assert runtime.lifecycle_registry is registry
-    assert runtime.lifecycle_manager is manager
+    context = ApplicationContext(
+        app=FastAPI(),
+        runtime=runtime,
+    )
+
+    assert context.runtime is runtime
