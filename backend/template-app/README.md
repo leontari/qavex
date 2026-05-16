@@ -1,5 +1,7 @@
 # IT IS NOT a FastAPI CRUD app
 
+Plugin Runtime Platform
+
 It is an other architecture level which can be described as:
 
 - microservice runtime platform;
@@ -58,7 +60,7 @@ RuntimeKernel
     └── lifecycle orchestration
 ```
 
-Plugins / Modules:
+## Plugins / Modules:
 
 - UserService
 - AuthService
@@ -67,7 +69,22 @@ Plugins / Modules:
 - MetricsService
 - HealthService
 
-Infrastructure Adapters:
+Supports:
+- sandbox modules;
+- hot reload modules;
+- dynamic plugins;
+- remote plugins;
+- signed plugins;
+- multi-tenant modules.
+
+Modules work only via public setup API:
+- `register_router`
+- `register_startup_hook`
+- `register_shutdown_hook`
+- `register_dependency`
+- `get_provider`
+
+## Infrastructure Adapters:
 
 - Postrgres
 - Kafka

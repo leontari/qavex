@@ -8,14 +8,14 @@ from template_app.bootstrap.registry import ModuleRegistry
 from template_app.bootstrap.runtime.hooks import LifecycleHook
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.application import ApplicationContext
+    from template_app.bootstrap.module_context import ModuleSetupContext
     from template_app.bootstrap.protocols import ModuleProtocol
 
 
 class HealthModule:
     """Application health module."""
 
-    def setup(self, context: ApplicationContext) -> None:
+    def setup(self, context: ModuleSetupContext) -> None:
 
         router: APIRouter = APIRouter(tags=["health"])
 
@@ -23,19 +23,23 @@ class HealthModule:
         async def health() -> dict[str, str]:
             return {"status": "ok"}
 
-        context.app.include_router(router)
+        context.register_router(router)
 
 
 class RuntimeModule:
     """Runtime diagnostics module."""
 
+    def __init__(self) -> None:
+        self.started = False
+        self.stopped = False
+
     async def startup_hook(self) -> None:
         self.started = True
 
     async def shutdown_hook(self) -> None:
-        self.stooped = True
+        self.stopped = True
 
-    def setup(self, context: ApplicationContext) -> None:
+    def setup(self, context: ModuleSetupContext) -> None:
 
         router: APIRouter = APIRouter(tags=["runtime"])
 
@@ -43,23 +47,16 @@ class RuntimeModule:
         async def runtime() -> dict[str, str]:
             return {"runtime": "active"}
 
-        context.app.include_router(router)
+        context.register_router(router)
 
-        context.runtime.lifecycle_registry.register_startup(
+        context.register_startup_hook(
             LifecycleHook(
                 name="runtime_startup",
                 handler=self.startup_hook,
             ),
         )
 
-        context.runtime.lifecycle_registry.register_startup(
-            LifecycleHook(
-                name="runtime_startup",
-                handler=self.startup_hook,
-            ),
-        )
-
-        context.runtime.lifecycle_registry.register_shutdown(
+        context.register_shutdown_hook(
             LifecycleHook(
                 name="runtime_shutdown",
                 handler=self.shutdown_hook,

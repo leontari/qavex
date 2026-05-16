@@ -21,3 +21,14 @@
 - [ ] provider observability
 - [ ] async resource pools
 - [ ] provider isolation
+
+## container.py - runtime service registry, implement latter:
+- [ ] lazy providers
+- [ ] scoped dependencies
+- [ ] async providers
+- [ ] singleton lifecycle
+- [ ] transient services
+- [ ] provider factories
+- [ ] typed resolution
+- [ ] plugin isolation
+- [ ] module namespaces

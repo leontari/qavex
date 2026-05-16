@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.application import ApplicationContext
+    from template_app.bootstrap.module_context import ModuleSetupContext
 
 
 class ModuleProtocol(Protocol):
@@ -22,5 +22,5 @@ class ModuleProtocol(Protocol):
     They receive them through the application context container.
     """
 
-    def setup(self, context: ApplicationContext) -> None:
-        """Configure module inside application context runtime."""
+    def setup(self, context: ModuleSetupContext) -> None:
+        """Configure module."""
