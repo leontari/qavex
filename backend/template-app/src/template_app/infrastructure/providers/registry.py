@@ -25,6 +25,7 @@ class InfrastructureRegistry:
     def get(self, name: str) -> InfrastructureProvider:
         return self._providers[name]
 
+    # TODO: check typing
     @property
     def providers(self) -> tuple[InfrastructureProvider, ...]:
         return tuple(self._providers.values())

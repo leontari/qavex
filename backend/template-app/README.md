@@ -52,12 +52,20 @@ Runtime Kernel:
 - Event Bus
 - Task Scheduler
 
-```
+```text
 RuntimeKernel
     ├── transport orchestration
     ├── module orchestration
     ├── infrastructure orchestration
     └── lifecycle orchestration
+```
+
+```text
+RuntimeKernel
+    ├── lifecycle
+    ├── modules
+    ├── DI container
+    └── infrastructure providers
 ```
 
 ## Plugins / Modules:
@@ -144,10 +152,20 @@ lifecycle = orchestration engine;
 kernel = runtime platform.
 ```
 
-which is close to:
-```text
-Temporal worker runtime;
-internal platform runtimes;
-microservice kernels;
-plugin-based enterprise systems.
-```
+which is base for:
+
+- event-driven microservices;
+- microservice kernel;
+- plugin-based systems;
+- orchestration runtime.
+
+As for now has been implemented:
+
+- Runtime kernel
+- Plugin modules
+- Lifecycle orchestration
+- Infrastructure registry
+- Dependency container
+- Provider abstraction
+- Restricted module API
+- Runtime/application separation

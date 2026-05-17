@@ -9,7 +9,6 @@ from template_app.infrastructure.providers.registry import (
 
 def bootstrap_infrastructure() -> InfrastructureRegistry:
     """Bootstrap infrastructure providers."""
-
     registry = InfrastructureRegistry()
 
     registry.register(DatabaseProvider())

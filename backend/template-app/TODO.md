@@ -32,3 +32,10 @@
 - [ ] typed resolution
 - [ ] plugin isolation
 - [ ] module namespaces
+
+## DependencyProvider - controlled dependency lifecycle
+- [ ] SingletonProvider
+- [ ] FactoryProvider
+- [ ] AsyncProvider
+- [ ] ScopedProvider
+TODO: now we have FastAPI DI Container, Runtime DI Container, Infra DI Container

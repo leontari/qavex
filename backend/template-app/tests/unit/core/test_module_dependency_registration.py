@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from template_app.bootstrap.module_context import ModuleSetupContext
 from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.infrastructure.providers.cache import CacheProvider
 
 
 def test_module_can_register_dependency() -> None:
@@ -9,15 +10,15 @@ def test_module_can_register_dependency() -> None:
 
     context = ModuleSetupContext(_kernel=kernel)
 
-    dependency = object()
+    provider = CacheProvider(url="redis://localhost",)
 
-    context.register_dependency("test", dependency)
+    context.register_dependency(provider)
 
     resolved = (
         kernel.context
         .runtime
         .container
-        .resolve("test")
+        .resolve("cache")
     )
 
-    assert resolved is dependency
+    assert resolved is provider

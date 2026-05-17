@@ -8,7 +8,9 @@ from typing import Protocol
 class InfrastructureProvider(Protocol):
     """Infrastructure provider contract."""
 
-    name: str
+    @property
+    def name(self) -> str:
+        """Provider name."""
 
     async def startup(self) -> None:
         """Start provider."""

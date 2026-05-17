@@ -3,24 +3,19 @@ from __future__ import annotations
 import pytest
 
 from template_app.bootstrap.container import Container
+from template_app.infrastructure.providers.cache import CacheProvider
 
 
 def test_container_registers_dependency() -> None:
     container = Container()
 
-    dependency = object()
+    provider = CacheProvider(url="redis://localhost")
 
-    container.register("service", dependency)
+    container.register(provider)
 
-    assert container.resolve("service") is dependency
+    resolved = container.resolve("cache")
 
-
-def test_container_contains_dependency() -> None:
-    container = Container()
-
-    container.register("service", object())
-
-    assert container.contains("service")
+    assert resolved is provider
 
 
 def test_container_raises_for_missing_dependency() -> None:
@@ -28,3 +23,18 @@ def test_container_raises_for_missing_dependency() -> None:
 
     with pytest.raises(LookupError):
         container.resolve("missing")
+
+
+
+def test_container_returns_readonly_mapping() -> None:
+    container = Container()
+
+    provider = CacheProvider(
+        url="redis://localhost",
+    )
+
+    container.register(provider)
+
+    dependencies = container.dependencies
+
+    assert "cache" in dependencies

@@ -1,27 +1,42 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from template_app.bootstrap.module_context import ModuleSetupContext
+from template_app.bootstrap.protocols import ModuleProtocol, DependencyProvider
+from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.core.types import DependencyScope
 
-from template_app.bootstrap.container import Container
-from template_app.bootstrap.protocols import ModuleProtocol
+
+class FakeProvider:
+    """Fake dependency provider."""
+
+    @property
+    def name(self) -> str:
+        return "fake"
+
+    @property
+    def scope(self) -> DependencyScope:
+        return DependencyScope.SINGLETON
+
+    def provide(self) -> object:
+        return object()
 
 
 class FakeModule:
-    def setup(
-        self,
-        app: FastAPI,
-        container: Container,
-    ) -> None:
-        app.state.module_loaded = True
+    """Fake module for protocol validation."""
 
+    def setup(self, context: ModuleSetupContext) -> None:
+        provider: DependencyProvider = FakeProvider
+
+        context.register_dependency(provider)
 
 
 def test_module_protocol_compatible() -> None:
+    kernel = bootstrap_application()
+
+    context = ModuleSetupContext(_kernel=kernel)
+
     module: ModuleProtocol = FakeModule()
 
-    app = FastAPI()
-    container = Container()
+    module.setup(context)
 
-    module.setup(app, container)
-
-    assert app.state.module_loaded is True
+    assert kernel.context.runtime.container.contains("fake") is True

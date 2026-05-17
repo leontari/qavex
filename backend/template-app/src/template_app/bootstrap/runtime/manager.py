@@ -9,10 +9,7 @@ if TYPE_CHECKING:
 class LifecycleManager:
     """Executes runtime lifecycle hooks."""
 
-    def __init__(
-        self,
-        registry: LifecycleRegistry,
-    ) -> None:
+    def __init__(self, registry: LifecycleRegistry) -> None:
         self.registry = registry
 
     async def startup(self) -> None:

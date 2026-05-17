@@ -19,28 +19,16 @@ class LifecycleRegistry:
         self._startup_hooks: list[LifecycleHook] = []
         self._shutdown_hooks: list[LifecycleHook] = []
 
-    def register_startup(
-        self,
-        hook: LifecycleHook,
-    ) -> None:
+    def register_startup(self, hook: LifecycleHook) -> None:
         self._startup_hooks.append(hook)
 
-    def register_shutdown(
-        self,
-        hook: LifecycleHook,
-    ) -> None:
+    def register_shutdown(self, hook: LifecycleHook) -> None:
         self._shutdown_hooks.append(hook)
 
-    def extend_startup(
-        self,
-        hooks: Iterable[LifecycleHook],
-    ) -> None:
+    def extend_startup(self, hooks: Iterable[LifecycleHook]) -> None:
         self._startup_hooks.extend(hooks)
 
-    def extend_shutdown(
-        self,
-        hooks: Iterable[LifecycleHook],
-    ) -> None:
+    def extend_shutdown(self, hooks: Iterable[LifecycleHook]) -> None:
         self._shutdown_hooks.extend(hooks)
 
     @property
