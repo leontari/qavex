@@ -152,6 +152,15 @@ lifecycle = orchestration engine;
 kernel = runtime platform.
 ```
 
+modules/
+```text
+registry     -> runtime module graph
+manifest     -> static metadata
+discovery    -> enable/disable/filtering
+loader       -> runtime activation
+context      -> restricted runtime API
+```
+
 which is base for:
 
 - event-driven microservices;

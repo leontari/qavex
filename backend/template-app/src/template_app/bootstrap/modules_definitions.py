@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 
 from fastapi import APIRouter
 
-from template_app.bootstrap.registry import ModuleRegistry
+from template_app.bootstrap.modules.manifests import ModuleManifest
+from template_app.bootstrap.modules.registry import ModuleRegistry
 from template_app.bootstrap.runtime.hooks import LifecycleHook
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.contracts import ModuleProtocol
-    from template_app.bootstrap.module_context import ModuleSetupContext
+    from template_app.bootstrap.modules.context import ModuleSetupContext
 
 
 class HealthModule:
@@ -29,15 +29,13 @@ class HealthModule:
 class RuntimeModule:
     """Runtime diagnostics module."""
 
-    def __init__(self) -> None:
-        self.started = False
-        self.stopped = False
+    started: bool = False
 
     async def startup_hook(self) -> None:
         self.started = True
 
     async def shutdown_hook(self) -> None:
-        self.stopped = True
+        self.started = False
 
     def setup(self, context: ModuleSetupContext) -> None:
 
@@ -66,11 +64,18 @@ class RuntimeModule:
 
 registry: ModuleRegistry = ModuleRegistry()
 
-registry.extend(
-    [
-        HealthModule(),
-        RuntimeModule(),
-    ],
+registry.register(
+    ModuleManifest(
+        name="health",
+        module=HealthModule(),
+    )
 )
 
-MODULES: tuple[ModuleProtocol, ...] = registry.modules
+registry.register(
+    ModuleManifest(
+        name="runtime",
+        module=RuntimeModule(),
+    )
+)
+
+MODULE_REGISTRY: ModuleRegistry = registry

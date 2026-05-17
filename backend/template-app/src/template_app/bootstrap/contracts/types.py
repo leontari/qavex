@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class DependencyScope(str, Enum):
+class DependencyScope(StrEnum):
     """Dependency lifetime."""
 
     SINGLETON = "singleton"

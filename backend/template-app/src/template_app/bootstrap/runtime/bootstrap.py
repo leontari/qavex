@@ -7,8 +7,9 @@ from fastapi import FastAPI
 from template_app.bootstrap.application import ApplicationContext
 from template_app.bootstrap.container import Container
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
-from template_app.bootstrap.module_context import ModuleSetupContext
-from template_app.bootstrap.modules import MODULES
+from template_app.bootstrap.modules import discover_modules, load_modules
+from template_app.bootstrap.modules.context import ModuleSetupContext
+from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
 from template_app.bootstrap.runtime.hooks import LifecycleHook
 from template_app.bootstrap.runtime.kernel import RuntimeKernel
 from template_app.bootstrap.runtime.lifespan import create_lifespan
@@ -57,9 +58,8 @@ def bootstrap_application() -> RuntimeKernel:
 
     # register modules
     module_context = ModuleSetupContext(_kernel=kernel)
-
-    for module in MODULES:
-        module.setup(module_context)
+    manifests = discover_modules(MODULE_REGISTRY)
+    load_modules(manifests=manifests, context=module_context)
 
     # integrate infrastructure providers
     for provider in infrastructure_registry.providers:
