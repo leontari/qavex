@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.protocols import DependencyProvider
+    from template_app.bootstrap.contracts import DependencyProvider
 
 
 @dataclass(slots=True)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from fastapi import APIRouter, FastAPI
 
-    from template_app.bootstrap.protocols import DependencyProvider
+    from template_app.bootstrap.contracts import DependencyProvider
     from template_app.bootstrap.runtime.hooks import LifecycleHook
     from template_app.bootstrap.runtime.kernel import RuntimeKernel
     from template_app.infrastructure.providers.base import (

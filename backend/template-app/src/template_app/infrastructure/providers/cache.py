@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from template_app.core.types import DependencyScope
+from template_app.bootstrap.contracts.types import DependencyScope
 
 
 @dataclass(slots=True)

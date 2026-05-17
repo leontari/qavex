@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 
 
-class DependencyScope(StrEnum):
-    """Dependency lifecycle scope."""
+class DependencyScope(str, Enum):
+    """Dependency lifetime."""
 
     SINGLETON = "singleton"
     TRANSIENT = "transient"

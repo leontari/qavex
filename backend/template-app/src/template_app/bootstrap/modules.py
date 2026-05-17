@@ -8,8 +8,8 @@ from template_app.bootstrap.registry import ModuleRegistry
 from template_app.bootstrap.runtime.hooks import LifecycleHook
 
 if TYPE_CHECKING:
+    from template_app.bootstrap.contracts import ModuleProtocol
     from template_app.bootstrap.module_context import ModuleSetupContext
-    from template_app.bootstrap.protocols import ModuleProtocol
 
 
 class HealthModule:
