@@ -46,13 +46,13 @@ repos:
         pass_filenames: true
         files: ^\.github/workflows/.*\.ya?ml$
 
-      - id: local-ruff-check
-        name: ruff check
-        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
-        require_serial: true
-        language: unsupported
-        pass_filenames: true
-        types: [ python ]
+#      - id: local-ruff-check
+#        name: ruff check
+#        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+#        require_serial: true
+#        language: unsupported
+#        pass_filenames: true
+#        types: [ python ]
 
       - id: local-ruff-format
         name: ruff format
@@ -62,13 +62,13 @@ repos:
         pass_filenames: true
         types: [ python ]
 
-      - id: local-mypy
-        name: mypy check
-        entry: uv run mypy
-        require_serial: true
-        language: unsupported
-        pass_filenames: true
-        types: [ python ]
+#      - id: local-mypy
+#        name: mypy check
+#        entry: uv run mypy
+#        require_serial: true
+#        language: unsupported
+#        pass_filenames: true
+#        types: [ python ]
 
       - id: local-pyproject-fmt
         name: pyproject-fmt

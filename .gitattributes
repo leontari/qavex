@@ -215,6 +215,7 @@ Dockerfile           text
 .dockerignore        text
 .editorconfig        text
 *.env                text
+.git_archival.txt    text export-subst
 .gitattributes       text export-ignore
 .gitconfig           text export-ignore
 .gitignore           text export-ignore

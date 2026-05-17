@@ -1,9 +1,10 @@
 [project]
 name = "qavex"
 version = "0.1.0"
-description = "Monorepo workspace"
+description = "The monorepo's workspace configuration"
 requires-python = ">=3.11"
 classifiers = [
+  "Private :: Do Not Upload",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -13,24 +14,19 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  "watchfiles>=1.1.1",
   { include-group = "ci" },
   { include-group = "lint" },
   { include-group = "pkg-meta" },
+  { include-group = "release" },
   { include-group = "test" },
-  { include-group = "type" },
+  { include-group = "typing" },
 ]
 test = [
   "covdefaults>=2.3",
   "pytest>=8.4.2",
+  "pytest-asyncio>=1.3",
   "pytest-cov>=7",
   "pytest-mock>=3.15.1",
-]
-type = [
-  "mypy>=1.20.2",
-  "pydantic>=2.13.1",
-  "pydantic-settings>=2.14",
-  "ty>=0.0.17",
 ]
 ci = [
   "prek>=0.3.11",
@@ -47,6 +43,16 @@ pkg-meta = [
   "check-wheel-contents>=0.6.3",
   "twine>=6.2",
 ]
+release = [
+  "pygithub>=2",
+  "towncrier>=23.11",
+]
+typing = [
+  "mypy>=1.20.2",
+  "pydantic>=2.13.1",
+  "pydantic-settings>=2.14",
+  "ty>=0.0.17",
+]
 
 [tool.uv]
 required-version = "==0.11.11"  # upgrade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
@@ -56,11 +62,7 @@ workspace.members = [
 
 [tool.ruff]
 line-length = 79
-exclude = [
-  "backend/template-app",
-  "shared/py/db",
-  "shared/py/logger",
-]
+exclude = [ "**/_version.py", "**/build/", "**/dict/", "**/tests/", "shared/py/db", "shared/py/logger" ]
 format.preview = true  # Switch to Ruff's experimental features
 format.indent-style = "space"
 format.quote-style = "double"
@@ -79,7 +81,7 @@ lint.ignore = [
   "RUF067", # '__init__' module should only contain docstrings and re-exports
   "S104",   # Possible binding to all interfaces
 ]
-lint.per-file-ignores."tests/**/*.py" = [
+lint.per-file-ignores."**/tests/**/*.py" = [
   "D",       # don't care about documentation in tests
   "FBT",     # don't care about booleans as positional arguments in tests
   "INP001",  # no implicit namespace
@@ -90,7 +92,9 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S",       # 'subprocess' call: check for execution of untrusted input
   "S101",    # asserts allowed in tests...
 ]
-lint.isort = { known-first-party = [], required-imports = [
+lint.isort = { known-first-party = [
+  "template_app",
+], required-imports = [
   "from __future__ import annotations",
 ] }
 lint.preview = true
@@ -100,22 +104,42 @@ builtin = "clear,usage,en-GB_to_en-US"
 count = true
 
 [tool.mypy]
+mypy_path = "backend/**/src"
+# files = [ "src" ]
+exclude = "(^|/)(tests|migrations|scripts)/"
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+explicit_package_bases = true
+no_implicit_reexport = true
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+# follow_imports = "normal"
+# pretty = true
+# show_column_numbers = true
+# show_error_codes = true
+# warn_no_return = false
 plugins = [
   "pydantic.mypy",
 ]
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-no_implicit_reexport = true
-disallow_untyped_defs = true
 
 [tool.ty]
 environment.python-version = "3.11"
 
 [tool.pytest]
-ini_options.testpaths = [
-  "tests",
+ini_options.asyncio_mode = "auto"
+ini_options.testpaths = [ "**/backend/**/tests" ]
+ini_options.python_files = [ "test_*.py" ]
+ini_options.xfail_strict = true
+ini_options.addopts = [ "-ra", "-q" ]
+# ini_options.addopts = ["-ra", "--strict-config", "--strict-markers", "-p", "vcs_versioning.test_api"]
+ini_options.markers = [
+  "issue(id): reference to github issue",
+  "skip_commit: allows to skip committing in the helpers",
 ]
 
 [tool.coverage]

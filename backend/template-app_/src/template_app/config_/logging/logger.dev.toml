@@ -1,0 +1,65 @@
+version = 1
+disable_existing_loggers = false
+
+###########################
+# FORMATTERS
+###########################
+
+[formatters.colored]
+class = "template_app.core.app.logger.ColorFormatter"
+format = "%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-35s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(message)s"
+
+[formatters.uvicorn_access]
+class = "template_app.core.app.logger.UvicornAccessFormatter"
+format = "%(levelname_color)s%(levelname)-8s%(reset)s %(time_color)s%(asctime)s%(reset)s %(logger_color)s%(name)-35s%(reset)s:%(lineno_color)s%(lineno)-4d%(reset)s - %(client_color)s%(client)s%(reset)s - \"%(method_color)s%(method)s%(reset)s %(path_color)s%(path)s%(reset)s\" %(status_color)s%(status)s%(reset)s"
+
+###########################
+# HANDLERS
+###########################
+
+[handlers.console]
+class = "logging.StreamHandler"
+formatter = "colored"
+stream = "ext://sys.stdout"
+
+[handlers.uvicorn_access]
+class = "logging.StreamHandler"
+formatter = "uvicorn_access"
+stream = "ext://sys.stdout"
+
+###########################
+# LOGGERS
+###########################
+
+[loggers.uvicorn]
+handlers = ["console"]
+level = "INFO"
+propagate = false
+
+[loggers."uvicorn.error"]
+handlers = ["console"]
+level = "INFO"
+propagate = false
+
+[loggers."uvicorn.access"]
+handlers = ["uvicorn_access"]
+level = "INFO"
+propagate = false
+
+[loggers.fastapi]
+handlers = ["console"]
+level = "INFO"
+propagate = false
+
+[loggers.template_app]
+handlers = ["console"]
+level = "DEBUG"
+propagate = false
+
+###########################
+# ROOT LOGGER
+###########################
+
+[root]
+level = "INFO"
+handlers = ["console"]
