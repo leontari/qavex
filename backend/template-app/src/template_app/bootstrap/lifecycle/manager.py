@@ -1,16 +1,17 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.runtime.registry import LifecycleRegistry
+    from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
 
 
+@dataclass(slots=True)
 class LifecycleManager:
-    """Executes runtime lifecycle hooks."""
+    """Lifecycle orchestration manager."""
 
-    def __init__(self, registry: LifecycleRegistry) -> None:
-        self.registry = registry
+    registry: LifecycleRegistry
 
     async def startup(self) -> None:
         """Execute startup lifecycle hooks."""

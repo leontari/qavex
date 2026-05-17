@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 from fastapi import APIRouter
 
+from template_app.bootstrap.lifecycle.hooks import LifecycleHook
 from template_app.bootstrap.modules.manifests import ModuleManifest
 from template_app.bootstrap.modules.registry import ModuleRegistry
-from template_app.bootstrap.runtime.hooks import LifecycleHook
 
 if TYPE_CHECKING:
     from template_app.bootstrap.modules.context import ModuleSetupContext
