@@ -25,11 +25,11 @@ class Container:
     _providers: dict[str, DependencyProvider] = field(default_factory=dict)
 
     def register(self, provider: DependencyProvider) -> None:
-        """Register dependency provider."""
+        """Register provider."""
         self._providers[provider.name] = provider
 
     def resolve(self, key: str) -> DependencyProvider:
-        """Resolve dependency."""
+        """Resolve provider."""
         try:
             return self._providers[key]
 
@@ -38,10 +38,10 @@ class Container:
             raise LookupError(msg) from error
 
     def contains(self, key: str) -> bool:
-        """Check dependency existence."""
+        """Check provider existence."""
         return key in self._providers
 
     @property
-    def dependencies(self) -> dict[str, DependencyProvider]:
-        """Readonly dependency mapping."""
-        return dict(self._providers)
+    def providers(self) -> tuple[DependencyProvider, ...]:
+        """Immutable providers snapshot."""
+        return tuple(self._providers.values())

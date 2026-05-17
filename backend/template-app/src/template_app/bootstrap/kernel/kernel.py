@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.application import ApplicationContext
+    from fastapi import FastAPI
+    from template_app.bootstrap.kernel import ApplicationContext
 
 
 @dataclass(slots=True)
@@ -22,10 +23,19 @@ class RuntimeKernel:
 
     context: ApplicationContext
 
+    @property
+    def app(self) -> FastAPI:
+        """Return FastAPI application instance."""
+        if self.context.app is None:
+            msg = "FastAPI application not initialized."
+            raise self.context.app
+
+        return self.context.app
+
     async def startup(self) -> None:
-        """Execute runtime startup lifecycle."""
+        """Execute startup lifecycle hooks."""
         await self.context.runtime.lifecycle_manager.startup()
 
     async def shutdown(self) -> None:
-        """Execute runtime shutdown lifecycle."""
+        """Execute shutdown lifecycle hooks."""
         await self.context.runtime.lifecycle_manager.shutdown()
