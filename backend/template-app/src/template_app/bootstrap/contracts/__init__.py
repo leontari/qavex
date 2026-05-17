@@ -1,3 +1,5 @@
+"""Protocols/contracts."""
+
 from __future__ import annotations
 
 from template_app.bootstrap.contracts.dependencies import (
