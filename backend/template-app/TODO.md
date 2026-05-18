@@ -3,7 +3,7 @@
 3. [x] Unified lifecycle registry
     - redesigning: Hexagonal Runtime Architecture
 4. [x] Infrastructure providers
-5. [ ] Event bus abstraction
+5. [x] Event bus abstraction
 6. [ ] Command/query execution layer
 7. [ ] Background task runtime
 8. [ ] Plugin health checks
@@ -38,4 +38,3 @@
 - [ ] FactoryProvider
 - [ ] AsyncProvider
 - [ ] ScopedProvider
-TODO: now we have FastAPI DI Container, Runtime DI Container, Infra DI Container

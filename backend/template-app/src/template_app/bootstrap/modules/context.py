@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         DependencyProvider,
         InfrastructureProvider,
     )
+    from template_app.bootstrap.events.bus import EventBus
     from template_app.bootstrap.kernel import RuntimeKernel
     from template_app.bootstrap.lifecycle import LifecycleHook
 
@@ -54,3 +55,7 @@ class ModuleSetupContext:
         runtime = self._kernel.context.runtime
 
         return runtime.infrastructure_registry.get(name)
+
+    @property
+    def event_bus(self) -> EventBus:
+        return self._kernel.context.runtime.event_bus

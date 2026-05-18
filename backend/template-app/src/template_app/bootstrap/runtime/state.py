@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from template_app.bootstrap.events.bus import EventBus
     from template_app.bootstrap.infrastructure.registry import (
         InfrastructureRegistry,
     )
@@ -19,6 +20,7 @@ class RuntimeState:
     """Application runtime state."""
 
     container: Container
+    event_bus: EventBus
     lifecycle_registry: LifecycleRegistry
     lifecycle_manager: LifecycleManager
     infrastructure_registry: InfrastructureRegistry

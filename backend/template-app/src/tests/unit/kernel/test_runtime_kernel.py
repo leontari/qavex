@@ -3,6 +3,9 @@ from __future__ import annotations
 import pytest
 from fastapi import FastAPI
 
+from template_app.bootstrap.events.bus import EventBus
+from template_app.bootstrap.events.dispatcher import EventDispatcher
+from template_app.bootstrap.events.registry import EventRegistry
 from template_app.bootstrap.kernel.container import Container
 from template_app.bootstrap.kernel.context import (
     ApplicationContext,
@@ -24,8 +27,15 @@ from template_app.bootstrap.infrastructure.registry import (
 def build_kernel() -> RuntimeKernel:
     registry = LifecycleRegistry()
 
+    # assemble event_bus instance
+    event_registry = EventRegistry()
+    event_dispatcher = EventDispatcher(registry=event_registry)
+    event_bus = EventBus(registry=event_registry, dispatcher=event_dispatcher)
+
+
     runtime = RuntimeState(
         container=Container(),
+        event_bus=event_bus,
         lifecycle_registry=registry,
         lifecycle_manager=LifecycleManager(registry=registry),
         infrastructure_registry=InfrastructureRegistry(),
