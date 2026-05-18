@@ -191,6 +191,8 @@ FastAPI is used more like a transport plugin above the application runtime kerne
 | api            | 	transport layer            |
 | domain         | 	business contracts         |
 | services       | 	application capabilities   |
+| contracts      | system component protocols  |
+| runtime        | runtime kernel              |
 
 ## Event Bus
 
