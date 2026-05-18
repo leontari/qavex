@@ -191,3 +191,66 @@ FastAPI is used more like a transport plugin above the application runtime kerne
 | api            | 	transport layer            |
 | domain         | 	business contracts         |
 | services       | 	application capabilities   |
+
+## Event Bus
+
+Target:
+- `inter-module communication` without `direct coupling`
+
+like:
+
+- `UserModule -> EventBus -> NotificatioonModule`
+
+and NOT:
+- `UserModule -> NotificationService`
+
+### Event Bus responsibilities
+
+| Responsibility	         | Description            |
+|-------------------------|------------------------|
+| publish events	         | runtime event emission |
+| subscribe handlers      | 	event routing         |
+| decouple modules	plugin | isolation              |
+| async orchestration	    | async execution        |
+| domain event transport  | 	business messaging    |
+| infrastructure bridge	  | Kafka/NATS later       |
+
+### Event system architecture
+
+```text
+bootstrap/
+├── events/
+│   ├── __init__.py
+│   ├── bus.py
+│   ├── protocols.py
+│   ├── registry.py
+│   ├── dispatcher.py
+│   ├── handlers.py
+│   ├── event.py
+│   └── exceptions.py
+```
+
+### System Graph
+```text
+Module A
+    │
+    ▼
+publish(event)
+    │
+    ▼
+┌──────────────────┐
+│    EventBus      │
+├──────────────────┤
+│ registry         │
+│ dispatcher       │
+└─────────┬────────┘
+          │
+          ▼
+┌──────────────────┐
+│ Event Handlers   │
+└─────────┬────────┘
+          │
+ ┌────────┴────────┐
+ ▼                 ▼
+Module B       Module C
+```

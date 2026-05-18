@@ -4,6 +4,9 @@ from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 
+from template_app.bootstrap.events.bus import EventBus
+from template_app.bootstrap.events.dispatcher import EventDispatcher
+from template_app.bootstrap.events.registry import EventRegistry
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
 from template_app.bootstrap.kernel import (
     ApplicationContext,
@@ -30,16 +33,21 @@ def bootstrap_application() -> RuntimeKernel:
     """Bootstrap runtime kernel."""
 
     lifecycle_registry = LifecycleRegistry()
-    lifecycle_manager = LifecycleManager(
-        registry=lifecycle_registry,
-    )
+    lifecycle_manager = LifecycleManager(registry=lifecycle_registry)
 
     infrastructure_registry = bootstrap_infrastructure()
 
     container = Container()
 
+    # assemble event_bus instance
+    event_registry = EventRegistry()
+    event_dispatcher = EventDispatcher(registry=event_registry)
+    event_bus = EventBus(registry=event_registry, dispatcher=event_dispatcher)
+
+    # create RuntimeState instance and inject its dependencies
     runtime = RuntimeState(
         container=container,
+        event_bus=event_bus,
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
         infrastructure_registry=infrastructure_registry,

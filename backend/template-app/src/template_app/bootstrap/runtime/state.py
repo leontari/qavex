@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from template_app.bootstrap.kernel import Container
     from template_app.bootstrap.lifecycle.manager import LifecycleManager
     from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
+    from template_app.bootstrap.events.bus import EventBus
 
 
 @dataclass(slots=True)
@@ -19,6 +20,7 @@ class RuntimeState:
     """Application runtime state."""
 
     container: Container
+    event_bus: EventBus
     lifecycle_registry: LifecycleRegistry
     lifecycle_manager: LifecycleManager
     infrastructure_registry: InfrastructureRegistry
