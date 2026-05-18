@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-from template_app.bootstrap.events.protocols import EventHandler
+if TYPE_CHECKING:
+    from template_app.bootstrap.events.protocols import EventHandler
 
 
 @dataclass(slots=True)

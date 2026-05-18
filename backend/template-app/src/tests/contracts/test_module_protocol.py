@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI
-
+from tests.factories.runtime import build_runtime_state
 from template_app.bootstrap.kernel.container import Container
 from template_app.bootstrap.kernel.context import ApplicationContext
 from template_app.bootstrap.kernel.kernel import RuntimeKernel
@@ -33,14 +33,7 @@ class FakeModule:
 
 
 def test_module_protocol_compatible() -> None:
-    runtime = RuntimeState(
-        container=Container(),
-        lifecycle_registry=LifecycleRegistry(),
-        lifecycle_manager=LifecycleManager(
-            registry=LifecycleRegistry(),
-        ),
-        infrastructure_registry=InfrastructureRegistry(),
-    )
+    runtime = build_runtime_state()
 
     context = ApplicationContext(runtime=runtime)
 

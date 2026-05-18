@@ -9,5 +9,4 @@ class Event:
     """Base runtime event."""
 
     name: str
-
     event_id: str = uuid4().hex
