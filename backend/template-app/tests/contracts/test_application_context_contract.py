@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.application import ApplicationContext
+from template_app.bootstrap.kernel.context import ApplicationContext
 from template_app.bootstrap.runtime.state import RuntimeState
 
 

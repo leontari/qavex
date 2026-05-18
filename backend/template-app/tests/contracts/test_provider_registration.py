@@ -12,4 +12,5 @@ def test_providers_registered() -> None:
     }
 
     assert "database" in names
-    assert "redis" in names
+    assert "cache" in names
+    assert "queue" in names

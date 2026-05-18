@@ -178,3 +178,16 @@ As for now has been implemented:
 - Provider abstraction
 - Restricted module API
 - Runtime/application separation
+
+### Application package responsibility separation:
+FastAPI is used more like a transport plugin above the application runtime kernel now.
+
+| Layer          | 	Responsibility             |
+|----------------|-----------------------------|
+| kernel         | 	runtime orchestration      |
+| lifecycle      | 	startup/shutdown execution |
+| modules        | 	business plugins           |
+| infrastructure | 	external systems adapters  |
+| api            | 	transport layer            |
+| domain         | 	business contracts         |
+| services       | 	application capabilities   |

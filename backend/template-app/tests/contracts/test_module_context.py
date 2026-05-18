@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.module_context import ModuleSetupContext
+from template_app.bootstrap.modules import ModuleSetupContext
 from template_app.bootstrap.runtime.bootstrap import  bootstrap_application
 
 

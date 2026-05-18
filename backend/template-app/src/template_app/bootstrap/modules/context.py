@@ -12,8 +12,8 @@ if TYPE_CHECKING:
         DependencyProvider,
         InfrastructureProvider,
     )
-    from template_app.bootstrap.runtime.hooks import LifecycleHook
-    from template_app.bootstrap.runtime.kernel import RuntimeKernel
+    from template_app.bootstrap.kernel import RuntimeKernel
+    from template_app.bootstrap.lifecycle import LifecycleHook
 
 
 @dataclass(slots=True)

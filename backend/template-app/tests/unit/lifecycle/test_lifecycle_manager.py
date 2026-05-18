@@ -51,3 +51,40 @@ async def test_manager_executes_shutdown_hooks() -> None:
     await manager.shutdown()
 
     assert state["shutdown"] is True
+
+
+async def test_lifecycle_manager_executes_hooks() -> None:
+    registry = LifecycleRegistry()
+
+    state: dict[str, bool] = {
+        "started": False,
+        "stopped": False,
+    }
+
+    async def startup() -> None:
+        state["started"] = True
+
+    async def shutdown() -> None:
+        state["stopped"] = True
+
+    registry.register_startup(
+        LifecycleHook(
+            name="startup",
+            handler=startup,
+        ),
+    )
+
+    registry.register_shutdown(
+        LifecycleHook(
+            name="shutdown",
+            handler=shutdown,
+        ),
+    )
+
+    manager = LifecycleManager(registry)
+
+    await manager.startup()
+    await manager.shutdown()
+
+    assert state["started"] is True
+    assert state["stopped"] is True

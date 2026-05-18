@@ -29,7 +29,7 @@ class RuntimeKernel:
         """Return FastAPI application instance."""
         if self.context.app is None:
             msg = "FastAPI application not initialized."
-            raise self.context.app
+            raise RuntimeError(msg)
 
         return self.context.app
 

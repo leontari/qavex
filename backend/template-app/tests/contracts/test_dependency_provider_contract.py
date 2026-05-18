@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from template_app.bootstrap.contracts.types import DependencyScope
-from template_app.infrastructure.providers.cache import CacheProvider
+from template_app.infrastructure.cache import CacheProvider
 
 
 def test_provider_has_name() -> None:

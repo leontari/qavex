@@ -1,20 +1,13 @@
 from __future__ import annotations
 
-from template_app.bootstrap.kernel.container import Container
-from template_app.bootstrap.kernel.context import (
-    ApplicationContext,
-)
-from template_app.bootstrap.lifecycle.manager import (
-    LifecycleManager,
-)
-from template_app.bootstrap.lifecycle.registry import (
-    LifecycleRegistry,
-)
+from template_app.bootstrap.kernel import Container
+from template_app.bootstrap.kernel import ApplicationContext
+from template_app.bootstrap.lifecycle import LifecycleManager
+from template_app.bootstrap.lifecycle import LifecycleRegistry
 from template_app.bootstrap.runtime.state import RuntimeState
-from template_app.infrastructure.providers.registry import (
+from template_app.bootstrap.infrastructure.registry import (
     InfrastructureRegistry,
 )
-
 
 
 def test_application_context_initial_state() -> None:

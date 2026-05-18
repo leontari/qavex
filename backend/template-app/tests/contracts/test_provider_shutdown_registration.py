@@ -21,4 +21,5 @@ def test_provider_shutdown_hooks_registered() -> None:
     }
 
     assert "database.shutdown" in names
-    assert "redis.shutdown" in names
+    assert "cache.shutdown" in names
+    assert "queue.shutdown" in names

@@ -8,7 +8,7 @@ Actual place where:
 
 from __future__ import annotations
 
-from bootstrap import bootstrap_application
+from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 
 __all__ = [
     "bootstrap_application",

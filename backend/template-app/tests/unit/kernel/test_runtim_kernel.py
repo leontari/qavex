@@ -15,7 +15,7 @@ from template_app.bootstrap.lifecycle.registry import (
     LifecycleRegistry,
 )
 from template_app.bootstrap.runtime.state import RuntimeState
-from template_app.infrastructure.providers.registry import (
+from template_app.bootstrap.infrastructure.registry import (
     InfrastructureRegistry,
 )
 

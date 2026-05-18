@@ -1,10 +1,12 @@
+"""Infrastructure provider contract."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
 
 class InfrastructureProvider(Protocol):
-    """Infrastructure runtime provider."""
+    """Infrastructure runtime provider contract."""
 
     @property
     def name(self) -> str:

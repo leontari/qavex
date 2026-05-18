@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.container import Container
+from template_app.bootstrap.kernel import Container
 from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 
 

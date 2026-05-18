@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from template_app.bootstrap.module_context import ModuleSetupContext
+from template_app.bootstrap.modules import ModuleSetupContext
 from template_app.bootstrap.runtime.bootstrap import bootstrap_application
-from template_app.infrastructure.providers.cache import CacheProvider
+from template_app.infrastructure.cache import CacheProvider
 
 
 def test_module_can_register_dependency() -> None:

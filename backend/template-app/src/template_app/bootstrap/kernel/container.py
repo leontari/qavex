@@ -42,6 +42,11 @@ class Container:
         return key in self._providers
 
     @property
+    def dependencies(self) -> dict[str, DependencyProvider]:
+        """Readonly dependency mapping."""
+        return dict(self._providers)
+
+    @property
     def providers(self) -> tuple[DependencyProvider, ...]:
         """Immutable providers snapshot."""
         return tuple(self._providers.values())

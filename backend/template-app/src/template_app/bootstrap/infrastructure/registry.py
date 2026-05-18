@@ -6,9 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.infrastructure.providers.base import (
-        InfrastructureProvider,
-    )
+    from template_app.bootstrap.contracts import InfrastructureProvider
 
 
 @dataclass(slots=True)
@@ -25,7 +23,7 @@ class InfrastructureRegistry:
     def get(self, name: str) -> InfrastructureProvider:
         return self._providers[name]
 
-    # TODO: check typing
+    # TODO: check typing - looks OK
     @property
     def providers(self) -> tuple[InfrastructureProvider, ...]:
         return tuple(self._providers.values())

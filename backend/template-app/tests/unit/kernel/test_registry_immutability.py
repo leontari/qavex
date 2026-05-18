@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.bootstrap.registry import ModuleRegistry
-from template_app.bootstrap.runtime.registry import LifecycleRegistry
+from template_app.bootstrap.modules import ModuleRegistry
+from template_app.bootstrap.lifecycle import LifecycleRegistry
 
 
 def test_registry_lists_are_immutable() -> None:
