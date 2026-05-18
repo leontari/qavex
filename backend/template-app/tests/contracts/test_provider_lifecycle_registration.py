@@ -21,4 +21,5 @@ def test_provider_startup_hooks_registered() -> None:
     }
 
     assert "database.startup" in names
-    assert "redis.startup" in names
+    assert "cache.startup" in names
+    assert "queue.startup" in names

@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from template_app.bootstrap.runtime.hooks import LifecycleHook
-from template_app.bootstrap.runtime.kernel import RuntimeKernel
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.bootstrap.lifecycle import LifecycleHook
+from template_app.bootstrap.kernel import RuntimeKernel
+from template_app.bootstrap.runtime import bootstrap_application
 
 
 @dataclass(slots=True)

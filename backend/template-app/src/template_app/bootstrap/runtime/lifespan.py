@@ -3,24 +3,25 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from fastapi import FastAPI
 
-    from template_app.bootstrap.runtime.kernel import RuntimeKernel
+    from template_app.bootstrap.kernel.kernel import RuntimeKernel
 
 
 def create_lifespan(kernel: RuntimeKernel):
-    """Create application lifespan closure."""
+    """Build FastAPI lifespan from runtime kernel."""
 
     @asynccontextmanager
-    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         await kernel.startup()
 
-        yield
+        try:
+            yield
 
-        await kernel.shutdown()
+        finally:
+            await kernel.shutdown()
 
     return lifespan
