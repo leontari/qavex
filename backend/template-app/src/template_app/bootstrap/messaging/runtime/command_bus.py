@@ -4,17 +4,17 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.dispatching.commands.models import Command
-    from template_app.bootstrap.dispatching.registry import (
-        MessageHandlerRegistry,
+    from template_app.bootstrap.messaging.contracts.commands import Command
+    from template_app.bootstrap.messaging.runtime.registry import (
+        RuntimeHandlerRegistry,
     )
 
 
 @dataclass(slots=True)
-class CommandDispatcher:
-    """Application command dispatcher."""
+class RuntimeCommandBus:
+    """Runtime command bus."""
 
-    registry: MessageHandlerRegistry
+    registry: RuntimeHandlerRegistry
 
     async def execute(self, command: Command) -> None:
 

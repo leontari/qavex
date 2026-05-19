@@ -1,0 +1,27 @@
+# Planned messaging capabilities
+
+- [x] Internal runtime orchestration
+- [x] Plugin decoupling
+- [x] Runtime event bus
+- [x] Runtime command bus
+- [x] Runtime query bus
+- [x] CQRS foundation
+- [x] Domain events
+- [x] Modular monolith foundation
+- [x] Async runtime pipelines
+- [ ] Distributed event bridge
+- [ ] Kafka event bridge
+- [ ] Redis Streams bridge
+- [ ] NATS event bridge
+- [ ] Distributed command gateway
+- [ ] RPC query gateway
+- [ ] Distributed workflows
+- [ ] Saga orchestration
+- [ ] Workflow engine
+- [ ] Event sourcing
+- [ ] Outbox pattern
+- [ ] Dead letter queues
+- [ ] Retry policies
+- [ ] Message serialization
+- [ ] Distributed tracing
+- [ ] OpenTelemetry integration
