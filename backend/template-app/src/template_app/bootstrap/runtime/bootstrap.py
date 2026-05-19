@@ -1,3 +1,5 @@
+"""Composition root."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -17,6 +19,13 @@ from template_app.bootstrap.lifecycle import (
     LifecycleHook,
     LifecycleManager,
     LifecycleRegistry,
+)
+from template_app.bootstrap.messaging.buses import (
+    CommandBus,
+    QueryBus,
+)
+from template_app.bootstrap.messaging.registry import (
+    MessageHandlerRegistry,
 )
 from template_app.bootstrap.modules import (
     ModuleRegistry,  # TODO: recheck this as now it's done via  MODULE_REGISTRY
@@ -39,10 +48,15 @@ def bootstrap_application() -> RuntimeKernel:
 
     container = Container()
 
-    # assemble event_bus instance
+    # assemble inter-module communication event_bus instance
     event_registry = EventRegistry()
     event_dispatcher = EventDispatcher(registry=event_registry)
     event_bus = EventBus(registry=event_registry, dispatcher=event_dispatcher)
+
+    # assemble command/query buses
+    message_registry = MessageHandlerRegistry()
+    command_bus = CommandBus(registry=message_registry)
+    query_bus = QueryBus(registry=message_registry)
 
     # create RuntimeState instance and inject its dependencies
     runtime = RuntimeState(
@@ -51,6 +65,9 @@ def bootstrap_application() -> RuntimeKernel:
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
         infrastructure_registry=infrastructure_registry,
+        message_registry=message_registry,
+        command_bus=command_bus,
+        query_bus=query_bus,
     )
 
     context = ApplicationContext(runtime=runtime)

@@ -1,9 +1,8 @@
 """
 Application kernel constructor.
 
-Actual place where:
+It's an actual place where:
 - application kernel bootstrapping happens
-- transport and runtime adapters are injected into kernel.
 """
 
 from __future__ import annotations
