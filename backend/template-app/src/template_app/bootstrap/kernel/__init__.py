@@ -1,4 +1,4 @@
-"""Runtime orchestration."""
+"""Runtime kernel."""
 
 from __future__ import annotations
 
