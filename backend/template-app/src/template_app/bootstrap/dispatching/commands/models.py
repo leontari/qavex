@@ -5,4 +5,4 @@ from dataclasses import dataclass
 
 @dataclass(slots=True)
 class Command:
-    """Base command."""
+    """Base application command."""

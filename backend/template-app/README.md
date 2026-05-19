@@ -256,3 +256,33 @@ publish(event)
  ▼                 ▼
 Module B       Module C
 ```
+
+## Current architecture layers
+
+### Kernel Layer
+- RuntimeKernel
+- ApplicationContext
+- RuntimeState
+- Container
+
+### Lifecycle Layer
+- startup/shutdown hooks
+- registry
+- manager
+
+### Messaging Layer
+- EventBus
+- CommandBus
+- QueryBus
+- HandlerRegistry
+
+### Module Layer
+- ModuleProtocol
+- ModuleLoader
+- ModuleRegistry
+- ModuleSetupContext
+
+### Infrastructure Layer
+- providers
+- registry
+- lifecycle integration

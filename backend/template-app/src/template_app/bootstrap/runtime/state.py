@@ -6,19 +6,30 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.events.bus import EventBus
+    from template_app.bootstrap.dispatching.commands.dispatcher import (
+        CommandDispatcher,
+    )
+    from template_app.bootstrap.dispatching.queries.dispatcher import (
+        QueryDispatcher,
+    )
+    from template_app.bootstrap.dispatching.registry import (
+        MessageHandlerRegistry,
+    )
     from template_app.bootstrap.infrastructure.registry import (
         InfrastructureRegistry,
     )
-    from template_app.bootstrap.kernel import Container
-    from template_app.bootstrap.lifecycle.manager import LifecycleManager
-    from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
-    from template_app.bootstrap.messaging.buses import (
-        CommandBus,
-        QueryBus,
+    from template_app.bootstrap.integration.bus import (
+        RuntimeIntegrationBus,
     )
-    from template_app.bootstrap.messaging.registry import (
-        MessageHandlerRegistry,
+    from template_app.bootstrap.integration.registry import (
+        IntegrationHandlerRegistry,
+    )
+    from template_app.bootstrap.kernel.container import Container
+    from template_app.bootstrap.lifecycle.manager import (
+        LifecycleManager,
+    )
+    from template_app.bootstrap.lifecycle.registry import (
+        LifecycleRegistry,
     )
 
 
@@ -28,13 +39,18 @@ class RuntimeState:
 
     container: Container
 
-    infrastructure_registry: InfrastructureRegistry
-
     lifecycle_registry: LifecycleRegistry
+
     lifecycle_manager: LifecycleManager
 
-    event_bus: EventBus
+    infrastructure_registry: InfrastructureRegistry
+
+    integration_registry: IntegrationHandlerRegistry
+
+    integration_bus: RuntimeIntegrationBus
 
     message_registry: MessageHandlerRegistry
-    command_bus: CommandBus
-    query_bus: QueryBus
+
+    command_dispatcher: CommandDispatcher
+
+    query_dispatcher: QueryDispatcher

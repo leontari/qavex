@@ -12,7 +12,7 @@ if TYPE_CHECKING:
         DependencyProvider,
         InfrastructureProvider,
     )
-    from template_app.bootstrap.events.bus import EventBus
+    from template_app.bootstrap.integration.bus import EventBus
     from template_app.bootstrap.kernel import RuntimeKernel
     from template_app.bootstrap.lifecycle import LifecycleHook
 

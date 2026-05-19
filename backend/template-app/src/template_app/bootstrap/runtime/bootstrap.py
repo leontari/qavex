@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from fastapi import FastAPI
 
-from template_app.bootstrap.events.bus import EventBus
-from template_app.bootstrap.events.dispatcher import EventDispatcher
-from template_app.bootstrap.events.registry import EventRegistry
+from template_app.bootstrap.dispatching.commands.dispatcher import (
+    CommandDispatcher,
+)
+from template_app.bootstrap.dispatching.queries.dispatcher import (
+    QueryDispatcher,
+)
+from template_app.bootstrap.dispatching.registry import (
+    MessageHandlerRegistry,
+)
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
+from template_app.bootstrap.integration.bus import (
+    RuntimeIntegrationBus,
+)
+from template_app.bootstrap.integration.registry import (
+    IntegrationHandlerRegistry,
+)
 from template_app.bootstrap.kernel import (
     ApplicationContext,
     Container,
@@ -20,15 +30,8 @@ from template_app.bootstrap.lifecycle import (
     LifecycleManager,
     LifecycleRegistry,
 )
-from template_app.bootstrap.messaging.buses import (
-    CommandBus,
-    QueryBus,
-)
-from template_app.bootstrap.messaging.registry import (
-    MessageHandlerRegistry,
-)
 from template_app.bootstrap.modules import (
-    ModuleRegistry,  # TODO: recheck this as now it's done via  MODULE_REGISTRY
+    # TODO: recheck this as now it's done via  MODULE_REGISTRY
     ModuleSetupContext,
     discover_modules,
     load_modules,
@@ -46,47 +49,46 @@ def bootstrap_application() -> RuntimeKernel:
 
     infrastructure_registry = bootstrap_infrastructure()
 
-    container = Container()
+    # in-memory runtime inter-module data communication bus
+    integration_registry = IntegrationHandlerRegistry()
+    integration_bus = RuntimeIntegrationBus(registry=integration_registry)
 
-    # assemble inter-module communication event_bus instance
-    event_registry = EventRegistry()
-    event_dispatcher = EventDispatcher(registry=event_registry)
-    event_bus = EventBus(registry=event_registry, dispatcher=event_dispatcher)
-
-    # assemble command/query buses
+    # in-memory runtime inter-module commands/queries bus
     message_registry = MessageHandlerRegistry()
-    command_bus = CommandBus(registry=message_registry)
-    query_bus = QueryBus(registry=message_registry)
+    command_dispatcher = CommandDispatcher(registry=message_registry)
+    query_dispatcher = QueryDispatcher(registry=message_registry)
+
+    # DI container
+    container = Container()
 
     # create RuntimeState instance and inject its dependencies
     runtime = RuntimeState(
         container=container,
-        event_bus=event_bus,
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
         infrastructure_registry=infrastructure_registry,
+        integration_registry=integration_registry,
+        integration_bus=integration_bus,
         message_registry=message_registry,
-        command_bus=command_bus,
-        query_bus=query_bus,
+        command_dispatcher=command_dispatcher,
+        query_dispatcher=query_dispatcher,
     )
 
+    # build kernel
     context = ApplicationContext(runtime=runtime)
-
     kernel = RuntimeKernel(context=context)
-
     app = FastAPI(
         title="template-app",
         lifespan=create_lifespan(kernel),
     )
-
     context.app = app
 
-    # register modules
+    # register modules in kernel
     module_context = ModuleSetupContext(_kernel=kernel)
     manifests = discover_modules(MODULE_REGISTRY)
     load_modules(manifests=manifests, context=module_context)
 
-    # register infrastructure providers
+    # register infrastructure providers in kernel
     for provider in infrastructure_registry.providers:
         lifecycle_registry.register_startup(
             LifecycleHook(

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from template_app.bootstrap.contracts.types import DependencyScope
-
 if TYPE_CHECKING:
     from typing import Any
+
+    from template_app.bootstrap.contracts.types import DependencyScope
 
 
 class DependencyProvider(Protocol):

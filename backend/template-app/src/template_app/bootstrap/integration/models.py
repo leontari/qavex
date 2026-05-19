@@ -4,5 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass(slots=True)
-class Query:
-    """Base query."""
+class IntegrationEvent:
+    """Base integration event."""
+
+    name: str

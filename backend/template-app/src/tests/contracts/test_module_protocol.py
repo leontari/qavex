@@ -1,22 +1,21 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI
-from tests.factories.runtime import build_runtime_state
-from template_app.bootstrap.kernel.container import Container
-from template_app.bootstrap.kernel.context import ApplicationContext
-from template_app.bootstrap.kernel.kernel import RuntimeKernel
+
+from template_app.bootstrap.contracts import DependencyProvider
+from tests.factories.kernel import build_testing_kernel
 from template_app.bootstrap.modules.context import ModuleSetupContext
 from template_app.bootstrap.contracts.modules import ModuleProtocol
-from template_app.bootstrap.runtime.state import RuntimeState
-from template_app.bootstrap.lifecycle.registry import (
-    LifecycleRegistry,
-)
-from template_app.bootstrap.lifecycle.manager import (
-    LifecycleManager,
-)
-from template_app.bootstrap.infrastructure.registry import (
-    InfrastructureRegistry,
-)
+
+
+class FakeProvider(DependencyProvider):
+
+    @property
+    def name(self) -> str:
+        return "fake"
+
+    def provide(self) -> str:
+        return "value"
 
 
 class FakeModule:
@@ -31,25 +30,16 @@ class FakeModule:
 
         context.register_router(router)
 
+        context.register_dependency(FakeProvider())
+
 
 def test_module_protocol_compatible() -> None:
-    runtime = build_runtime_state()
-
-    context = ApplicationContext(runtime=runtime)
-
-    app = FastAPI()
-
-    context.app = app
-
-    kernel = RuntimeKernel(context=context)
-
-    module_context = ModuleSetupContext(kernel)
+    kernel = build_testing_kernel()
 
     module: ModuleProtocol = FakeModule()
 
-    module.setup(module_context)
+    context = ModuleSetupContext(_kernel=kernel) # TODO: check protect necessity
 
-    assert any(
-        route.path == "/fake"
-        for route in kernel.context.app.routes
-    )
+    module.setup(context)
+
+    assert kernel.context.runtime.container.contains("fake") is True

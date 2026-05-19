@@ -4,7 +4,7 @@
     - redesigning: Hexagonal Runtime Architecture
 4. [x] Infrastructure providers
 5. [x] Event bus abstraction
-6. [ ] Command/query execution layer
+6. [x] Command/query execution layer
 7. [ ] Background task runtime
 8. [ ] Plugin health checks
 9. [ ] Runtime capabilities registry
