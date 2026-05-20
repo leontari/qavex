@@ -9,9 +9,9 @@ if TYPE_CHECKING:
     from template_app.bootstrap.runtime.state import RuntimeState
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class ApplicationContext:
     """Application runtime context."""
 
     runtime: RuntimeState
-    app: FastAPI | None = None
+    app: FastAPI

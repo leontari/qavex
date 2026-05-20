@@ -10,6 +10,6 @@ def test_modules_loaded_into_application() -> None:
         route.path
         for route in kernel.context.app.routes
     }
-
+    print(paths)
     assert "/health" in paths
     assert "/runtime" in paths

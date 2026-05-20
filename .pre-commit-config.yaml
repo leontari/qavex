@@ -78,6 +78,13 @@ repos:
         pass_filenames: true
         files: ^(.*/)?pyproject\.toml$
 
+#      - id: local-ty
+#        name: ty check
+#        entry: uv run ty check fastapi
+#        require_serial: true
+#        language: unsupported
+#        pass_filenames: false
+
       - id: local-uv-lock
         name: uv lock check
         entry: uv run uv lock --check

@@ -40,20 +40,24 @@ from template_app.bootstrap.runtime.state import RuntimeState
 
 def bootstrap_application() -> RuntimeKernel:
     """Bootstrap runtime kernel."""
+
     # DI
     container = Container()
 
+    # lifecycle
     lifecycle_registry = LifecycleRegistry()
     lifecycle_manager = LifecycleManager(registry=lifecycle_registry)
 
+    # infrastructure
     infrastructure_registry = bootstrap_infrastructure()
 
+    # messaging
     messaging_registry = RuntimeHandlerRegistry()
     event_bus = RuntimeEventBus(registry=messaging_registry)
     command_bus = RuntimeCommandBus(registry=messaging_registry)
     query_bus = RuntimeQueryBus(registry=messaging_registry)
 
-    # create RuntimeState instance and inject its dependencies
+    # runtime state
     runtime = RuntimeState(
         container=container,
         lifecycle_registry=lifecycle_registry,
@@ -65,21 +69,24 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    # build kernel
-    context = ApplicationContext(runtime=runtime)
-    kernel = RuntimeKernel(context=context)
-    app = FastAPI(
-        title="template-app",
-        lifespan=create_lifespan(kernel),
-    )
-    context.app = app
+    # transport
+    app = FastAPI(title="template-app")
 
-    # register modules in kernel
+    # immutable application context
+    context = ApplicationContext(runtime=runtime, app=app)
+
+    # kernel
+    kernel = RuntimeKernel(context=context)
+
+    # inject lifespan AFTER kernel creation
+    app.router.lifespan_context = create_lifespan(kernel)
+
+    # module system
     module_context = ModuleSetupContext(_kernel=kernel)
     manifests = discover_modules(MODULE_REGISTRY)
     load_modules(manifests=manifests, context=module_context)
 
-    # register infrastructure providers in kernel
+    # infrastructure Lifecycle integration
     for provider in infrastructure_registry.providers:
         lifecycle_registry.register_startup(
             LifecycleHook(

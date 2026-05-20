@@ -7,7 +7,22 @@ from template_app.bootstrap.runtime.bootstrap import (
 )
 
 
-def test_kernel_contains_real_fastapi_app() -> None:
+def test_bootstrap_returns_kernel() -> None:
     kernel = bootstrap_application()
 
-    assert isinstance(kernel.context.app, FastAPI)
+    assert kernel is not None
+
+
+def test_bootstrap_creates_fastapi() -> None:
+    kernel = bootstrap_application()
+
+    assert isinstance(kernel.app, FastAPI)
+
+
+def test_bootstrap_binds_lifespan() -> None:
+    kernel = bootstrap_application()
+
+    assert (
+        kernel.app.router.lifespan_context
+        is not None
+    )

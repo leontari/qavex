@@ -11,12 +11,12 @@ async def test_database_provider_lifecycle() -> None:
         dsn="postgresql://localhost/test",
     )
 
-    assert provider.started is False
+    assert not provider.started
 
     await provider.startup()
 
-    assert provider.started is True
+    assert provider.started
 
     await provider.shutdown()
 
-    assert provider.started is False
+    assert not provider.started

@@ -28,7 +28,7 @@ class Container:
         """Register provider."""
         self._providers[provider.name] = provider
 
-    def resolve(self, key: str) -> DependencyProvider:
+    def resolve(self, key: str) -> object:
         """Resolve provider."""
         try:
             return self._providers[key]
