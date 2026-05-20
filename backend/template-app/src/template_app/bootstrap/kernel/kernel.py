@@ -27,11 +27,13 @@ class RuntimeKernel:
     @property
     def app(self) -> FastAPI:
         """Return FastAPI application instance."""
-        if self.context.app is None:
+        app = self.context.app
+
+        if app is None:
             msg = "FastAPI application not initialized."
             raise RuntimeError(msg)
 
-        return self.context.app
+        return app
 
     async def startup(self) -> None:
         """Execute startup lifecycle hooks."""

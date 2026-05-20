@@ -62,13 +62,13 @@ repos:
         pass_filenames: true
         types: [ python ]
 
-#      - id: local-mypy
-#        name: mypy check
-#        entry: uv run mypy
-#        require_serial: true
-#        language: unsupported
-#        pass_filenames: true
-#        types: [ python ]
+      - id: local-mypy
+        name: mypy check .
+        entry: uv run mypy
+        require_serial: true
+        language: unsupported
+        pass_filenames: true
+        types: [ python ]
 
       - id: local-pyproject-fmt
         name: pyproject-fmt

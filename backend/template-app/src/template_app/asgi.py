@@ -13,4 +13,4 @@ if TYPE_CHECKING:
 
 kernel: RuntimeKernel = bootstrap_application()
 
-app: FastAPI = kernel.context.app
+app: FastAPI = kernel.app
