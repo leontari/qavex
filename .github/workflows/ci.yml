@@ -18,6 +18,7 @@ run-name: >
 
 on:
   merge_group:
+
   pull_request:
     types:
       - opened
@@ -38,13 +39,14 @@ env:
 
 permissions:
   contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   linters:
-    name: 🧹 Linters
+    name: 🧪 Linters
     runs-on: ubuntu-24.04
 
     steps:
@@ -54,27 +56,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: 🔧 Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version-file: ".python-version"
+      - name: 🔧 Bootstrap environment
+        uses: ./.github/actions/setup-uv-python
 
-      - name: 🔧 Setup uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
-        with:
-          version-file: "pyproject.toml"
-          activate-environment: "false"
-          enable-cache: "true"
-          restore-cache: "true"
-          save-cache: ${{ github.ref == 'refs/heads/main' }} # sets <save-cache: "true"> only for merge in main
-          cache-suffix: ""  # Suffix for the cache key
-          cache-local-path: ${{ env.UV_CACHE_DIR }}
-          prune-cache: "false"
+      - name: 🔧 Install dependencies
+        run: uv sync --frozen --group lint
 
-      - name: 🔧 Setup .venv
-        run: uv sync --frozen --group dev
-
-      - name: 🧪 Run prek checks
+      - name: 🧪 Run lint checks
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "Running prek on PR diff"
@@ -92,19 +80,52 @@ jobs:
             uv run prek run --all-files
           fi
 
-      - name: 📝 Print environment summary
-        run: |
-          echo "📝 OS:"; uname -a
-          echo "📝 UV:"; uv --version ; which uv
-          echo "📝 UV_CACHE_DIR:"; du -sh "${{ env.UV_CACHE_DIR }}"
-          echo "📝 PYTHON:"; uv run python --version ; uv run which python
-          echo "📝 PYTHON .venv SIZE:"; du -sh .venv
+  typing:
+    name: 🧪 Typing
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 🔧 Setup uv and python
+        uses: ./.github/actions/setup-uv-python
+
+      - name: 🔧 Install dependencies
+        run: uv sync --frozen --all-packages --group typing
+
+      - name: 🧪 Run type checks
+        run: uv run mypy .
+
+  tests:
+    name: 🧪 Tests
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 🔧 Setup uv and python
+        uses: ./.github/actions/setup-uv-python
+
+      - name: 🔧 Install dependencies
+        run: uv sync --frozen --all-packages --group test
+
+      - name: 🧪 Run tests
+        run: uv run pytest -vv
 
   check:  # This job does nothing and is only used for the branch protection
     name: 🏁 Check
     if: always()
     needs:
       - linters
+      - tests
     runs-on: ubuntu-24.04
     timeout-minutes: 1
 

@@ -1,0 +1,22 @@
+name: Setup uv and python
+description: "Checkout, setup Python, setup uv"
+runs:
+  using: "composite"
+
+  steps:
+    - name: 🔧 Setup Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version-file: ".python-version"
+
+    - name: 🔧 Setup uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      with:
+        version-file: "pyproject.toml"
+        activate-environment: "false"
+        enable-cache: "true"
+        restore-cache: "true"
+        save-cache: ${{ github.ref == 'refs/heads/main' }}
+        cache-suffix: ""
+        cache-local-path: ${{ env.UV_CACHE_DIR }}
+        prune-cache: "false"
