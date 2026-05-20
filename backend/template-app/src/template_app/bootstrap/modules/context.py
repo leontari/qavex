@@ -1,4 +1,4 @@
-"""Kernel API for the modules."""
+"""Restricted kernel API for the modules."""
 
 from __future__ import annotations
 

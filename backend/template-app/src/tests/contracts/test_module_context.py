@@ -9,4 +9,4 @@ def test_module_context_created() -> None:
 
     context = ModuleSetupContext(_kernel=kernel)
 
-    assert context.app is not None
+    assert context._app is not None
