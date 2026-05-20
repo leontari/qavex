@@ -14,7 +14,6 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  { include-group = "ci" },
   { include-group = "lint" },
   { include-group = "pkg-meta" },
   { include-group = "release" },
@@ -28,12 +27,10 @@ test = [
   "pytest-cov>=7",
   "pytest-mock>=3.15.1",
 ]
-ci = [
-  "prek>=0.3.11",
-]
 lint = [
   "check-jsonschema>=0.37.2",
   "codespell>=2.4.2",
+  "prek>=0.3.11",
   "pyproject-fmt>=2.21.1",
   "pyyaml>=6.0.3",
   "ruff>=0.15.12",

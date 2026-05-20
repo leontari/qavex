@@ -1493,9 +1493,6 @@ version = "0.1.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
-ci = [
-    { name = "prek" },
-]
 dev = [
     { name = "check-jsonschema" },
     { name = "check-wheel-contents" },
@@ -1521,6 +1518,7 @@ dev = [
 lint = [
     { name = "check-jsonschema" },
     { name = "codespell" },
+    { name = "prek" },
     { name = "pyproject-fmt" },
     { name = "pyyaml" },
     { name = "ruff" },
@@ -1551,7 +1549,6 @@ typing = [
 [package.metadata]
 
 [package.metadata.requires-dev]
-ci = [{ name = "prek", specifier = ">=0.3.11" }]
 dev = [
     { name = "check-jsonschema", specifier = ">=0.37.2" },
     { name = "check-wheel-contents", specifier = ">=0.6.3" },
@@ -1577,6 +1574,7 @@ dev = [
 lint = [
     { name = "check-jsonschema", specifier = ">=0.37.2" },
     { name = "codespell", specifier = ">=2.4.2" },
+    { name = "prek", specifier = ">=0.3.11" },
     { name = "pyproject-fmt", specifier = ">=2.21.1" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "ruff", specifier = ">=0.15.12" },

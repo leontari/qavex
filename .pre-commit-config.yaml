@@ -46,6 +46,14 @@ repos:
         pass_filenames: true
         files: ^\.github/workflows/.*\.ya?ml$
 
+      - id: local-check-github-actions
+        name: check GitHub actions
+        entry: uv run check-jsonschema --verbose --builtin-schema vendor.github-actions
+        language: unsupported
+        require_serial: true
+        pass_filenames: true
+        files: (^|/)(action\.ya?ml)$
+
 #      - id: local-ruff-check
 #        name: ruff check
 #        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
@@ -62,22 +70,6 @@ repos:
         pass_filenames: true
         types: [ python ]
 
-      - id: local-mypy
-        name: mypy check
-        entry: uv run mypy
-        require_serial: true
-        language: unsupported
-        pass_filenames: true
-        types: [ python ]
-
-      - id: local-pytest
-        name: pytest tests
-        entry: uv run pytest
-        require_serial: true
-        language: unsupported
-        pass_filenames: true
-        types: [ python ]
-
       - id: local-pyproject-fmt
         name: pyproject-fmt
         entry: uv run pyproject-fmt
@@ -85,13 +77,6 @@ repos:
         require_serial: true
         pass_filenames: true
         files: ^(.*/)?pyproject\.toml$
-
-#      - id: local-ty
-#        name: ty check
-#        entry: uv run ty check fastapi
-#        require_serial: true
-#        language: unsupported
-#        pass_filenames: false
 
       - id: local-uv-lock
         name: uv lock check
