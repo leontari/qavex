@@ -26,14 +26,8 @@ class RuntimeKernel:
 
     @property
     def app(self) -> FastAPI:
-        """Return FastAPI application instance."""
-        app = self.context.app
-
-        if app is None:
-            msg = "FastAPI application not initialized."
-            raise RuntimeError(msg)
-
-        return app
+        """Public ASGI transport entrypoint."""
+        return self.context.app
 
     async def startup(self) -> None:
         """Execute startup lifecycle hooks."""

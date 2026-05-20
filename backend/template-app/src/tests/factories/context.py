@@ -17,7 +17,7 @@ def build_context_no_app() -> ApplicationContext:
         runtime=build_runtime_state(),
     )
 
-def build_context():
+def build_context() -> ApplicationContext:
     app = FastAPI()
     runtime=build_runtime_state()
     context = ApplicationContext(app=app, runtime=runtime)

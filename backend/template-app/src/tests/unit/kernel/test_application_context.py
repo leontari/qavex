@@ -1,12 +1,28 @@
 from __future__ import annotations
 
-from tests.factories.runtime import build_runtime_state
+from fastapi import FastAPI
+
 from template_app.bootstrap.kernel import ApplicationContext
-from template_app.bootstrap.runtime.state import RuntimeState
+from tests.factories.runtime import build_runtime_state
 
 
-def test_application_context_initial_state() -> None:
-    context = ApplicationContext(runtime=build_runtime_state())
+def test_application_context_contains_runtime() -> None:
+    app = FastAPI()
 
-    assert context.app is None
-    assert isinstance(context.runtime, RuntimeState)
+    context = ApplicationContext(
+        runtime=build_runtime_state(),
+        app=app,
+    )
+
+    assert context.runtime is not None
+
+
+def test_application_context_contains_fastapi() -> None:
+    app = FastAPI()
+
+    context = ApplicationContext(
+        runtime=build_runtime_state(),
+        app=app,
+    )
+
+    assert context.app is app

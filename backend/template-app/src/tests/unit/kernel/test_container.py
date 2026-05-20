@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import pytest
 
+from template_app.bootstrap.contracts import DependencyScope
 from template_app.bootstrap.contracts.dependencies import DependencyProvider
 from template_app.bootstrap.kernel.container import Container
 from template_app.infrastructure.cache import CacheProvider
@@ -17,8 +18,13 @@ class FakeProvider:
     def name(self) -> str:
         return "fake"
 
+    @property
+    def scope(self) -> DependencyScope:
+        return DependencyScope.SINGLETON
+
     def provide(self) -> str:
         return self.value
+
 
 
 

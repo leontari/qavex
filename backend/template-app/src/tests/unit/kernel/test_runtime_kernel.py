@@ -1,34 +1,41 @@
 from __future__ import annotations
 
-import pytest
 from fastapi import FastAPI
 
 from template_app.bootstrap.kernel import (
-    RuntimeKernel,
     ApplicationContext,
+    RuntimeKernel,
 )
 from tests.factories.runtime import build_runtime_state
 
 
-def test_kernel_requires_initialized_app() -> None:
-    kernel = RuntimeKernel(
-        context=ApplicationContext(
-            runtime=build_runtime_state(),
-        )
-    )
-
-    with pytest.raises(RuntimeError):
-        _ = kernel.app
-
-
-
 def test_kernel_returns_app() -> None:
-    context = ApplicationContext(runtime=build_runtime_state())
-
     app = FastAPI()
 
-    context.app = app
+    context = ApplicationContext(
+        runtime=build_runtime_state(),
+        app=app,
+    )
 
-    kernel = RuntimeKernel(context=context)
+    kernel = RuntimeKernel(
+        context=context,
+    )
 
     assert kernel.app is app
+
+
+def test_kernel_contains_runtime() -> None:
+    app = FastAPI()
+
+    runtime = build_runtime_state()
+
+    context = ApplicationContext(
+        runtime=runtime,
+        app=app,
+    )
+
+    kernel = RuntimeKernel(
+        context=context,
+    )
+
+    assert kernel.context.runtime is runtime
