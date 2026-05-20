@@ -46,10 +46,16 @@ concurrency:
 
 jobs:
   linters:
-    name: 🧹 Linters
+    name: 🧪 Linters
     runs-on: ubuntu-24.04
 
     steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
       - name: 🔧 Bootstrap environment
         uses: ./.github/actions/setup-uv-python
 
@@ -79,13 +85,19 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
       - name: 🔧 Setup uv and python
         uses: ./.github/actions/setup-uv-python
 
       - name: 🔧 Install dependencies
         run: uv sync --frozen --all-packages --group typing
 
-      - name: 🧪 Run typechecks
+      - name: 🧪 Run type checks
         run: uv run mypy .
 
   tests:
@@ -93,6 +105,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
       - name: 🔧 Setup uv and python
         uses: ./.github/actions/setup-uv-python
 
