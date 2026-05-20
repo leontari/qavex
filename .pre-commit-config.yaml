@@ -64,7 +64,7 @@ repos:
 
       - id: local-mypy
         name: mypy check
-        entry: uv run mypy .
+        entry: uv run mypy
         require_serial: true
         language: unsupported
         pass_filenames: true

@@ -104,7 +104,9 @@ builtin = "clear,usage,en-GB_to_en-US"
 count = true
 
 [tool.mypy]
-mypy_path = "backend/**/src"
+mypy_path = [
+  "backend/template-app/src",
+]
 exclude = [
   "(^|/)(tests|migrations|scripts)/",
   "backend/template-app_",
