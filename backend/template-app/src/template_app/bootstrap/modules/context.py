@@ -1,4 +1,4 @@
-"""Runtime API for restricted module registration within context."""
+"""Kernel API for the modules."""
 
 from __future__ import annotations
 
@@ -21,22 +21,28 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class ModuleSetupContext:
-    """Restricted module setup context."""
+    """
+    Internal module bootstrap API.
+
+    Modules MUST NOT access RuntimeKernel directly.
+    """
 
     _kernel: RuntimeKernel
 
+    ##################################
+    # transport layer (internal only)
+    ##################################
+
     @property
-    def app(self) -> FastAPI:
-        app = self._kernel.context.app
-
-        if app is None:
-            msg = "FastAPI application not initialized."
-            raise RuntimeError(msg)
-
-        return app
+    def _app(self) -> FastAPI:
+        return self._kernel.context.app
 
     def register_router(self, router: APIRouter) -> None:
-        self.app.include_router(router)
+        self._app.include_router(router)
+
+    ############
+    # lifecycle
+    ############
 
     def register_startup_hook(self, hook: LifecycleHook) -> None:
         runtime = self._kernel.context.runtime
@@ -48,16 +54,27 @@ class ModuleSetupContext:
 
         runtime.lifecycle_registry.register_shutdown(hook)
 
+    ###############
+    # DI container
+    ###############
+
     def register_dependency(self, provider: DependencyProvider) -> None:
         runtime = self._kernel.context.runtime
 
         runtime.container.register(provider)
+
+    ########################
+    # infrastructure access
+    ########################
 
     def get_provider(self, name: str) -> InfrastructureProvider:
         runtime = self._kernel.context.runtime
 
         return runtime.infrastructure_registry.get(name)
 
+    ############
+    # messaging
+    ############
     @property
     def event_bus(self) -> RuntimeEventBus:
         return self._kernel.context.runtime.event_bus
