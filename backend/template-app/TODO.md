@@ -1,15 +1,15 @@
 1. [x] Module bootstrap protocol
 2. [x] Dynamic module registry
 3. [x] Unified lifecycle registry
-    - redesigning: Hexagonal Runtime Architecture
+    - [x] redesigning: Hexagonal Runtime Architecture
 4. [x] Infrastructure providers
 5. [x] Event bus abstraction
 6. [x] Command/query execution layer
    - redesign for future:
-     - RedisStreamEventBridge
-     - NatsEventBridge
-     - DistributedCommandGateway
-     - RPCQueryGateway
+     - [ ] RedisStreamEventBridge
+     - [ ] NatsEventBridge
+     - [ ] DistributedCommandGateway
+     - [ ] RPCQueryGateway
 7. [ ] Background task runtime
 8. [ ] Plugin health checks
 9. [ ] Runtime capabilities registry

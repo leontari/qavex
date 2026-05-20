@@ -135,10 +135,10 @@ environment.python-version = "3.11"
 
 [tool.pytest]
 ini_options.asyncio_mode = "auto"
-ini_options.testpaths = [ "**/backend/**/tests" ]
+# ini_options.testpaths = [ "**/backend/**/tests" ]
 ini_options.python_files = [ "test_*.py" ]
 ini_options.xfail_strict = true
-ini_options.addopts = [ "-ra", "-q" ]
+ini_options.addopts = [ "-ra", "-q", "--ignore=backend/template-app_" ]
 # ini_options.addopts = ["-ra", "--strict-config", "--strict-markers", "-p", "vcs_versioning.test_api"]
 ini_options.markers = [
   "issue(id): reference to github issue",
