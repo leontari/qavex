@@ -1,32 +1,38 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter
 
-from template_app.bootstrap.contracts import DependencyProvider, \
-    DependencyScope
-from tests.factories.kernel import build_testing_kernel
-from template_app.bootstrap.modules.context import ModuleSetupContext
-from template_app.bootstrap.contracts.modules import ModuleProtocol
+from template_app.bootstrap.contracts import (
+    DependencyProvider,
+)
+from template_app.bootstrap.contracts.modules import (
+    ModuleProtocol,
+)
+from template_app.bootstrap.modules.capabilities import (
+    ModuleCapability,
+)
+from tests.factories.module_context import (
+    build_module_context,
+)
 
 
-class FakeProvider:
+class FakeProvider(DependencyProvider):
 
     @property
     def name(self) -> str:
         return "fake"
 
     @property
-    def scope(self) -> DependencyScope:
-        return DependencyScope.SINGLETON
+    def scope(self) -> str:
+        return "singleton"
 
     def provide(self) -> str:
         return "value"
 
 
-class FakeModule:
-    """Fake module for protocol validation."""
+class FakeModule(ModuleProtocol):
 
-    def setup(self, context: ModuleSetupContext) -> None:
+    def setup(self, context) -> None:
 
         router = APIRouter()
 
@@ -36,18 +42,25 @@ class FakeModule:
 
         context.register_router(router)
 
-        provider: DependencyProvider = FakeProvider()
-
-        context.register_dependency(provider)
+        context.register_dependency(
+            FakeProvider(),
+        )
 
 
 def test_module_protocol_compatible() -> None:
-    kernel = build_testing_kernel()
+
+    context = build_module_context(
+        frozenset({
+            ModuleCapability.ROUTER,
+            ModuleCapability.DEPENDENCIES,
+        }),
+    )
 
     module: ModuleProtocol = FakeModule()
 
-    context = ModuleSetupContext(_kernel=kernel) # TODO: check protect necessity
-
     module.setup(context)
 
-    assert kernel.context.runtime.container.contains("fake") is True
+    assert (
+        context.runtime.container.contains("fake")
+        is True
+    )

@@ -4,14 +4,11 @@ from template_app.bootstrap.modules.activation import (
 from template_app.bootstrap.modules.capabilities import (
     ModuleCapability,
 )
-from template_app.bootstrap.modules.context import (
-    ModuleSetupContext,
-)
-from template_app.bootstrap.modules.manifest import (
+from template_app.bootstrap.modules.manifests import (
     ModuleManifest,
 )
-from tests.factories.kernel import (
-    build_testing_kernel,
+from tests.factories.module_context import (
+    build_module_context,
 )
 
 
@@ -26,8 +23,6 @@ class FakeModule:
 
 def test_activate_module() -> None:
 
-    kernel = build_testing_kernel()
-
     module = FakeModule()
 
     manifest = ModuleManifest(
@@ -38,11 +33,8 @@ def test_activate_module() -> None:
         }),
     )
 
-    context = ModuleSetupContext(
-        runtime=kernel.runtime_api,
-        infra=kernel.infra_api,
-        messaging=kernel.messaging_api,
-        capabilities=manifest.capabilities,
+    context = build_module_context(
+        manifest.capabilities,
     )
 
     activate_module(

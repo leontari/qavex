@@ -33,11 +33,9 @@ from template_app.bootstrap.modules.apis import (
     ModuleRuntimeAPI,
 )
 from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
-from template_app.bootstrap.runtime.lifespan import create_lifespan
 from template_app.bootstrap.runtime.state import RuntimeState
 from template_app.bootstrap.runtime.transport import (
     configure_transport,
-    create_transport,
 )
 
 

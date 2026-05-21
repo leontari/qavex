@@ -1,7 +1,9 @@
-from template_app.bootstrap.modules.context import ModuleSetupContext
-from template_app.bootstrap.modules.loader import load_modules
-from template_app.bootstrap.modules.manifests import ModuleManifest
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.bootstrap.modules import (
+    ModuleSetupContext,
+    ModuleManifest,
+    load_modules,
+)
+from template_app.bootstrap.runtime import bootstrap_application
 
 
 class FakeModule:
@@ -24,7 +26,7 @@ def test_loader_executes_module_setup() -> None:
         ),
     )
 
-    context = ModuleSetupContext(_kernel=kernel)
+    context = ModuleSetupContext()
 
     load_modules(
         manifests=manifests,

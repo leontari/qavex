@@ -6,16 +6,18 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from template_app.bootstrap.modules.context import ModuleSetupContext
-    from template_app.bootstrap.modules.manifest import ModuleManifest
+    from template_app.bootstrap.modules.manifests import ModuleManifest
 
 
-def load_modules(
+def activate_module(
     manifest: ModuleManifest,
     context: ModuleSetupContext,
 ) -> None:
     """
-    Activate application module.
+    Activate a single module.
 
     One manifest -> one scoped context.
+
+    This is the ONLY allowed entrypoint for a module's execution.
     """
     manifest.module.setup(context)

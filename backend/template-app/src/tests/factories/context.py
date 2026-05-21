@@ -1,25 +1,76 @@
-from __future__ import annotations
-
 from fastapi import FastAPI
 
-from template_app.bootstrap.kernel.context import ApplicationContext
-from tests.factories.runtime import build_runtime_state
+from template_app.bootstrap.infrastructure.registry import (
+    InfrastructureRegistry,
+)
+from template_app.bootstrap.kernel import (
+    Container,
+)
+from template_app.bootstrap.lifecycle import (
+    LifecycleRegistry,
+)
+from template_app.bootstrap.messaging.runtime.command_bus import (
+    RuntimeCommandBus,
+)
+from template_app.bootstrap.messaging.runtime.event_bus import (
+    RuntimeEventBus,
+)
+from template_app.bootstrap.messaging.runtime.query_bus import (
+    RuntimeQueryBus,
+)
+from template_app.bootstrap.messaging.runtime.registry import (
+    RuntimeHandlerRegistry,
+)
+from template_app.bootstrap.modules.apis import (
+    ModuleInfraAPI,
+    ModuleMessagingAPI,
+    ModuleRuntimeAPI,
+)
+from template_app.bootstrap.modules.capabilities import (
+    ModuleCapability,
+)
+from template_app.bootstrap.modules.context import (
+    ModuleSetupContext,
+)
 
 
-def build_context_no_app() -> ApplicationContext:
-    """
-    Build application context.
+def build_module_context(
+    capabilities: frozenset[ModuleCapability],
+) -> ModuleSetupContext:
 
-    Returns:
-        ApplicationContext: pure runtime
-    """
-    return ApplicationContext(
-        runtime=build_runtime_state(),
+    app = FastAPI()
+
+    container = Container()
+
+    lifecycle_registry = LifecycleRegistry()
+
+    messaging_registry = RuntimeHandlerRegistry()
+
+    runtime_api = ModuleRuntimeAPI(
+        app=app,
+        container=container,
+        lifecycle_registry=lifecycle_registry,
     )
 
-def build_context() -> ApplicationContext:
-    app = FastAPI()
-    runtime=build_runtime_state()
-    context = ApplicationContext(app=app, runtime=runtime)
+    infra_api = ModuleInfraAPI(
+        registry=InfrastructureRegistry(),
+    )
 
-    return context
+    messaging_api = ModuleMessagingAPI(
+        event_bus=RuntimeEventBus(
+            registry=messaging_registry,
+        ),
+        command_bus=RuntimeCommandBus(
+            registry=messaging_registry,
+        ),
+        query_bus=RuntimeQueryBus(
+            registry=messaging_registry,
+        ),
+    )
+
+    return ModuleSetupContext(
+        runtime=runtime_api,
+        infra=infra_api,
+        messaging=messaging_api,
+        capabilities=capabilities,
+    )

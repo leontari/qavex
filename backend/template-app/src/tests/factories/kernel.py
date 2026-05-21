@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.bootstrap.kernel import ApplicationContext
+from template_app.bootstrap.kernel import KernelContext
 from template_app.bootstrap.kernel.kernel import RuntimeKernel
-from tests.factories.context import build_context, build_context_no_app
 from tests.factories.runtime import build_runtime_state
 
 if TYPE_CHECKING:

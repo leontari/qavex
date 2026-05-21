@@ -1,23 +1,23 @@
-from __future__ import annotations
-
 from dataclasses import FrozenInstanceError
 
 import pytest
 from fastapi import FastAPI
 
-from template_app.bootstrap.kernel import (
-    ApplicationContext,
+from template_app.bootstrap.kernel.context import (
+    KernelContext,
 )
-from tests.factories.runtime import build_runtime_state
+from tests.factories.runtime import (
+    build_runtime_state,
+)
 
 
-def test_application_context_is_immutable() -> None:
-    app = FastAPI()
+def test_kernel_context_is_immutable() -> None:
 
-    context = ApplicationContext(
+    context = KernelContext(
         runtime=build_runtime_state(),
-        app=app,
+        app=FastAPI(),
     )
 
     with pytest.raises(FrozenInstanceError):
-        context.app = FastAPI()
+
+        context.app = FastAPI()  # type: ignore[misc]

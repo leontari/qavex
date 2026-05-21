@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from fastapi import APIRouter
 
 from template_app.bootstrap.lifecycle.hooks import LifecycleHook
+from template_app.bootstrap.modules.capabilities import ModuleCapability
 from template_app.bootstrap.modules.manifests import ModuleManifest
 from template_app.bootstrap.modules.registry import ModuleRegistry
 
@@ -49,14 +50,14 @@ class RuntimeModule:
 
         context.register_startup_hook(
             LifecycleHook(
-                name="runtime_startup",
+                name="runtime.startup",
                 handler=self.startup_hook,
             ),
         )
 
         context.register_shutdown_hook(
             LifecycleHook(
-                name="runtime_shutdown",
+                name="runtime.shutdown",
                 handler=self.shutdown_hook,
             ),
         )
@@ -68,6 +69,7 @@ registry.register(
     ModuleManifest(
         name="health",
         module=HealthModule(),
+        capabilities=frozenset({ModuleCapability.ROUTER}),
     )
 )
 
@@ -75,6 +77,10 @@ registry.register(
     ModuleManifest(
         name="runtime",
         module=RuntimeModule(),
+        capabilities=frozenset({
+            ModuleCapability.ROUTER,
+            ModuleCapability.LIFECYCLE,
+        }),
     )
 )
 
