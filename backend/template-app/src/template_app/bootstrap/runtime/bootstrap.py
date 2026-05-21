@@ -6,8 +6,8 @@ from fastapi import FastAPI
 
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
 from template_app.bootstrap.kernel import (
-    ApplicationContext,
     Container,
+    KernelContext,
     RuntimeKernel,
 )
 from template_app.bootstrap.lifecycle import (
@@ -35,6 +35,10 @@ from template_app.bootstrap.modules.apis import (
 from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
 from template_app.bootstrap.runtime.lifespan import create_lifespan
 from template_app.bootstrap.runtime.state import RuntimeState
+from template_app.bootstrap.runtime.transport import (
+    configure_transport,
+    create_transport,
+)
 
 
 def bootstrap_application() -> RuntimeKernel:
@@ -96,29 +100,33 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    #################################
-    # the context of the application
-    #################################
+    #########
+    # Kernel
+    #########
 
-    # TODO: rename to KernelContext? Frozen?
-    context = ApplicationContext(runtime=runtime)
+    # transport
+    app = FastAPI()
 
-    kernel = RuntimeKernel(context=context)
-
-    app = FastAPI(
-        title="template-app",
-        lifespan=create_lifespan(),
+    # the immutable context of the kernel
+    context = KernelContext(
+        runtime=runtime,
+        app=app,
     )
 
-    context.app = app
+    # create kernel
+    kernel = RuntimeKernel(context=context)
 
-    # injection of lifespan AFTER the kernel's creation
-    # app.router.lifespan_context = create_lifespan(kernel)
+    # bind transport runtime integrations
+    configure_transport(
+        app=app,
+        kernel=kernel,
+    )
 
-    ######################
-    # APIs of the modules
-    ######################
+    #########################
+    # Load pluggable modules
+    #########################
 
+    # modules' APIs
     runtime_api = ModuleRuntimeAPI(
         app=app,
         container=container,
@@ -135,10 +143,7 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    ###################
     # modules' loading
-    ###################
-
     manifests = discover_modules(
         MODULE_REGISTRY,
     )  # TODO: autodiscover modules
@@ -156,9 +161,9 @@ def bootstrap_application() -> RuntimeKernel:
             context=module_context,
         )
 
-    #############################
-    # infrastructure's lifecycle
-    #############################
+    ##########################################
+    # Register the infrastructure's lifecycle
+    ##########################################
 
     for provider in infrastructure_registry.providers:
         lifecycle_registry.register_startup(

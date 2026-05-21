@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 
 @dataclass(slots=True, frozen=True)
-class ApplicationContext:
-    """Application runtime context."""
+class KernelContext:
+    """Immutable runtime composition graph."""
 
     runtime: RuntimeState
     app: FastAPI
