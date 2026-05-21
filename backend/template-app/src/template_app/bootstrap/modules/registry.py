@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.modules.manifests import ModuleManifest
+    from template_app.bootstrap.modules.manifest import ModuleManifest
 
 
 @dataclass(slots=True)

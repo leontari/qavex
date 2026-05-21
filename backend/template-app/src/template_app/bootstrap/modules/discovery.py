@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.bootstrap.modules.manifests import ModuleManifest
+    from template_app.bootstrap.modules.manifest import ModuleManifest
     from template_app.bootstrap.modules.registry import ModuleRegistry
 
 

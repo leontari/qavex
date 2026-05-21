@@ -5,17 +5,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from template_app.bootstrap.modules.capabilities import ModuleCapability
+
 if TYPE_CHECKING:
-    from fastapi import APIRouter, FastAPI
+    from fastapi import APIRouter
 
     from template_app.bootstrap.contracts import (
         DependencyProvider,
         InfrastructureProvider,
     )
-    from template_app.bootstrap.kernel import RuntimeKernel
     from template_app.bootstrap.lifecycle import LifecycleHook
     from template_app.bootstrap.messaging.runtime.event_bus import (
         RuntimeEventBus,
+    )
+    from template_app.bootstrap.modules.apis import (
+        ModuleInfraAPI,
+        ModuleMessagingAPI,
+        ModuleRuntimeAPI,
     )
 
 
@@ -27,70 +33,67 @@ class ModuleSetupContext:
     Modules MUST NOT access RuntimeKernel directly.
     """
 
-    # _kernel: RuntimeKernel
     runtime: ModuleRuntimeAPI
     infra: ModuleInfraAPI
     messaging: ModuleMessagingAPI
+    capabilities: frozenset[ModuleCapability]
 
-    ###########
-    # internal
-    ###########
+    ###############
+    # internal API
+    ###############
 
     def _require(self, capability: ModuleCapability) -> None:
-        if capability not in self.capabilities:  # TODO: check this up latter
+
+        if capability not in self.capabilities:
             msg = f"Module lacks capability: {capability}"
             raise PermissionError(msg)
 
-    ############
-    # transport
-    ############
-
-    # @property
-    # def _app(self) -> FastAPI:
-    #     return self._kernel.context.app
+    ################
+    # transport API
+    ################
 
     def register_router(self, router: APIRouter) -> None:
         self._require(ModuleCapability.ROUTER)
 
         self.runtime.register_router(router)
 
-        # self._app.include_router(router)
-
-    ############
-    # lifecycle
-    ############
+    ################
+    # lifecycle API
+    ################
 
     def register_startup_hook(self, hook: LifecycleHook) -> None:
-        runtime = self._kernel.context.runtime
+        self._require(ModuleCapability.LIFECYCLE)
 
-        runtime.lifecycle_registry.register_startup(hook)
+        self.runtime.register_startup_hook(hook)
 
     def register_shutdown_hook(self, hook: LifecycleHook) -> None:
-        runtime = self._kernel.context.runtime
+        self._require(ModuleCapability.LIFECYCLE)
 
-        runtime.lifecycle_registry.register_shutdown(hook)
+        self.runtime.lifecycle_registry.register_shutdown(hook)
 
-    ###############
-    # DI container
-    ###############
+    ###################
+    # DI container API
+    ###################
 
     def register_dependency(self, provider: DependencyProvider) -> None:
-        runtime = self._kernel.context.runtime
+        self._require(ModuleCapability.DEPENDENCIES)
 
-        runtime.container.register(provider)
+        self.runtime.container.register(provider)
 
     ########################
     # infrastructure access
     ########################
 
     def get_provider(self, name: str) -> InfrastructureProvider:
-        runtime = self._kernel.context.runtime
+        self._require(ModuleCapability.INFRASTRUCTURE)
 
-        return runtime.infrastructure_registry.get(name)
+        return self.infra.get_provider(name)
 
-    ############
-    # messaging
-    ############
+    ##################
+    # messaging buses
+    ##################
     @property
     def event_bus(self) -> RuntimeEventBus:
-        return self._kernel.context.runtime.event_bus
+        self._require(ModuleCapability.EVENT_BUS)
+
+        return self.messaging.event_bus

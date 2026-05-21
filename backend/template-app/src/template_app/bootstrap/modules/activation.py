@@ -6,14 +6,16 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from template_app.bootstrap.modules.context import ModuleSetupContext
-    from template_app.bootstrap.modules.manifests import ModuleManifest
+    from template_app.bootstrap.modules.manifest import ModuleManifest
 
 
 def load_modules(
-    manifests: tuple[ModuleManifest, ...],
+    manifest: ModuleManifest,
     context: ModuleSetupContext,
 ) -> None:
-    """Load application modules."""
+    """
+    Activate application module.
 
-    for manifest in manifests:
-        manifest.module.setup(context)
+    One manifest -> one scoped context.
+    """
+    manifest.module.setup(context)
