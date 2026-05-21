@@ -129,7 +129,9 @@ where:
 - runtime = orchestration layer.
 
 This will allow the change FastApi itself:
+
 For example:
+
 ```text
 HTTP adapter
 gRPC adapter

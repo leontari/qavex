@@ -1,4 +1,4 @@
-"""RuntimeState."""
+"""Abstractions existing while kernel is running."""
 
 from __future__ import annotations
 
