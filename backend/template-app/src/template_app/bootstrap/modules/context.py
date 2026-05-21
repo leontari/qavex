@@ -22,23 +22,39 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class ModuleSetupContext:
     """
-    Internal module bootstrap API.
+    A pluggable module's internal bootstrap API.
 
     Modules MUST NOT access RuntimeKernel directly.
     """
 
-    _kernel: RuntimeKernel
+    # _kernel: RuntimeKernel
+    runtime: ModuleRuntimeAPI
+    infra: ModuleInfraAPI
+    messaging: ModuleMessagingAPI
 
-    ##################################
-    # transport layer (internal only)
-    ##################################
+    ###########
+    # internal
+    ###########
 
-    @property
-    def _app(self) -> FastAPI:
-        return self._kernel.context.app
+    def _require(self, capability: ModuleCapability) -> None:
+        if capability not in self.capabilities:  # TODO: check this up latter
+            msg = f"Module lacks capability: {capability}"
+            raise PermissionError(msg)
+
+    ############
+    # transport
+    ############
+
+    # @property
+    # def _app(self) -> FastAPI:
+    #     return self._kernel.context.app
 
     def register_router(self, router: APIRouter) -> None:
-        self._app.include_router(router)
+        self._require(ModuleCapability.ROUTER)
+
+        self.runtime.register_router(router)
+
+        # self._app.include_router(router)
 
     ############
     # lifecycle
