@@ -17,4 +17,4 @@ class ModuleManifest:
     name: str
     module: ModuleProtocol
     capabilities: frozenset[ModuleCapability]
-    enabled: bool = True
+    enabled: bool = True  # TODO: recheck this
