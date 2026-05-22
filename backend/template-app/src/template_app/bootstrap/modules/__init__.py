@@ -1,4 +1,4 @@
-"""Business capability pluggable modules."""
+"""The entrypoint for the kernel runtime bootstrap."""
 
 from __future__ import annotations
 

@@ -115,7 +115,7 @@ def bootstrap_application() -> RuntimeKernel:
 
     setup_modules(
         kernel=kernel,
-        registry=MODULE_REGISTRY,  # TODO: check this
+        registry=MODULE_REGISTRY,
     )
 
     ##########################################

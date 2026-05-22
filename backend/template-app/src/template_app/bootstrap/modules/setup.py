@@ -1,38 +1,40 @@
 """
 Module system bootstrap.
 
-The flow of the modules plugging into kernel:
-    discover_modules()
-        ↓
-    load_modules()
-        ↓
-    activate_module()
-        ↓
-    Module.setup(context)
+Setups injects/installs modules' contexts into the kernel's runtime state.
 
+The flow:
+---------
+bootstrap/runtime/bootstrap.py
+    ↓
+setup_modules()
 
-Modules pipeline:
-    Manifest
-        ↓
-    setup isolated context
-        ↓
-    activation
+modules/setup.py
+    ↓
+discover()
+activate()
+load()
+    ↓
+modules/factory.py
+    ↓
+build_module_context()
 
+modules/lifecycle.py
+    ↓
+load_module()
 
-Setup injects/installs modules' contexts into the kernel's runtime state.
+modules/loader.py
+    ↓
+module.setup(context)
+
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.bootstrap.modules.apis import (
-    ModuleInfraAPI,
-    ModuleMessagingAPI,
-    ModuleRuntimeAPI,
-)
-from template_app.bootstrap.modules.context import (
-    ModuleSetupContext,
+from template_app.bootstrap.modules.factory import (
+    build_module_context,
 )
 from template_app.bootstrap.modules.lifecycle import (
     activate,
@@ -42,6 +44,7 @@ from template_app.bootstrap.modules.lifecycle import (
 
 if TYPE_CHECKING:
     from template_app.bootstrap.kernel import RuntimeKernel
+    from template_app.bootstrap.modules.context import ModuleSetupContext
     from template_app.bootstrap.modules.manifests import (
         ModuleManifest,
     )
@@ -57,12 +60,6 @@ def setup_modules(
     """
     Install pluggable runtime modules.
 
-    Responsibilities:
-    - discover modules
-    - activate modules
-    - create module contexts
-    - inject modules into kernel runtime
-
     Returns:
         tuple[ModuleManifest, ...]:
             installed module manifests
@@ -70,33 +67,14 @@ def setup_modules(
     """
     manifests = discover(registry)
     manifests = activate(manifests)
-    runtime = kernel.context.runtime
-
-    runtime_api = ModuleRuntimeAPI(
-        app=kernel.app,
-        container=runtime.container,
-        lifecycle_registry=runtime.lifecycle_registry,
-    )
-
-    infra_api = ModuleInfraAPI(
-        registry=runtime.infrastructure_registry,
-    )
-
-    messaging_api = ModuleMessagingAPI(
-        event_bus=runtime.event_bus,
-        command_bus=runtime.command_bus,
-        query_bus=runtime.query_bus,
-    )
 
     def context_factory(
         manifest: ModuleManifest,
     ) -> ModuleSetupContext:
 
-        return ModuleSetupContext(
-            runtime=runtime_api,
-            infra=infra_api,
-            messaging=messaging_api,
-            capabilities=manifest.capabilities,
+        return build_module_context(
+            kernel=kernel,
+            manifest=manifest,
         )
 
     load(

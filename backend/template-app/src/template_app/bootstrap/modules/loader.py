@@ -4,15 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.bootstrap.modules.activation import activate_module
-from template_app.bootstrap.modules.context import ModuleSetupContext
-
 if TYPE_CHECKING:
-    from template_app.bootstrap.modules.apis import (
-        ModuleInfraAPI,
-        ModuleMessagingAPI,
-        ModuleRuntimeAPI,
-    )
+    from template_app.bootstrap.modules.context import ModuleSetupContext
     from template_app.bootstrap.modules.manifests import ModuleManifest
 
 

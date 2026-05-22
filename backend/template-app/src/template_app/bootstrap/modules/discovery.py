@@ -19,6 +19,4 @@ def discover_modules(registry: ModuleRegistry) -> tuple[ModuleManifest, ...]:
         an immutable list of enabled modules
 
     """
-    return tuple(
-        manifest for manifest in registry.modules if manifest.enabled
-    )  # TODO: recheck
+    return tuple(manifest for manifest in registry.modules if manifest.enabled)

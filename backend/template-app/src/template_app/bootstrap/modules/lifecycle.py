@@ -1,41 +1,17 @@
-"""
-Module lifecycle orchestration.
-
-The flow of the modules plugging into kernel:
-    discover_modules()
-        ↓
-    load_modules()
-        ↓
-    activate_module()
-        ↓
-    Module.setup(context)
-
-
-In other words::
-    Manifest
-        ↓
-    setup modules' isolated context
-        ↓
-    activation
-
-"""
+"""Module lifecycle orchestration."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.bootstrap.modules import discover_modules, load_modules
 from template_app.bootstrap.modules.activation import activate_module
-from template_app.bootstrap.modules.context import ModuleSetupContext
+from template_app.bootstrap.modules.discovery import discover_modules
+from template_app.bootstrap.modules.loader import load_modules
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from collections.abc import Callable, Iterable
 
-    from template_app.bootstrap.modules.apis import (
-        ModuleInfraAPI,
-        ModuleMessagingAPI,
-        ModuleRuntimeAPI,
-    )
+    from template_app.bootstrap.modules.context import ModuleSetupContext
     from template_app.bootstrap.modules.manifests import ModuleManifest
     from template_app.bootstrap.modules.registry import ModuleRegistry
 
@@ -56,61 +32,21 @@ def discover(registry: ModuleRegistry) -> tuple[ModuleManifest, ...]:
 def activate(
     manifests: Iterable[ModuleManifest],
 ) -> tuple[ModuleManifest, ...]:
-    """Activate enabled modules."""
+    """Activate discovered modules."""
 
-    return tuple(activate_module(manifests) for manifest in manifests)
+    return tuple(activate_module(manifest) for manifest in manifests)
 
 
 def load(
     manifests: Iterable[ModuleManifest],
-    contest_factory,
+    context_factory: Callable[[ModuleManifest], ModuleSetupContext],
 ) -> None:
     """Load activated modules."""
 
     for manifest in manifests:
-        context = contest_factory(manifest)
+        context = context_factory(manifest)
 
-        load_module(
+        load_modules(
             manifest=manifest,
             context=context,
         )
-
-
-# def activate_module(
-#     manifest: ModuleManifest,
-#     context: ModuleSetupContext,
-# ) -> None:
-#     """
-#     Activate a single module.
-#
-#     One manifest -> one scoped context.
-#
-#     This is the ONLY allowed entrypoint for a module's execution.
-#     """
-#     manifest.module.setup(context)
-
-
-# def load_modules(
-#     manifests: tuple[ModuleManifest, ...],
-#     runtime_api: ModuleRuntimeAPI,
-#     infra_api: ModuleInfraAPI,
-#     messaging_api: ModuleMessagingAPI,
-# ) -> None:
-#     """
-#     Load and execute the module activation in the kernel.
-#
-#     This is used by bootstrap only.
-#     """
-#     for manifest in manifests:
-#
-#         context = ModuleSetupContext(
-#             runtime=runtime_api,
-#             infra=infra_api,
-#             messaging=messaging_api,
-#             capabilities=manifest.capabilities,
-#         )
-#
-#         activate_module(
-#             manifest=manifest,
-#             context=context,
-#         )
