@@ -1,9 +1,9 @@
 """
 Bootstrap is a sole composition root package.
 
-It creates an applicationContext alongside a Fastapi instance.
+It creates an KernelContext alongside a Fastapi instance.
 
-Package returns an ApplicationContext and not just a FastApi instance.
+Package returns an KernelContext and not just a FastApi instance.
 
 Bootstrap phases:
 1. config

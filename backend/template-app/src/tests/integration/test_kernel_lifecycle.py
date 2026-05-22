@@ -1,7 +1,15 @@
+from __future__ import annotations
+
 import pytest
 
+from tests.fakes.modules import (
+    FakeRuntimeModule,
+)
 from tests.factories.kernel import (
     build_testing_kernel,
+)
+from tests.factories.module_context import (
+    build_module_context,
 )
 
 
@@ -10,15 +18,17 @@ async def test_kernel_startup_executes_hooks() -> None:
 
     kernel = build_testing_kernel()
 
-    runtime_module = next(
-        manifest.module
-        for manifest in kernel.module_manifests
-        if manifest.name == "runtime"
+    module = FakeRuntimeModule()
+
+    module.setup(
+        build_module_context(),
     )
+
+    assert module.started is False
 
     await kernel.startup()
 
-    assert runtime_module.started is True
+    assert module.started is True
 
 
 @pytest.mark.asyncio
@@ -26,14 +36,16 @@ async def test_kernel_shutdown_executes_hooks() -> None:
 
     kernel = build_testing_kernel()
 
-    runtime_module = next(
-        manifest.module
-        for manifest in kernel.module_manifests
-        if manifest.name == "runtime"
+    module = FakeRuntimeModule()
+
+    module.setup(
+        build_module_context(),
     )
 
     await kernel.startup()
 
+    assert module.started is True
+
     await kernel.shutdown()
 
-    assert runtime_module.started is False
+    assert module.started is False

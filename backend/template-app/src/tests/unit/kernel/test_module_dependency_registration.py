@@ -3,12 +3,13 @@ from __future__ import annotations
 from template_app.bootstrap.modules import ModuleSetupContext
 from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 from template_app.infrastructure.cache import CacheProvider
+from tests.factories.module_context import build_module_context
 
 
 def test_module_can_register_dependency() -> None:
     kernel = bootstrap_application()
 
-    context = ModuleSetupContext(_kernel=kernel)
+    context = build_module_context()
 
     provider = CacheProvider(url="redis://localhost",)
 

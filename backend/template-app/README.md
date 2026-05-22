@@ -263,7 +263,7 @@ Module B       Module C
 
 ### Kernel Layer
 - RuntimeKernel
-- ApplicationContext
+- KernelContext
 - RuntimeState
 - Container
 

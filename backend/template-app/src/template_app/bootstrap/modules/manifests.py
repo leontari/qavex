@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -16,5 +16,7 @@ class ModuleManifest:
 
     name: str
     module: ModuleProtocol
-    capabilities: frozenset[ModuleCapability]
-    enabled: bool = True  # TODO: recheck this
+    capabilities: frozenset[ModuleCapability] = field(
+        default_factory=frozenset
+    )
+    enabled: bool = True

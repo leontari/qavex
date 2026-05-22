@@ -3,6 +3,16 @@ Application kernel constructor.
 
 It's an actual place where:
 - application kernel bootstrapping happens
+
+Flow:
+contracts
+    ↓
+kernel
+    ↓
+runtime
+    ↓
+bootstrap
+
 """
 
 from __future__ import annotations

@@ -1,10 +1,18 @@
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
-from template_app.bootstrap.modules.context import ModuleSetupContext
+from tests.factories.module_context import (
+    build_module_context,
+)
 
 
 def test_module_context_does_not_expose_kernel_directly() -> None:
-    kernel = bootstrap_application()
-    ctx = ModuleSetupContext(_kernel=kernel)
 
-    assert hasattr(ctx, "_app")
-    assert not hasattr(ctx, "app")  # explicit design decision
+    ctx = build_module_context()
+
+    # sandbox APIs are exposed
+    assert hasattr(ctx, "runtime")
+    assert hasattr(ctx, "infra")
+    assert hasattr(ctx, "messaging")
+
+    # kernel internals MUST stay hidden
+    assert not hasattr(ctx, "_kernel")
+    assert not hasattr(ctx, "_app")
+    assert not hasattr(ctx, "app")

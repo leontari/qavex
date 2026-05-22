@@ -1,4 +1,17 @@
-A pluggable module`s initializing flow
+# Module
+
+Can NOT do:
+- use kernel
+- mutate runtime
+- read private state
+
+Can do:
+- register router
+- work with lifecycle
+- use event bus
+- use infrastructure
+
+## A pluggable module`s initializing flow
 
 ```
 discover_modules()

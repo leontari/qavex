@@ -14,4 +14,4 @@ class KernelContext:
     """Immutable runtime composition graph."""
 
     runtime: RuntimeState
-    app: FastAPI
+    app: FastAPI | None = None

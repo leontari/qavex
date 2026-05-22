@@ -1,21 +1,26 @@
 from __future__ import annotations
 
-from fastapi.routing import APIRoute, APIRouter
+from fastapi.routing import APIRoute
+from fastapi import APIRouter
 
-from template_app.bootstrap.modules import ModuleSetupContext
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.bootstrap.modules.capabilities import (
+    ModuleCapability,
+)
+from tests.factories.module_context import (
+    build_module_context,
+)
+from template_app.bootstrap.runtime.bootstrap import (
+    bootstrap_application,
+)
 
 
 def test_health_route_registered() -> None:
+
     kernel = bootstrap_application()
-
-    app = kernel.context.app
-
-    assert app is not None
 
     paths = {
         route.path
-        for route in app.routes
+        for route in kernel.app.routes
         if isinstance(route, APIRoute)
     }
 
@@ -23,21 +28,25 @@ def test_health_route_registered() -> None:
 
 
 def test_module_can_register_router() -> None:
-    kernel = bootstrap_application()
-    ctx = ModuleSetupContext(_kernel=kernel)
+
+    ctx = build_module_context(
+        capabilities=frozenset({
+            ModuleCapability.ROUTER,
+        }),
+    )
 
     router = APIRouter()
 
     @router.get("/test")
-    async def test():
+    async def test() -> dict[str, bool]:
         return {"ok": True}
 
     ctx.register_router(router)
 
-    routes = {
+    paths = {
         route.path
-        for route in kernel.app.routes
-        if hasattr(route, "path")
+        for route in ctx.runtime.app.routes
+        if isinstance(route, APIRoute)
     }
 
-    assert "/test" in routes
+    assert "/test" in paths

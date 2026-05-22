@@ -12,66 +12,77 @@ if TYPE_CHECKING:
 
 
 
+def build_context_no_app() -> KernelContext:
+    """
+    Build isolated kernel context without transport.
+
+    Returns:
+        KernelContext: runtime-only context
+    """
+    runtime = build_runtime_state()
+
+    return KernelContext(
+        runtime=runtime,
+        app=None,
+    )
+
+
 def build_kernel_no_app() -> RuntimeKernel:
     """
-    Build minimal runtime kernel.
+    Build isolated runtime kernel.
 
-    It doesn't contain FastaAPI transport
-
-    This factory should be used in:
+    Used for:
     - unit tests
-    - isolated runtime tests
-    - pure kernel tests
+    - pure runtime tests
+    - lifecycle tests
+    - kernel orchestration tests
 
     Returns:
         RuntimeKernel: isolated kernel
-
     """
-    context = build_context_no_app()
 
-    kernel = RuntimeKernel(context=context)
+    return RuntimeKernel(
+        context=build_context_no_app(),
+    )
 
-    return kernel
 
 
 def build_testing_kernel() -> RuntimeKernel:
     """
-    Build fully initialized testing kernel.
+    Build fully initialized application kernel.
 
-    Unlike build_kernel(), this factory creates:
-    - FastAPI app
+    Uses REAL application bootstrap.
+
+    Includes:
+    - FastAPI transport
     - lifecycle
-    - modules
     - infrastructure
-    - buses
+    - messaging
+    - module activation
 
-    This factory should be used in:
+    Used for:
     - integration tests
-    - route tests
-    - startup tests
-    - lifecycle tests
+    - API tests
+    - startup/shutdown tests
 
     Returns:
-        RuntimeKernel: initialized runtime
+        RuntimeKernel: initialized runtime kernel
     """
 
-    context = build_context()
-    kernel = RuntimeKernel(context=context)
-
-    return kernel
+    return bootstrap_application()
 
 
 def build_testing_app() -> FastAPI:
     """
-    Build initialized FastAPI testing app.
+    Build initialized FastAPI app.
 
-    This factory should be used in:
+    Used for:
     - TestClient
-    - API tests
-    - HTTP integration
+    - HTTP tests
+    - route tests
 
     Returns:
-        FastAPI: initialized FastAPI transport
-
+        FastAPI: initialized application transport
     """
+
     return build_testing_kernel().app

@@ -24,6 +24,7 @@ from template_app.bootstrap.messaging.runtime import (
 from template_app.bootstrap.modules import (
     # TODO: recheck this as now it's done via  MODULE_REGISTRY
     ModuleSetupContext,
+    activate_module,
     discover_modules,
     load_modules,
 )
@@ -102,17 +103,17 @@ def bootstrap_application() -> RuntimeKernel:
     # Kernel
     #########
 
-    # transport
+    # HTTP transport
     app = FastAPI()
 
     # the immutable context of the kernel
-    context = KernelContext(
+    kernel_context = KernelContext(
         runtime=runtime,
         app=app,
     )
 
     # create kernel
-    kernel = RuntimeKernel(context=context)
+    kernel = RuntimeKernel(context=kernel_context)
 
     # bind transport runtime integrations
     configure_transport(
@@ -120,11 +121,11 @@ def bootstrap_application() -> RuntimeKernel:
         kernel=kernel,
     )
 
-    #########################
-    # Load pluggable modules
-    #########################
+    ###############
+    # Load modules
+    ###############
 
-    # modules' APIs
+    # create APIs used by modules
     runtime_api = ModuleRuntimeAPI(
         app=app,
         container=container,
@@ -141,23 +142,18 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    # modules' loading
+    # discover existing modules
     manifests = discover_modules(
         MODULE_REGISTRY,
-    )  # TODO: autodiscover modules
+    )
 
-    for manifest in manifests:
-        module_context = ModuleSetupContext(
-            runtime=runtime_api,
-            infra=infra_api,
-            messaging=messaging_api,
-            capabilities=manifest.capabilities,
-        )
-
-        load_modules(
-            manifest=manifest,
-            context=module_context,
-        )
+    # install found modules
+    load_modules(
+        manifests=manifests,
+        runtime_api=runtime_api,
+        infra_api=infra_api,
+        messaging_api=messaging_api,
+    )
 
     ##########################################
     # Register the infrastructure's lifecycle

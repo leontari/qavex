@@ -1,4 +1,14 @@
-"""Module runtime activation."""
+"""
+Interception point.
+
+can be used for:
+- logging
+- tracing
+- sandboxing
+- permissions
+- dependency injection validation
+
+"""
 
 from __future__ import annotations
 

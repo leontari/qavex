@@ -6,8 +6,10 @@ from enum import Enum
 class ModuleCapability(str, Enum):
     ROUTER = "router"
     DEPENDENCIES = "dependencies"
-    LIFECYCLE = "lifecycle"
-    EVENT_BUS = "event_bus"
     INFRASTRUCTURE = "infrastructure"
+
+    LIFECYCLE = "lifecycle"
+
+    EVENT_BUS = "event_bus"
     COMMAND_BUS = "command_bus"
     QUERY_BUS = "query_bus"
