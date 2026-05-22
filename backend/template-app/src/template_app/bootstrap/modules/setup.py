@@ -104,6 +104,6 @@ def setup_modules(
         context_factory=context_factory,
     )
 
-    kernel.modules = manifests
+    kernel.install_modules(manifests)
 
     return manifests

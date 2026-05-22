@@ -26,7 +26,10 @@ class RuntimeKernel:
 
     context: KernelContext
 
-    modules: tuple[ModuleManifest, ...] = field(default_factory=tuple)
+    _modules: tuple[ModuleManifest, ...] = field(
+        default_factory=tuple,
+        init=False,
+    )
 
     @property
     def app(self) -> FastAPI:
@@ -42,6 +45,13 @@ class RuntimeKernel:
             raise RuntimeError(msg)
 
         return self.context.app
+
+    @property
+    def modules(self) -> tuple[ModuleManifest, ...]:
+        return self._modules
+
+    def install_modules(self, manifests: tuple[ModuleManifest, ...]) -> None:
+        self._modules = manifests
 
     async def startup(self) -> None:
         """Execute startup lifecycle."""
