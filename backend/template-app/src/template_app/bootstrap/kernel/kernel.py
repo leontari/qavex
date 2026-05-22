@@ -68,10 +68,6 @@ class RuntimeKernel:
             FastAPI instance: public ASGI transport entrypoint.
 
         """
-        if self._context.app is None:
-            msg = "FastAPI transport is not installed."
-            raise RuntimeError(msg)
-
         return self._context.app
 
     ################
