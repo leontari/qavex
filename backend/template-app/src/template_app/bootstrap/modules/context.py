@@ -1,4 +1,4 @@
-"""Restricted kernel API for the modules."""
+"""Restricted module bootstrap context."""
 
 from __future__ import annotations
 
@@ -28,14 +28,15 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class ModuleSetupContext:
     """
-    A pluggable module's internal bootstrap API.
+    Restricted module API sandbox.
 
-    Modules MUST NOT access RuntimeKernel directly.
+    Modules MUST NOT access RuntimeKernel (kernel) internals directly.
     """
 
     runtime: ModuleRuntimeAPI
     infra: ModuleInfraAPI
     messaging: ModuleMessagingAPI
+
     capabilities: frozenset[ModuleCapability]
 
     ###############
@@ -69,16 +70,16 @@ class ModuleSetupContext:
     def register_shutdown_hook(self, hook: LifecycleHook) -> None:
         self._require(ModuleCapability.LIFECYCLE)
 
-        self.runtime.lifecycle_registry.register_shutdown(hook)
+        self.runtime.register_shutdown_hook(hook=hook)
 
-    ###################
-    # DI container API
-    ###################
+    #################
+    # dependency API
+    #################
 
     def register_dependency(self, provider: DependencyProvider) -> None:
         self._require(ModuleCapability.DEPENDENCIES)
 
-        self.runtime.container.register(provider)
+        self.runtime.register_dependency(provider=provider)
 
     ########################
     # infrastructure access
@@ -90,7 +91,7 @@ class ModuleSetupContext:
         return self.infra.get_provider(name)
 
     ##################
-    # messaging buses
+    # messaging API
     ##################
     @property
     def event_bus(self) -> RuntimeEventBus:

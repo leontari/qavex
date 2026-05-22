@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from template_app.bootstrap.lifecycle import (
     LifecycleHook,
 )
-from template_app.bootstrap.modules import (
+from template_app.bootstrap.modules.context import (
     ModuleSetupContext,
 )
 

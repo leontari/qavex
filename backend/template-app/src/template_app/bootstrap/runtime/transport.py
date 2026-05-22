@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def create_transport() -> FastAPI:
-    return FastAPI()
+    return FastAPI(title="template-app")
 
 
 def configure_transport(app: FastAPI, kernel: RuntimeKernel) -> None:

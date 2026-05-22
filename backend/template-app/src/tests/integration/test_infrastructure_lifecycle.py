@@ -12,7 +12,7 @@ async def test_infrastructure_providers_execute_lifecycle() -> None:
     kernel = bootstrap_application()
 
     providers = (
-        kernel.context
+        kernel._context
         .runtime
         .infrastructure_registry
         .providers

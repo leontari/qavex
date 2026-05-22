@@ -8,7 +8,7 @@ def test_health_route_registered() -> None:
 
     paths = {
         route.path
-        for route in kernel.context.app.routes
+        for route in kernel._context.app.routes
     }
 
     assert "/health" in paths

@@ -1,45 +1,29 @@
-from template_app.bootstrap.modules.activation import (
-    activate_module,
-)
-from template_app.bootstrap.modules.capabilities import (
+from __future__ import annotations
+
+from template_app.bootstrap.modules import (
     ModuleCapability,
-)
-from template_app.bootstrap.modules.manifests import (
     ModuleManifest,
 )
-from tests.factories.module_context import (
-    build_module_context,
+from template_app.bootstrap.modules.lifecycle import (
+    activate,
 )
 
 
 class FakeModule:
-
-    def __init__(self) -> None:
-        self.loaded = False
-
-    def setup(self, context) -> None:
-        self.loaded = True
+    pass
 
 
-def test_activate_module() -> None:
-
-    module = FakeModule()
-
-    manifest = ModuleManifest(
-        name="fake",
-        module=module,
-        capabilities=frozenset({
-            ModuleCapability.ROUTER,
-        }),
+def test_activate_returns_same_manifests() -> None:
+    manifests = (
+        ModuleManifest(
+            name="fake",
+            module=FakeModule(),
+            capabilities=frozenset({
+                ModuleCapability.ROUTER,
+            }),
+        ),
     )
 
-    context = build_module_context(
-        manifest.capabilities,
-    )
+    activated = activate(manifests)
 
-    activate_module(
-        manifest=manifest,
-        context=context,
-    )
-
-    assert module.loaded is True
+    assert activated == manifests

@@ -1,33 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from fastapi import FastAPI
 
-from template_app.bootstrap.kernel import KernelContext
-from template_app.bootstrap.kernel.kernel import RuntimeKernel
+from template_app.bootstrap.kernel import RuntimeKernel
+from template_app.bootstrap.runtime.bootstrap import (
+    bootstrap_application,
+)
 from tests.factories.runtime import build_runtime_state
-
-if TYPE_CHECKING:
-    from fastapi import FastAPI
-    from template_app.bootstrap.runtime import bootstrap_application
+from tests.factories.transport import build_test_transport
 
 
-
-def build_context_no_app() -> KernelContext:
-    """
-    Build isolated kernel context without transport.
-
-    Returns:
-        KernelContext: runtime-only context
-    """
-    runtime = build_runtime_state()
-
-    return KernelContext(
-        runtime=runtime,
-        app=None,
-    )
-
-
-def build_kernel_no_app() -> RuntimeKernel:
+def build_isolated_kernel() -> tuple[RuntimeKernel]:
     """
     Build isolated runtime kernel.
 
@@ -41,10 +24,10 @@ def build_kernel_no_app() -> RuntimeKernel:
         RuntimeKernel: isolated kernel
     """
 
-    return RuntimeKernel(
-        context=build_context_no_app(),
-    )
-
+    return RuntimeKernel.create(
+        runtime=build_runtime_state(),
+        app=build_test_transport(),
+        ),
 
 
 def build_testing_kernel() -> RuntimeKernel:

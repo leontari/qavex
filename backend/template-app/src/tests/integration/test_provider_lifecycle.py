@@ -32,7 +32,7 @@ async def test_providers_execute_lifecycle() -> None:
 
     provider = FakeInfrastructureProvider()
 
-    runtime = kernel.context.runtime
+    runtime = kernel._context.runtime
 
     runtime.infrastructure_registry.register(provider)
 

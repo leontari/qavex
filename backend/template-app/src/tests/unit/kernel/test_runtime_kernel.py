@@ -17,8 +17,9 @@ def test_kernel_returns_app() -> None:
         app=app,
     )
 
-    kernel = RuntimeKernel(
-        context=context,
+    kernel = RuntimeKernel.create(
+        runtime=context.runtime,
+        app=context.app,
     )
 
     assert kernel.app is app
@@ -34,8 +35,19 @@ def test_kernel_contains_runtime() -> None:
         app=app,
     )
 
-    kernel = RuntimeKernel(
-        context=context,
+    kernel = RuntimeKernel.create(
+        runtime=context.runtime,
+        app=context.app,
     )
 
-    assert kernel.context.runtime is runtime
+    assert kernel._context.runtime is runtime
+
+
+def test_kernel_has_no_modules_initially() -> None:
+
+    kernel = RuntimeKernel.create(
+        runtime=build_runtime_state(),
+        app=FastAPI(),
+    )
+
+    assert kernel.modules == ()
