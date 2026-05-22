@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
-
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
 from template_app.bootstrap.kernel import (
     Container,
-    KernelContext,
     RuntimeKernel,
 )
 from template_app.bootstrap.lifecycle import (
@@ -26,6 +23,7 @@ from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
 from template_app.bootstrap.runtime.state import RuntimeState
 from template_app.bootstrap.runtime.transport import (
     configure_transport,
+    create_transport,
 )
 
 
@@ -93,19 +91,17 @@ def bootstrap_application() -> RuntimeKernel:
     #########
 
     # HTTP transport
-    app = FastAPI()
+    app = create_transport()
 
-    # create kernel
-    kernel = RuntimeKernel(
-        context=KernelContext(
-            runtime=runtime_state,
-            app=app,
-        )
+    # create kernel runtime
+    kernel = RuntimeKernel.create(
+        runtime=runtime_state,
+        app=app,
     )
 
     # bind transport runtime integrations
     configure_transport(
-        app=app,
+        app=kernel.app,
         kernel=kernel,
     )
 

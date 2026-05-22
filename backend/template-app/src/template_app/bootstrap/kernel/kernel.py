@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from template_app.bootstrap.kernel import KernelContext
 from template_app.bootstrap.modules.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
@@ -14,8 +15,8 @@ from template_app.bootstrap.modules.apis import (
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-    from template_app.bootstrap.kernel import KernelContext
     from template_app.bootstrap.modules.manifests import ModuleManifest
+    from template_app.bootstrap.runtime.state import RuntimeState
 
 
 @dataclass(slots=True)
@@ -36,6 +37,23 @@ class RuntimeKernel:
         default_factory=tuple,
         init=False,
     )
+
+    ######################
+    # kernel construction
+    ######################
+
+    @classmethod
+    def create(
+        cls,
+        runtime: RuntimeState,
+        app: FastAPI,
+    ) -> RuntimeKernel:
+        return cls(
+            _context=KernelContext(
+                runtime=runtime,
+                app=app,
+            )
+        )
 
     ################
     # transport API
