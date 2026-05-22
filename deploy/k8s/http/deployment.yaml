@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-http
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: template-http
+  template:
+    metadata:
+      labels:
+        app: template-http
+    spec:
+      containers:
+        - name: app
+          image: template-app:latest
+          command: ["python", "-m", "template_app.cli", "http"]

@@ -6,6 +6,7 @@ from template_app.bootstrap.infrastructure import bootstrap_infrastructure
 from template_app.bootstrap.kernel import (
     Container,
     RuntimeKernel,
+    KernelContext,
 )
 from template_app.bootstrap.lifecycle import (
     LifecycleHook,
@@ -25,6 +26,7 @@ from template_app.bootstrap.runtime.transport import (
     configure_transport,
     create_transport,
 )
+from template_app.bootstrap.transport.fastapi import FastApiTransport
 
 
 def bootstrap_application() -> RuntimeKernel:
@@ -86,27 +88,23 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    #########
-    # Kernel
-    #########
+    #####################
+    # kernel (pure core)
+    #####################
 
-    # HTTP transport
+    kernel = RuntimeKernel(
+        context=KernelContext(runtime=runtime_state),
+    )
+
+    #############
+    # transports
+    #############
     app = create_transport()
 
-    # create kernel runtime
-    kernel = RuntimeKernel.create(
-        runtime=runtime_state,
-        app=app,
-    )
-
-    # bind transport runtime integrations
-    configure_transport(
-        app=kernel.app,
-        kernel=kernel,
-    )
+    kernel.install_transport(FastApiTransport(app))
 
     ##################
-    # Install modules
+    # modules system
     ##################
 
     setup_modules(

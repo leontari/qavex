@@ -1,4 +1,4 @@
-{{- if .Values.postgres.enabled }}
+#{{- if .Values.postgres.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -37,4 +37,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.postgres.storage }}
-{{- end }}
+#{{- end }}

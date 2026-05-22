@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: {{ .Values.backend.service.port }}
           env:
-            {{- range $key, $value := .Values.backend.env }}
-            - name: {{ $key }}
-              value: "{{ $value }}"
-            {{- end }}
+#            {{- range $key, $value := .Values.backend.env }}
+#            - name: {{ $key }}
+#              value: "{{ $value }}"
+#            {{- end }}

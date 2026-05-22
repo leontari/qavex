@@ -43,3 +43,56 @@
 - [ ] FactoryProvider
 - [ ] AsyncProvider
 - [ ] ScopedProvider
+
+
+## Target for now:
+1) new transport layer
+```
+template_app/
+├── bootstrap/
+│   ├── kernel/              # core runtime (NO FastAPI dependency)
+│   ├── runtime/             # lifecycle, state
+│   ├── modules/             # plugin system
+│   ├── transport/           # abstraction + implementations
+│   │   ├── http/
+│   │   ├── kafka/
+│   │   ├── grpc/
+│   │   ├── cli/
+│   │   └── manager.py
+│   ├── launcher/            # kernel run http/kafka/grpc/cli
+│   ├── config/              # unified config
+│   └── bootstrap.py         # single entrypoint
+│
+├── asgi.py (thin)
+├── cli.py  (thin)
+└── main.py (optional)
+```
+
+2) a lot of renames to separate concerns
+
+```text
+template_app/
+├── kernel/              ← EVERYTHING CORE
+│
+│   ├── bootstrap.py     ← composition root
+│   ├── kernel.py        ← RuntimeKernel
+│   ├── context.py       ← KernelContext
+│   ├── state.py         ← KernelState
+│   ├── lifecycle/
+│   ├── messaging/
+│   ├── modules/
+│   ├── transport/
+│   ├── infrastructure/
+│   └── container/
+│
+├── transports/          ← concrete transport implementations
+│   ├── http/
+│   ├── grpc/
+│   ├── kafka/
+│   └── cli/
+│
+├── app/
+├── domain/
+├── config/
+└── deploy/
+```
