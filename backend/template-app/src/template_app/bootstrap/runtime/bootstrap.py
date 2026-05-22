@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
-
 from template_app.bootstrap.infrastructure import bootstrap_infrastructure
 from template_app.bootstrap.kernel import (
-    ApplicationContext,
     Container,
     RuntimeKernel,
 )
@@ -15,50 +12,70 @@ from template_app.bootstrap.lifecycle import (
     LifecycleManager,
     LifecycleRegistry,
 )
-from template_app.bootstrap.messaging.runtime.command_bus import (
+from template_app.bootstrap.messaging.runtime import (
     RuntimeCommandBus,
-)
-from template_app.bootstrap.messaging.runtime.event_bus import (
     RuntimeEventBus,
-)
-from template_app.bootstrap.messaging.runtime.query_bus import (
+    RuntimeHandlerRegistry,
     RuntimeQueryBus,
 )
-from template_app.bootstrap.messaging.runtime.registry import (
-    RuntimeHandlerRegistry,
-)
-from template_app.bootstrap.modules import (
-    # TODO: recheck this as now it's done via  MODULE_REGISTRY
-    ModuleSetupContext,
-    discover_modules,
-    load_modules,
-)
+from template_app.bootstrap.modules.setup import setup_modules
 from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
-from template_app.bootstrap.runtime.lifespan import create_lifespan
 from template_app.bootstrap.runtime.state import RuntimeState
+from template_app.bootstrap.runtime.transport import (
+    configure_transport,
+    create_transport,
+)
 
 
 def bootstrap_application() -> RuntimeKernel:
-    """Bootstrap runtime kernel."""
+    """
+    Bootstrap runtime kernel.
 
-    # DI
+    Responsibilities:
+    - initialize runtime state
+    - initialize infrastructure
+    - initialize messaging
+    - initialize FastAPi transport
+    - initialize module system
+    - register lifecycle hooks
+
+    Returns:
+        RuntimeKernel: fully initialized the application's kernel
+
+    """
+    ###############
+    # DI container
+    ###############
     container = Container()
 
+    ############
     # lifecycle
+    ############
     lifecycle_registry = LifecycleRegistry()
+
     lifecycle_manager = LifecycleManager(registry=lifecycle_registry)
 
+    #################
     # infrastructure
+    #################
+
     infrastructure_registry = bootstrap_infrastructure()
 
-    # messaging
+    ##############
+    # data busses
+    ##############
+
     messaging_registry = RuntimeHandlerRegistry()
+
     event_bus = RuntimeEventBus(registry=messaging_registry)
     command_bus = RuntimeCommandBus(registry=messaging_registry)
     query_bus = RuntimeQueryBus(registry=messaging_registry)
 
-    # runtime state
-    runtime = RuntimeState(
+    #######################
+    # Kernel runtime state
+    #######################
+
+    runtime_state = RuntimeState(
         container=container,
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
@@ -69,24 +86,38 @@ def bootstrap_application() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    # transport
-    app = FastAPI(title="template-app")
+    #########
+    # Kernel
+    #########
 
-    # immutable application context
-    context = ApplicationContext(runtime=runtime, app=app)
+    # HTTP transport
+    app = create_transport()
 
-    # kernel
-    kernel = RuntimeKernel(context=context)
+    # create kernel runtime
+    kernel = RuntimeKernel.create(
+        runtime=runtime_state,
+        app=app,
+    )
 
-    # inject lifespan AFTER kernel creation
-    app.router.lifespan_context = create_lifespan(kernel)
+    # bind transport runtime integrations
+    configure_transport(
+        app=kernel.app,
+        kernel=kernel,
+    )
 
-    # module system
-    module_context = ModuleSetupContext(_kernel=kernel)
-    manifests = discover_modules(MODULE_REGISTRY)
-    load_modules(manifests=manifests, context=module_context)
+    ##################
+    # Install modules
+    ##################
 
-    # infrastructure Lifecycle integration
+    setup_modules(
+        kernel=kernel,
+        registry=MODULE_REGISTRY,
+    )
+
+    ##########################################
+    # Register the infrastructure's lifecycle
+    ##########################################
+
     for provider in infrastructure_registry.providers:
         lifecycle_registry.register_startup(
             LifecycleHook(

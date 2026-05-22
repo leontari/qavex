@@ -1,34 +1,49 @@
-from template_app.bootstrap.modules.context import ModuleSetupContext
-from template_app.bootstrap.modules.loader import load_modules
-from template_app.bootstrap.modules.manifests import ModuleManifest
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from __future__ import annotations
+
+from template_app.bootstrap.modules import (
+    ModuleCapability,
+    ModuleManifest,
+)
+from template_app.bootstrap.modules.lifecycle import (
+    load,
+)
+
+from tests.factories.module_context import (
+    build_module_context,
+)
 
 
 class FakeModule:
 
     loaded: bool = False
 
-    def setup(self, context: ModuleSetupContext) -> None:
+    def setup(self, context) -> None:
         self.loaded = True
 
 
 def test_loader_executes_module_setup() -> None:
-    kernel = bootstrap_application()
-
     module = FakeModule()
 
     manifests = (
         ModuleManifest(
             name="fake",
             module=module,
+            capabilities=frozenset({
+                ModuleCapability.ROUTER,
+            }),
         ),
     )
 
-    context = ModuleSetupContext(_kernel=kernel)
+    def context_factory(
+        manifest: ModuleManifest,
+    ):
+        return build_module_context(
+            capabilities=manifest.capabilities,
+        )
 
-    load_modules(
+    load(
         manifests=manifests,
-        context=context,
+        context_factory=context_factory,
     )
 
     assert module.loaded is True

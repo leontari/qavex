@@ -1,4 +1,4 @@
-"""Module runtime activation."""
+"""Module loader."""
 
 from __future__ import annotations
 
@@ -10,10 +10,8 @@ if TYPE_CHECKING:
 
 
 def load_modules(
-    manifests: tuple[ModuleManifest, ...],
+    manifest: ModuleManifest,
     context: ModuleSetupContext,
 ) -> None:
-    """Load application modules."""
-
-    for manifest in manifests:
-        manifest.module.setup(context)
+    """Execute module setup."""
+    manifest.module.setup(context)

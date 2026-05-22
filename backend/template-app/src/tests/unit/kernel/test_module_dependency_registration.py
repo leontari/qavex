@@ -1,23 +1,31 @@
-from __future__ import annotations
+from tests.factories.module_context import (
+    build_module_context,
+)
 
-from template_app.bootstrap.modules import ModuleSetupContext
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
-from template_app.infrastructure.cache import CacheProvider
+from template_app.infrastructure.cache.provider import (
+    CacheProvider,
+)
+
+from template_app.bootstrap.modules.capabilities import (
+    ModuleCapability,
+)
 
 
 def test_module_can_register_dependency() -> None:
-    kernel = bootstrap_application()
+    context = build_module_context(
+        capabilities=frozenset({
+            ModuleCapability.DEPENDENCIES,
+        }),
+    )
 
-    context = ModuleSetupContext(_kernel=kernel)
-
-    provider = CacheProvider(url="redis://localhost",)
+    provider = CacheProvider(
+        url="redis://localhost",
+    )
 
     context.register_dependency(provider)
 
     resolved = (
-        kernel.context
-        .runtime
-        .container
+        context.runtime.container
         .resolve("cache")
     )
 

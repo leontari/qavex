@@ -21,7 +21,11 @@ class InfrastructureRegistry:
         self._providers[provider.name] = provider
 
     def get(self, name: str) -> InfrastructureProvider:
-        return self._providers[name]
+        try:
+            return self._providers[name]
+        except KeyError as e:
+            msg = f"Infrastructure provider not found: {name}"
+            raise LookupError(msg) from e
 
     # TODO: check typing - looks OK
     @property

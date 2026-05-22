@@ -7,7 +7,7 @@ def test_runtime_contains_infrastructure_registry() -> None:
     kernel = bootstrap_application()
 
     providers = (
-        kernel.context
+        kernel._context
         .runtime
         .infrastructure_registry
         .providers

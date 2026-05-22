@@ -25,7 +25,7 @@
              ┌─────────────────────┼─────────────────────┬─────────────────────────────────────┐
              ▼                     ▼                     ▼                                     ▼
 ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐            ┌─────────────────────────┐
-│ ApplicationContext │  │   RuntimeState     │  │   ModuleRegistry   │            │ InfrastructureRegistry  │
+│   KernelContext    │  │   RuntimeState     │  │   ModuleRegistry   │            │ InfrastructureRegistry  │
 ├────────────────────┤  ├────────────────────┤  ├────────────────────┤            └────────────┬────────────┘
 │ app: FastAPI       │  │ container          │  │ modules            │                         │
 │ runtime            │  │ lifecycle_registry │  └────────────────────┘    ┌────────────────────┼─────────────────┐

@@ -9,7 +9,7 @@ def test_provider_startup_hooks_registered() -> None:
     kernel = bootstrap_application()
 
     hooks = (
-        kernel.context
+        kernel._context
         .runtime
         .lifecycle_registry
         .startup_hooks

@@ -1,4 +1,4 @@
-"""enable/disable/filtering."""
+"""enable/disable/filter modules."""
 
 from __future__ import annotations
 
@@ -10,5 +10,13 @@ if TYPE_CHECKING:
 
 
 def discover_modules(registry: ModuleRegistry) -> tuple[ModuleManifest, ...]:
-    """Discover enabled modules."""
+    """
+    Discover enabled modules.
+
+    registry → manifests
+
+    Returns:
+        an immutable list of enabled modules
+
+    """
     return tuple(manifest for manifest in registry.modules if manifest.enabled)

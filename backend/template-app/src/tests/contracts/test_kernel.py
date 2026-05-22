@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 from template_app.bootstrap.kernel import RuntimeKernel
+from tests.factories.kernel import build_testing_kernel
 
 
 def test_bootstrap_returns_kernel() -> None:
-    kernel = bootstrap_application()
+    kernel = build_testing_kernel()
 
     assert isinstance(kernel, RuntimeKernel)

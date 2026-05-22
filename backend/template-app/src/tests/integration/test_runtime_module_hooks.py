@@ -8,7 +8,7 @@ from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 def test_health_route_registered() -> None:
     kernel = bootstrap_application()
 
-    app = kernel.context.app
+    app = kernel._context.app
 
     assert app is not None
 

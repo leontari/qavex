@@ -129,7 +129,9 @@ where:
 - runtime = orchestration layer.
 
 This will allow the change FastApi itself:
+
 For example:
+
 ```text
 HTTP adapter
 gRPC adapter
@@ -261,7 +263,7 @@ Module B       Module C
 
 ### Kernel Layer
 - RuntimeKernel
-- ApplicationContext
+- KernelContext
 - RuntimeState
 - Container
 

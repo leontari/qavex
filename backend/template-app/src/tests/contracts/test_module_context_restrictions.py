@@ -1,14 +1,19 @@
-from __future__ import annotations
+from tests.factories.module_context import (
+    build_module_context,
+)
 
-from template_app.bootstrap.modules import ModuleSetupContext
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
 
+def test_module_context_hides_runtime_internals() -> None:
 
-def test_module_context_hides_runtime() -> None:
-    kernel = bootstrap_application()
+    context = build_module_context()
 
-    context = ModuleSetupContext(_kernel=kernel)
+    # sandbox APIs are allowed
+    assert hasattr(context, "runtime")
+    assert hasattr(context, "infra")
+    assert hasattr(context, "messaging")
 
-    assert not hasattr(context, "runtime")
+    # runtime internals MUST stay hidden
     assert not hasattr(context, "container")
     assert not hasattr(context, "lifecycle_registry")
+    assert not hasattr(context, "state")
+    assert not hasattr(context, "_kernel")

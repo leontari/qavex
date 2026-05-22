@@ -18,7 +18,7 @@ def test_bootstrap_returns_initialized_kernel() -> None:
 def test_kernel_has_runtime_state() -> None:
     kernel = bootstrap_application()
 
-    runtime = kernel.context.runtime
+    runtime = kernel._context.runtime
 
     assert runtime.container is not None
     assert runtime.lifecycle_registry is not None
