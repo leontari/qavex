@@ -33,6 +33,7 @@ from template_app.bootstrap.modules.apis import (
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
 )
+from template_app.bootstrap.modules.setup import setup_modules
 from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
 from template_app.bootstrap.runtime.state import RuntimeState
 from template_app.bootstrap.runtime.transport import (
@@ -74,9 +75,9 @@ def bootstrap_application() -> RuntimeKernel:
 
     infrastructure_registry = bootstrap_infrastructure()
 
-    ############
-    # messaging
-    ############
+    ##############
+    # data busses
+    ##############
 
     messaging_registry = RuntimeHandlerRegistry()
 
@@ -84,11 +85,11 @@ def bootstrap_application() -> RuntimeKernel:
     command_bus = RuntimeCommandBus(registry=messaging_registry)
     query_bus = RuntimeQueryBus(registry=messaging_registry)
 
-    ###########################
-    # the state of the runtime
-    ###########################
+    #######################
+    # Kernel runtime state
+    #######################
 
-    runtime = RuntimeState(
+    runtime_state = RuntimeState(
         container=container,
         lifecycle_registry=lifecycle_registry,
         lifecycle_manager=lifecycle_manager,
@@ -106,14 +107,13 @@ def bootstrap_application() -> RuntimeKernel:
     # HTTP transport
     app = FastAPI()
 
-    # the immutable context of the kernel
-    kernel_context = KernelContext(
-        runtime=runtime,
-        app=app,
-    )
-
     # create kernel
-    kernel = RuntimeKernel(context=kernel_context)
+    kernel = RuntimeKernel(
+        context=KernelContext(
+            runtime=runtime_state,
+            app=app,
+        )
+    )
 
     # bind transport runtime integrations
     configure_transport(
@@ -121,38 +121,13 @@ def bootstrap_application() -> RuntimeKernel:
         kernel=kernel,
     )
 
-    ###############
-    # Load modules
-    ###############
+    ##################
+    # Install modules
+    ##################
 
-    # create APIs used by modules
-    runtime_api = ModuleRuntimeAPI(
-        app=app,
-        container=container,
-        lifecycle_registry=lifecycle_registry,
-    )
-
-    infra_api = ModuleInfraAPI(
-        registry=infrastructure_registry,
-    )
-
-    messaging_api = ModuleMessagingAPI(
-        event_bus=event_bus,
-        command_bus=command_bus,
-        query_bus=query_bus,
-    )
-
-    # discover existing modules
-    manifests = discover_modules(
-        MODULE_REGISTRY,
-    )
-
-    # install found modules
-    load_modules(
-        manifests=manifests,
-        runtime_api=runtime_api,
-        infra_api=infra_api,
-        messaging_api=messaging_api,
+    setup_modules(
+        kernel=kernel,
+        registry=MODULE_REGISTRY,
     )
 
     ##########################################

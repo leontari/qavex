@@ -1,4 +1,4 @@
-"""The entrypoint for module loading into kernel context."""
+"""Module loader."""
 
 from __future__ import annotations
 
@@ -17,25 +17,8 @@ if TYPE_CHECKING:
 
 
 def load_modules(
-    manifests: tuple[ModuleManifest, ...],
-    runtime_api: ModuleRuntimeAPI,
-    infra_api: ModuleInfraAPI,
-    messaging_api: ModuleMessagingAPI,
+    manifest: ModuleManifest,
+    context: ModuleSetupContext,
 ) -> None:
-    """
-    Load and execute the module activation.
-
-    This is used by bootstrap only.
-    """
-    for manifest in manifests:
-        context = ModuleSetupContext(
-            runtime=runtime_api,
-            infra=infra_api,
-            messaging=messaging_api,
-            capabilities=manifest.capabilities,
-        )
-
-        activate_module(
-            manifest=manifest,
-            context=context,
-        )
+    """Execute module setup."""
+    manifest.module.setup(context)
