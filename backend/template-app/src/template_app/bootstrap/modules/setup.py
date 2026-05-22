@@ -55,13 +55,13 @@ def setup_modules(
     registry: ModuleRegistry,
 ) -> tuple[ModuleManifest, ...]:
     """
-    Set up pluggable runtime modules.
+    Install pluggable runtime modules.
 
     Responsibilities:
     - discover modules
     - activate modules
     - create module contexts
-    - inject modules into runtime
+    - inject modules into kernel runtime
 
     Returns:
         tuple[ModuleManifest, ...]:
@@ -103,5 +103,7 @@ def setup_modules(
         manifests=manifests,
         context_factory=context_factory,
     )
+
+    kernel.modules = manifests
 
     return manifests

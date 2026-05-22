@@ -21,18 +21,6 @@ from template_app.bootstrap.messaging.runtime import (
     RuntimeHandlerRegistry,
     RuntimeQueryBus,
 )
-from template_app.bootstrap.modules import (
-    # TODO: recheck this as now it's done via  MODULE_REGISTRY
-    ModuleSetupContext,
-    activate_module,
-    discover_modules,
-    load_modules,
-)
-from template_app.bootstrap.modules.apis import (
-    ModuleInfraAPI,
-    ModuleMessagingAPI,
-    ModuleRuntimeAPI,
-)
 from template_app.bootstrap.modules.setup import setup_modules
 from template_app.bootstrap.modules_definitions import MODULE_REGISTRY
 from template_app.bootstrap.runtime.state import RuntimeState
@@ -127,7 +115,7 @@ def bootstrap_application() -> RuntimeKernel:
 
     setup_modules(
         kernel=kernel,
-        registry=MODULE_REGISTRY,
+        registry=MODULE_REGISTRY,  # TODO: check this
     )
 
     ##########################################

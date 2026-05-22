@@ -9,3 +9,9 @@ def test_kernel_contains_application_context() -> None:
     kernel = bootstrap_application()
 
     assert isinstance(kernel.context.app, FastAPI)
+
+
+def test_kernel_contains_installed_modules() -> None:
+    kernel = bootstrap_application()
+
+    assert len(kernel.modules) > 0
