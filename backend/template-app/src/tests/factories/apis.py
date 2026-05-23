@@ -1,23 +1,23 @@
 from fastapi import FastAPI
 
-from template_app.bootstrap.infrastructure.registry import (
+from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from template_app.bootstrap.messaging.runtime import (
+from template_app.runtime.messaging.runtime import (
     RuntimeCommandBus,
     RuntimeEventBus,
     RuntimeQueryBus,
     RuntimeHandlerRegistry,
 )
-from template_app.bootstrap.modules.apis import (
+from template_app.runtime.module.apis import (
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
     ModuleInfraAPI,
 )
-from template_app.bootstrap.kernel import (
+from template_app.runtime.container.container import (
     Container,
 )
-from template_app.bootstrap.lifecycle import (
+from template_app.runtime.lifecycle import (
     LifecycleRegistry,
 )
 

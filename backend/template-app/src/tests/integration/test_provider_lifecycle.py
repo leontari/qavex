@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from template_app.bootstrap.lifecycle import LifecycleHook
-from template_app.bootstrap.kernel import RuntimeKernel
-from template_app.bootstrap.runtime import bootstrap_application
+from template_app.runtime.lifecycle import LifecycleHook
+from template_app.runtime.kernel import RuntimeKernel
+from template_app.runtime.bootstrap import bootstrap_kernel
 
 
 @dataclass(slots=True)
@@ -28,7 +28,7 @@ class FakeInfrastructureProvider:
 
 @pytest.mark.asyncio
 async def test_providers_execute_lifecycle() -> None:
-    kernel: RuntimeKernel = bootstrap_application()
+    kernel: RuntimeKernel = bootstrap_kernel()
 
     provider = FakeInfrastructureProvider()
 

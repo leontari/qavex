@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.modules.apis import ModuleRuntimeAPI
+from template_app.runtime.module.apis import ModuleRuntimeAPI
 from tests.factories.module_context import build_module_context
 
 

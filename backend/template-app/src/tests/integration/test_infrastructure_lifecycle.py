@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
+from template_app.runtime.bootstrap import (
+    bootstrap_kernel,
 )
 
 
 @pytest.mark.asyncio
 async def test_infrastructure_providers_execute_lifecycle() -> None:
-    kernel = bootstrap_application()
+    kernel = bootstrap_kernel()
 
     providers = (
         kernel._context

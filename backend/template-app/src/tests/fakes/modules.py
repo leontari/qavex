@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from template_app.bootstrap.lifecycle import (
+from template_app.runtime.lifecycle import (
     LifecycleHook,
 )
-from template_app.bootstrap.modules.context import (
-    ModuleSetupContext,
+from template_app.runtime.module.context import (
+    ModuleContext,
 )
 
 
@@ -22,7 +22,7 @@ class FakeRuntimeModule:
 
     def setup(
         self,
-        context: ModuleSetupContext,
+        context: ModuleContext,
     ) -> None:
 
         router = APIRouter()

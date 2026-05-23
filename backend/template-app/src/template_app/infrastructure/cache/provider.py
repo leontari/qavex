@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from template_app.bootstrap.contracts import DependencyScope
 from template_app.infrastructure.cache.client import CacheClient
+from template_app.runtime.container.types import DependencyScope
 
 
 @dataclass(slots=True)

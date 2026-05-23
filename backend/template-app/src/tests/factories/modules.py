@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from template_app.bootstrap.lifecycle.hooks import LifecycleHook
-from template_app.bootstrap.modules.context import ModuleSetupContext
+from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.module.context import ModuleContext
 
 
 class FakeModule:
@@ -19,7 +19,7 @@ class FakeModule:
     async def shutdown(self) -> None:
         self.stopped = True
 
-    def setup(self, context: ModuleSetupContext) -> None:
+    def setup(self, context: ModuleContext) -> None:
 
         router = APIRouter()
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.bootstrap.kernel import (
+from template_app.runtime.kernel import (
     KernelContext,
 )
 from tests.factories.runtime import (

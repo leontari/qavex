@@ -3,7 +3,7 @@ from dataclasses import FrozenInstanceError
 from fastapi import FastAPI
 import pytest
 
-from template_app.bootstrap.kernel.context import (
+from template_app.runtime.kernel.context import (
     KernelContext,
 )
 from tests.factories.runtime import (

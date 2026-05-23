@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.infrastructure import bootstrap_infrastructure
+from template_app.runtime.infrastructure.bootstrap import bootstrap_infrastructure
 
 
 def test_providers_registered() -> None:

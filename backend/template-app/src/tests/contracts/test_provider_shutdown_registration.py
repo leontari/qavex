@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
+from template_app.runtime.bootstrap import (
+    bootstrap_kernel,
 )
 
 
 def test_provider_shutdown_hooks_registered() -> None:
-    kernel = bootstrap_application()
+    kernel = bootstrap_kernel()
 
     hooks = (
         kernel._context

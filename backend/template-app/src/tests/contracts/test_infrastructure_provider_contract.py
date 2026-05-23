@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from template_app.bootstrap.contracts import InfrastructureProvider
+from template_app.runtime.infrastructure.contracts import InfrastructureProvider
 
 
 @dataclass(slots=True)

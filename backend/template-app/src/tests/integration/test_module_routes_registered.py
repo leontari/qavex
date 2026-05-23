@@ -1,12 +1,12 @@
 from fastapi.routing import APIRoute
 
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
+from template_app.runtime.bootstrap import (
+    bootstrap_kernel,
 )
 
 
 def test_module_routes_registered() -> None:
-    kernel = bootstrap_application()
+    kernel = bootstrap_kernel()
 
     paths = {
         route.path

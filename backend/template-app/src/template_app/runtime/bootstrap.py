@@ -1,0 +1,155 @@
+"""
+Composition root.
+
+Responsibilities:
+    - build runtime graph
+    - wire dependencies
+    - construct kernel
+"""
+
+from __future__ import annotations
+
+from template_app.modules.modules_definitions import MODULE_REGISTRY
+from template_app.runtime.container.container import Container
+from template_app.runtime.infrastructure.bootstrap import (
+    bootstrap_infrastructure,
+)
+from template_app.runtime.kernel import (
+    KernelContext,
+    RuntimeKernel,
+    RuntimeState,
+)
+from template_app.runtime.lifecycle import (
+    LifecycleHook,
+    LifecycleManager,
+    LifecycleRegistry,
+)
+from template_app.runtime.messaging.runtime import (
+    RuntimeCommandBus,
+    RuntimeEventBus,
+    RuntimeHandlerRegistry,
+    RuntimeQueryBus,
+)
+from template_app.runtime.module.setup import setup_modules
+from template_app.runtime.transports.http.fastapi_transport import (
+    FastApiTransport,
+)
+from template_app.runtime.transports.http.transport import (
+    configure_transport,
+    create_transport,
+)
+
+
+def bootstrap_kernel() -> RuntimeKernel:
+    """
+    Bootstrap runtime kernel.
+
+    Responsibilities:
+    - initialize runtime state
+    - initialize infrastructure
+    - initialize messaging
+    - initialize FastAPi transport
+    - initialize module system
+    - register lifecycle hooks
+
+    Returns:
+        RuntimeKernel: fully initialized the application's kernel
+
+    """
+    ###############
+    # DI container
+    ###############
+    container = Container()
+
+    ############
+    # lifecycle
+    ############
+    lifecycle_registry = LifecycleRegistry()
+
+    lifecycle_manager = LifecycleManager(registry=lifecycle_registry)
+
+    #################
+    # infrastructure
+    #################
+
+    infrastructure_registry = bootstrap_infrastructure()
+
+    ##############
+    # data busses
+    ##############
+
+    messaging_registry = RuntimeHandlerRegistry()
+
+    event_bus = RuntimeEventBus(registry=messaging_registry)
+    command_bus = RuntimeCommandBus(registry=messaging_registry)
+    query_bus = RuntimeQueryBus(registry=messaging_registry)
+
+    #######################
+    # Kernel runtime state
+    #######################
+
+    runtime_state = RuntimeState(
+        container=container,
+        lifecycle_registry=lifecycle_registry,
+        lifecycle_manager=lifecycle_manager,
+        infrastructure_registry=infrastructure_registry,
+        messaging_registry=messaging_registry,
+        event_bus=event_bus,
+        command_bus=command_bus,
+        query_bus=query_bus,
+    )
+
+    #####################
+    # kernel (pure core)
+    #####################
+
+    # HTTP transport
+    app = create_transport()
+
+    # create kernel runtime
+    kernel = RuntimeKernel.create(
+        runtime=runtime_state,
+    )
+
+    # bind transport runtime integrations
+    configure_transport(
+        app=kernel.app,
+        kernel=kernel,
+    )
+
+    #############
+    # transports
+    #############
+    app = create_transport()
+
+    kernel.install_transport(FastApiTransport(app=app, kernel=kernel))
+
+    ##################
+    # modules system
+    ##################
+
+    setup_modules(
+        kernel=kernel,
+        registry=MODULE_REGISTRY,
+    )
+
+    ##########################################
+    # Register the infrastructure's lifecycle
+    ##########################################
+
+    for provider in infrastructure_registry.providers:
+        lifecycle_registry.register_startup(
+            LifecycleHook(
+                name=f"{provider.name}.startup",
+                handler=provider.startup,
+            ),
+        )
+
+        lifecycle_registry.register_shutdown(
+            LifecycleHook(
+                name=f"{provider.name}.shutdown",
+                handler=provider.shutdown,
+            ),
+        )
+
+    return kernel

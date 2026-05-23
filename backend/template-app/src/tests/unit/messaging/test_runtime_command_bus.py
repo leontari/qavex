@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.bootstrap.messaging.contracts.commands import (
+from template_app.runtime.messaging.contracts.commands import (
     Command,
 )
-from template_app.bootstrap.messaging.runtime.command_bus import (
+from template_app.runtime.messaging.runtime.command_bus import (
     RuntimeCommandBus,
 )
-from template_app.bootstrap.messaging.runtime.registry import (
+from template_app.runtime.messaging.runtime.registry import (
     RuntimeHandlerRegistry,
 )
 

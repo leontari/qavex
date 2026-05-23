@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from template_app.bootstrap.lifecycle.hooks import LifecycleHook
-from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
+from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
 async def startup_handler() -> None:

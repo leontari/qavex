@@ -282,7 +282,7 @@ Module B       Module C
 - ModuleProtocol
 - ModuleLoader
 - ModuleRegistry
-- ModuleSetupContext
+- ModuleContext
 
 ### Infrastructure Layer
 - providers

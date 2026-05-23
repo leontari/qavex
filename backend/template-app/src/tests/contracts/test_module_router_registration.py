@@ -3,20 +3,20 @@ from __future__ import annotations
 from fastapi.routing import APIRoute
 from fastapi import APIRouter
 
-from template_app.bootstrap.modules.capabilities import (
+from template_app.runtime.module.capabilities import (
     ModuleCapability,
 )
 from tests.factories.module_context import (
     build_module_context,
 )
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
+from template_app.runtime.bootstrap import (
+    bootstrap_kernel,
 )
 
 
 def test_health_route_registered() -> None:
 
-    kernel = bootstrap_application()
+    kernel = bootstrap_kernel()
 
     paths = {
         route.path

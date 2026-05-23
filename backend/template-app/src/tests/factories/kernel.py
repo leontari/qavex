@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.bootstrap.kernel import RuntimeKernel
-from template_app.bootstrap.runtime.bootstrap import (
-    bootstrap_application,
+from template_app.runtime.kernel import RuntimeKernel
+from template_app.runtime.bootstrap import (
+    bootstrap_kernel,
 )
 from tests.factories.runtime import build_runtime_state
 from tests.factories.transport import build_test_transport
@@ -52,7 +52,7 @@ def build_testing_kernel() -> RuntimeKernel:
         RuntimeKernel: initialized runtime kernel
     """
 
-    return bootstrap_application()
+    return bootstrap_kernel()
 
 
 def build_testing_app() -> FastAPI:

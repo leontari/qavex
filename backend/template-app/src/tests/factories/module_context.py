@@ -4,25 +4,25 @@ from collections.abc import Iterable
 
 from fastapi import FastAPI
 
-from template_app.bootstrap.infrastructure.registry import (
+from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from template_app.bootstrap.kernel import Container
-from template_app.bootstrap.lifecycle import (
+from template_app.runtime.container.container import Container
+from template_app.runtime.lifecycle import (
     LifecycleManager,
     LifecycleRegistry,
 )
-from template_app.bootstrap.messaging.runtime import (
+from template_app.runtime.messaging.runtime import (
     RuntimeCommandBus,
     RuntimeEventBus,
     RuntimeHandlerRegistry,
     RuntimeQueryBus,
 )
-from template_app.bootstrap.modules import (
+from template_app.runtime.module import (
     ModuleCapability,
-    ModuleSetupContext,
+    ModuleContext,
 )
-from template_app.bootstrap.modules.apis import (
+from template_app.runtime.module.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
@@ -31,7 +31,7 @@ from template_app.bootstrap.modules.apis import (
 
 def build_module_context(
     capabilities: Iterable[ModuleCapability] | None = None,
-) -> ModuleSetupContext:
+) -> ModuleContext:
 
     capabilities = capabilities or frozenset({
         ModuleCapability.ROUTER,
@@ -75,7 +75,7 @@ def build_module_context(
         ),
     )
 
-    return ModuleSetupContext(
+    return ModuleContext(
         runtime=runtime_api,
         infra=infra_api,
         messaging=messaging_api,

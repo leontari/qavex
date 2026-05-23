@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.bootstrap.messaging.contracts.events import (
+from template_app.runtime.messaging.contracts.events import (
     Event,
 )
-from template_app.bootstrap.messaging.runtime.event_bus import (
+from template_app.runtime.messaging.runtime.event_bus import (
     RuntimeEventBus,
 )
-from template_app.bootstrap.messaging.runtime.registry import (
+from template_app.runtime.messaging.runtime.registry import (
     RuntimeHandlerRegistry,
 )
 

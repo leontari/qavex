@@ -96,3 +96,36 @@ template_app/
 ├── config/
 └── deploy/
 ```
+3. improvement
+```text
+template_app/
+│
+├── kernel/
+│   ├── __init__.py
+│   ├── kernel.py
+│   ├── context.py
+│   ├── state.py
+│   │
+│   ├── modules/
+│   ├── messaging/
+│   ├── lifecycle/
+│   ├── infrastructure/
+│   ├── transport/
+│   └── container/
+│
+├── launcher/
+│   ├── __init__.py
+│   ├── bootstrap.py
+│   ├── run.py
+│   ├── modes.py
+│   └── config.py
+│
+├── transports/
+│   ├── http/
+│   ├── grpc/
+│   ├── kafka/
+│   └── cli/
+│
+├── asgi.py
+└── cli.py
+```

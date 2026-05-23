@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from template_app.bootstrap.contracts import (
+from template_app.runtime.container.contracts import (
     DependencyProvider,
 )
-from template_app.bootstrap.contracts.modules import (
+from template_app.runtime.module.contracts import (
     ModuleProtocol,
 )
-from template_app.bootstrap.modules.capabilities import (
+from template_app.runtime.module.capabilities import (
     ModuleCapability,
 )
 from tests.factories.module_context import (

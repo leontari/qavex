@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.kernel import RuntimeKernel
+from template_app.runtime.kernel import RuntimeKernel
 from tests.factories.kernel import build_testing_kernel
 
 

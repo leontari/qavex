@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from template_app.bootstrap.contracts import (
+from template_app.runtime.container.contracts import (
     DependencyProvider,
 )
 

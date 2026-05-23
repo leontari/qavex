@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.bootstrap.lifecycle.hooks import LifecycleHook
-from template_app.bootstrap.lifecycle.manager import LifecycleManager
-from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
+from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.manager import LifecycleManager
+from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
 @pytest.mark.asyncio

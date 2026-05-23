@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from template_app.bootstrap.runtime.bootstrap import bootstrap_application
+from template_app.runtime.bootstrap import bootstrap_kernel
 
 
 def test_health_route_registered() -> None:
-    kernel = bootstrap_application()
+    kernel = bootstrap_kernel()
 
     paths = {
         route.path
