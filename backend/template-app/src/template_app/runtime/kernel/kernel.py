@@ -11,14 +11,12 @@ from template_app.runtime.module.apis import (
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
 )
-from template_app.runtime.transports.manager import TransportManager
+from template_app.transports.manager import TransportManager
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI
-
     from template_app.runtime.kernel.state import RuntimeState
     from template_app.runtime.module.manifests import ModuleManifest
-    from template_app.runtime.transports.contracts import Transport
+    from template_app.transports.contracts import Transport
 
 
 @dataclass(slots=True)
@@ -39,41 +37,20 @@ class RuntimeKernel:
         default_factory=tuple,
         init=False,
     )
+    _transports: TransportManager = field(default_factory=TransportManager)
 
-    transports: TransportManager = field(default_factory=TransportManager)
+    #########
+    # kernel
+    #########
 
     @classmethod
     def create(cls, runtime: RuntimeState) -> RuntimeKernel:
-        return cls(_context=KernelContext(runtime=runtime, app=None))
-
-    ################
-    # transport API
-    ################
-
-    def attach_http_app(self, app: FastAPI) -> None:
-        self._context = KernelContext(runtime=self._context.runtime, app=app)
+        """Create kernel."""
+        return cls(_context=KernelContext(runtime=runtime))
 
     @property
-    def app(self) -> FastAPI:
-        """
-        Return transport application.
-
-        Returns:
-            FastAPI instance: public ASGI transport entrypoint.
-
-        """
-        if self._context.app is None:
-            msg = "No HTTP transport attached"
-            raise RuntimeError(msg)
-
-        return self._context.app
-
-    def install_transport(self, transport: Transport) -> None:
-        self.transports.register(transport)
-
-    ################
-    # module system
-    ################
+    def context(self) -> KernelContext:
+        return self._context
 
     @property
     def modules(self) -> tuple[ModuleManifest, ...]:
@@ -89,18 +66,21 @@ class RuntimeKernel:
 
         self._modules = manifests
 
+    def install_transport(self, transport: Transport) -> None:
+        self._transports.install(transport)
+
     ################
     # Lifecycle API
     ################
 
     async def startup(self) -> None:
         """Execute kernel startup lifecycle."""
-        await self.transports.startup()
+        await self._transports.startup()
         await self._context.runtime.lifecycle_manager.startup()
 
     async def shutdown(self) -> None:
         """Execute kernel shutdown lifecycle."""
-        await self.transports.shutdown()
+        await self._transports.shutdown()
         await self._context.runtime.lifecycle_manager.shutdown()
 
     #######################
@@ -126,7 +106,7 @@ class RuntimeKernel:
             registry=self._context.runtime.infrastructure_registry,
         )
 
-    def build_mesaging_api(self) -> ModuleMessagingAPI:
+    def build_messaging_api(self) -> ModuleMessagingAPI:
         """Build restricted messaging API."""
 
         return ModuleMessagingAPI(

@@ -1,3 +1,5 @@
+"""Kernel context."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,4 +16,3 @@ class KernelContext:
     """Immutable runtime composition graph."""
 
     runtime: RuntimeState
-    app: FastAPI

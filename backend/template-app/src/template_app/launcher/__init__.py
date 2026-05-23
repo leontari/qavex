@@ -1,13 +1,11 @@
 """
-Process orchestration.
+Launcher system.
 
 Launcher system is responsible for:
-    - assembly
-    - bootstrap
-    - process startup
+    - process startup orchestration TODO: check
     - mode selection
-    - transport installation
-    - runtime execution
+    - transport installation TODO: check
+    - runtime startup
 """
 
 from __future__ import annotations

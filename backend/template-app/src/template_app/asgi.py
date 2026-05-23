@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI
 
 from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.transports.http.fastapi_transport import create_http_app
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -15,18 +16,4 @@ if TYPE_CHECKING:
 
 kernel: RuntimeKernel = bootstrap_kernel()
 
-app: FastAPI = kernel.app
-
-
-# kernel: KernelRuntime = bootstrap_kernel()
-#
-#
-# def create_app() -> FastAPI:
-#     app: FastAPI = FastAPI()
-#     transport = FastApiTransport(app, kernel)
-#     kernel.install_transport(transport)
-#
-#     return app
-#
-#
-# app = create_app()
+app: FastAPI = create_http_app(kernel)

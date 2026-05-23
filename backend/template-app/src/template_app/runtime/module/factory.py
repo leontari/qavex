@@ -19,6 +19,6 @@ def build_module_context(
     return ModuleContext(
         runtime=kernel.build_runtime_api(),
         infra=kernel.build_infra_api(),
-        messaging=kernel.build_mesaging_api(),
+        messaging=kernel.build_messaging_api(),
         capabilities=manifest.capabilities,
     )

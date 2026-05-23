@@ -1,4 +1,13 @@
-"""Restricted module bootstrap context."""
+"""
+Restricted module bootstrap context.
+
+Important:
+---------
+Module context must NEVER depend on FastAPI.
+It should only use ModuleRuntimeAPI.
+No transport imports allowed.
+
+"""
 
 from __future__ import annotations
 

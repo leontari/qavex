@@ -15,7 +15,6 @@ from template_app.runtime.infrastructure.bootstrap import (
     bootstrap_infrastructure,
 )
 from template_app.runtime.kernel import (
-    KernelContext,
     RuntimeKernel,
     RuntimeState,
 )
@@ -31,13 +30,6 @@ from template_app.runtime.messaging.runtime import (
     RuntimeQueryBus,
 )
 from template_app.runtime.module.setup import setup_modules
-from template_app.runtime.transports.http.fastapi_transport import (
-    FastApiTransport,
-)
-from template_app.runtime.transports.http.transport import (
-    configure_transport,
-    create_transport,
-)
 
 
 def bootstrap_kernel() -> RuntimeKernel:
@@ -99,57 +91,57 @@ def bootstrap_kernel() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    #####################
-    # kernel (pure core)
-    #####################
+    # #####################
+    # # kernel (pure core)
+    # #####################
+    #
+    # # HTTP transport
+    # app = create_transport()
+    #
+    # # create kernel runtime
+    # kernel = RuntimeKernel.create(
+    #     runtime=runtime_state,
+    # )
+    #
+    # # bind transport runtime integrations
+    # configure_transport(
+    #     app=kernel.app,
+    #     kernel=kernel,
+    # )
+    #
+    # #############
+    # # transports
+    # #############
+    # app = create_transport()
+    #
+    # kernel.install_transport(FastApiTransport(app=app, kernel=kernel))
+    #
+    # ##################
+    # # modules system
+    # ##################
+    #
+    # setup_modules(
+    #     kernel=kernel,
+    #     registry=MODULE_REGISTRY,
+    # )
+    #
+    # ##########################################
+    # # Register the infrastructure's lifecycle
+    # ##########################################
+    #
+    # for provider in infrastructure_registry.providers:
+    #     lifecycle_registry.register_startup(
+    #         LifecycleHook(
+    #             name=f"{provider.name}.startup",
+    #             handler=provider.startup,
+    #         ),
+    #     )
+    #
+    #     lifecycle_registry.register_shutdown(
+    #         LifecycleHook(
+    #             name=f"{provider.name}.shutdown",
+    #             handler=provider.shutdown,
+    #         ),
+    #     )
 
-    # HTTP transport
-    app = create_transport()
-
-    # create kernel runtime
-    kernel = RuntimeKernel.create(
-        runtime=runtime_state,
-    )
-
-    # bind transport runtime integrations
-    configure_transport(
-        app=kernel.app,
-        kernel=kernel,
-    )
-
-    #############
-    # transports
-    #############
-    app = create_transport()
-
-    kernel.install_transport(FastApiTransport(app=app, kernel=kernel))
-
-    ##################
-    # modules system
-    ##################
-
-    setup_modules(
-        kernel=kernel,
-        registry=MODULE_REGISTRY,
-    )
-
-    ##########################################
-    # Register the infrastructure's lifecycle
-    ##########################################
-
-    for provider in infrastructure_registry.providers:
-        lifecycle_registry.register_startup(
-            LifecycleHook(
-                name=f"{provider.name}.startup",
-                handler=provider.startup,
-            ),
-        )
-
-        lifecycle_registry.register_shutdown(
-            LifecycleHook(
-                name=f"{provider.name}.shutdown",
-                handler=provider.shutdown,
-            ),
-        )
-
-    return kernel
+    return RuntimeKernel.create(runtime=runtime_state)
