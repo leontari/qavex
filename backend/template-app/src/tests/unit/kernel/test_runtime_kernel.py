@@ -1,43 +1,25 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
-
 from template_app.runtime.kernel import (
-    KernelContext,
     RuntimeKernel,
 )
-from tests.factories.runtime import build_runtime_state
-
-
-def test_kernel_returns_app() -> None:
-    app = FastAPI()
-
-    context = KernelContext(
-        runtime=build_runtime_state(),
-        app=app,
-    )
-
-    kernel = RuntimeKernel.create(
-        runtime=context.runtime,
-        app=context.app,
-    )
-
-    assert kernel.app is app
+from template_app.transports.http.transport import (
+    FastAPITransport,
+)
+from tests.factories.runtime import (
+    build_runtime_state,
+)
+from tests.factories.transport import (
+    build_test_transport,
+)
 
 
 def test_kernel_contains_runtime() -> None:
-    app = FastAPI()
 
     runtime = build_runtime_state()
 
-    context = KernelContext(
-        runtime=runtime,
-        app=app,
-    )
-
     kernel = RuntimeKernel.create(
-        runtime=context.runtime,
-        app=context.app,
+        runtime=runtime,
     )
 
     assert kernel._context.runtime is runtime
@@ -47,7 +29,62 @@ def test_kernel_has_no_modules_initially() -> None:
 
     kernel = RuntimeKernel.create(
         runtime=build_runtime_state(),
-        app=FastAPI(),
     )
 
     assert kernel.modules == ()
+
+
+def test_kernel_has_no_transports_initially() -> None:
+
+    kernel = RuntimeKernel.create(
+        runtime=build_runtime_state(),
+    )
+
+    assert kernel.transport_manager.transports == ()
+
+
+def test_kernel_can_install_transport() -> None:
+
+    kernel = RuntimeKernel.create(
+        runtime=build_runtime_state(),
+    )
+
+    transport = build_test_transport()
+
+    kernel.install_transport(
+        transport,
+    )
+
+    assert transport in kernel.transport_manager.transports
+
+
+def test_kernel_can_resolve_transport() -> None:
+
+    kernel = RuntimeKernel.create(
+        runtime=build_runtime_state(),
+    )
+
+    transport = build_test_transport()
+
+    kernel.install_transport(
+        transport,
+    )
+
+    resolved = kernel.transport_manager.get(
+        type(transport),
+    )
+
+    assert resolved is transport
+
+
+def test_kernel_returns_none_for_missing_transport() -> None:
+
+    kernel = RuntimeKernel.create(
+        runtime=build_runtime_state(),
+    )
+
+    transport = kernel.transport_manager.get(
+        FastAPITransport,
+    )
+
+    assert transport is None

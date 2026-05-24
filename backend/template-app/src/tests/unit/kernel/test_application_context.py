@@ -1,6 +1,5 @@
 from dataclasses import FrozenInstanceError
 
-from fastapi import FastAPI
 import pytest
 
 from template_app.runtime.kernel.context import (
@@ -15,25 +14,19 @@ def test_kernel_context_initial_state() -> None:
 
     runtime = build_runtime_state()
 
-    app = FastAPI()
-
     context = KernelContext(
         runtime=runtime,
-        app=app,
     )
 
     assert context.runtime is runtime
-
-    assert context.app is app
 
 
 def test_kernel_context_is_immutable() -> None:
 
     context = KernelContext(
         runtime=build_runtime_state(),
-        app=FastAPI(),
     )
 
     with pytest.raises(FrozenInstanceError):
 
-        context.app = FastAPI()  # type: ignore[misc]
+        context.runtime = build_runtime_state()  # type: ignore[misc]

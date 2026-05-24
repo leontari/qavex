@@ -39,9 +39,9 @@ class RuntimeKernel:
     )
     _transports: TransportManager = field(default_factory=TransportManager)
 
-    ###################
-    # kernel public API
-    ###################
+    ##################
+    # read only access
+    ##################
 
     @classmethod
     def create(cls, runtime: RuntimeState) -> RuntimeKernel:
@@ -62,6 +62,10 @@ class RuntimeKernel:
         """Return immutable list of installed transports."""
         return self._transports.transports
 
+    #########################
+    # installation kernel API
+    #########################
+
     def install_modules(self, manifests: tuple[ModuleManifest, ...]) -> None:
         """Install module manifests."""
         # prevents mutation bugs in tests
@@ -74,6 +78,15 @@ class RuntimeKernel:
     def install_transport(self, transport: Transport) -> None:
         """Install transport."""
         self._transports.install(transport)
+
+    ###############
+    # orchestration
+    ###############
+
+    @property
+    def transport_manager(self) -> TransportManager:
+        """Return transport runtime manager."""
+        return self._transports
 
     ################
     # Lifecycle API
@@ -89,9 +102,9 @@ class RuntimeKernel:
         await self._transports.shutdown()
         await self._context.runtime.lifecycle_manager.shutdown()
 
-    #######################
-    # internal module APIs
-    #######################
+    #####################
+    # create module APIs
+    #####################
 
     def build_runtime_api(self) -> ModuleRuntimeAPI:
         """Build restricted runtime API."""

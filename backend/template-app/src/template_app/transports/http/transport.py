@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from fastapi import FastAPI
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
 @dataclass(slots=True)
@@ -10,7 +12,7 @@ class FastAPITransport:
     app: FastAPI
 
     async def startup(self) -> None:
-        return None
+        """Start HTTP transport."""
 
     async def shutdown(self) -> None:
-        return None
+        """Shutdown HTTP transport."""

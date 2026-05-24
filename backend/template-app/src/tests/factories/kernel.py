@@ -2,70 +2,80 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.runtime.kernel import RuntimeKernel
 from template_app.runtime.bootstrap import (
     bootstrap_kernel,
 )
-from tests.factories.runtime import build_runtime_state
-from tests.factories.transport import build_test_transport
+from template_app.runtime.kernel import (
+    RuntimeKernel,
+)
+from template_app.transports.http.factory import (
+    create_http_app,
+)
+from tests.factories.runtime import (
+    build_runtime_state,
+)
+from tests.factories.transport import (
+    get_http_app,
+)
 
 
-def build_isolated_kernel() -> tuple[RuntimeKernel]:
+def build_kernel_no_transport() -> RuntimeKernel:
     """
-    Build isolated runtime kernel.
-
-    Used for:
-    - unit tests
-    - pure runtime tests
-    - lifecycle tests
-    - kernel orchestration tests
-
-    Returns:
-        RuntimeKernel: isolated kernel
+    Build kernel without transports.
     """
 
     return RuntimeKernel.create(
         runtime=build_runtime_state(),
-        app=build_test_transport(),
-        ),
+    )
+
+
+def build_isolated_kernel() -> RuntimeKernel:
+    """
+    Build isolated runtime kernel.
+    """
+
+    return RuntimeKernel.create(
+        runtime=build_runtime_state(),
+    )
 
 
 def build_testing_kernel() -> RuntimeKernel:
     """
-    Build fully initialized application kernel.
-
-    Uses REAL application bootstrap.
+    Build initialized runtime kernel.
 
     Includes:
-    - FastAPI transport
-    - lifecycle
     - infrastructure
     - messaging
-    - module activation
+    - lifecycle
+    - modules
 
-    Used for:
-    - integration tests
-    - API tests
-    - startup/shutdown tests
-
-    Returns:
-        RuntimeKernel: initialized runtime kernel
+    No transports installed by default.
     """
 
     return bootstrap_kernel()
 
 
+def build_testing_http_kernel() -> RuntimeKernel:
+    """
+    Build initialized kernel with HTTP transport.
+    """
+
+    kernel = build_testing_kernel()
+
+    create_http_app(
+        kernel,
+    )
+
+    return kernel
+
+
 def build_testing_app() -> FastAPI:
     """
-    Build initialized FastAPI app.
-
-    Used for:
-    - TestClient
-    - HTTP tests
-    - route tests
-
-    Returns:
-        FastAPI: initialized application transport
+    Build initialized FastAPI application.
     """
 
-    return build_testing_kernel().app
+    kernel = build_testing_http_kernel()
+
+    return get_http_app(
+        kernel,
+    )

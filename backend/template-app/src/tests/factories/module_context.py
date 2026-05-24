@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from collections.abc import Iterable
 
-from fastapi import FastAPI
+from fastapi import APIRouter
 
+from template_app.runtime.container.container import (
+    Container,
+)
 from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from template_app.runtime.container.container import Container
 from template_app.runtime.lifecycle import (
     LifecycleManager,
     LifecycleRegistry,
@@ -29,17 +32,29 @@ from template_app.runtime.module.apis import (
 )
 
 
+def _noop_register_router(
+    _: APIRouter,
+) -> None:
+    """
+    No-op router registrar for isolated tests.
+    """
+
+
 def build_module_context(
     capabilities: Iterable[ModuleCapability] | None = None,
+    register_router: Callable[[APIRouter], None] | None = None,
 ) -> ModuleContext:
 
-    capabilities = capabilities or frozenset({
-        ModuleCapability.ROUTER,
-        ModuleCapability.DEPENDENCIES,
-        ModuleCapability.EVENT_BUS,
-        ModuleCapability.INFRASTRUCTURE,
-        ModuleCapability.LIFECYCLE,
-    })
+    resolved_capabilities = frozenset(
+        capabilities
+        or {
+            ModuleCapability.ROUTER,
+            ModuleCapability.DEPENDENCIES,
+            ModuleCapability.EVENT_BUS,
+            ModuleCapability.INFRASTRUCTURE,
+            ModuleCapability.LIFECYCLE,
+        }
+    )
 
     container = Container()
 
@@ -54,9 +69,12 @@ def build_module_context(
     infrastructure_registry = InfrastructureRegistry()
 
     runtime_api = ModuleRuntimeAPI(
-        app=FastAPI(),
         container=container,
         lifecycle_registry=lifecycle_registry,
+        register_router=(
+            register_router
+            or _noop_register_router
+        ),
     )
 
     infra_api = ModuleInfraAPI(
@@ -79,5 +97,5 @@ def build_module_context(
         runtime=runtime_api,
         infra=infra_api,
         messaging=messaging_api,
-        capabilities=frozenset(capabilities),
+        capabilities=resolved_capabilities,
     )

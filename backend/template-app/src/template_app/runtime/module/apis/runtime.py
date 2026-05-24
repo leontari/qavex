@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from fastapi import APIRouter, FastAPI
+    from collections.abc import Callable
+
+    from fastapi import APIRouter
 
     from template_app.runtime.container.container import Container
     from template_app.runtime.container.contracts import DependencyProvider
@@ -33,6 +35,8 @@ class ModuleRuntimeAPI:
 
     container: Container
     lifecycle_registry: LifecycleRegistry
+
+    register_router: Callable[[APIRouter], None]
 
     def register_router(self, router: APIRouter) -> None:  # noqa: ARG002
         msg = "Router registration requires HTTP transport."
