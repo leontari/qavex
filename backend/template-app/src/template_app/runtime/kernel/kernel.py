@@ -39,9 +39,9 @@ class RuntimeKernel:
     )
     _transports: TransportManager = field(default_factory=TransportManager)
 
-    #########
-    # kernel
-    #########
+    ###################
+    # kernel public API
+    ###################
 
     @classmethod
     def create(cls, runtime: RuntimeState) -> RuntimeKernel:
@@ -57,6 +57,11 @@ class RuntimeKernel:
         """Return immutable list of installed modules."""
         return self._modules
 
+    @property
+    def transports(self) -> tuple[Transport, ...]:
+        """Return immutable list of installed transports."""
+        return self._transports.transports
+
     def install_modules(self, manifests: tuple[ModuleManifest, ...]) -> None:
         """Install module manifests."""
         # prevents mutation bugs in tests
@@ -67,6 +72,7 @@ class RuntimeKernel:
         self._modules = manifests
 
     def install_transport(self, transport: Transport) -> None:
+        """Install transport."""
         self._transports.install(transport)
 
     ################
