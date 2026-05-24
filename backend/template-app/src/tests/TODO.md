@@ -56,3 +56,14 @@ test _version.py exist in installation in site_packages
 - no runtime leakage into FastAPI
 - startup/shutdown execution
 - plugin registration
+
+## Testing strategy update duet to introducing pluggable transports.
+
+1. kernel is independent from transport
+2. transport can be connected dynamically
+3. FastAPI doesn't own lifecycle
+4. launcher orchestrates lifecycle
+5. transports are interchangeable
+6. modules are sandboxed
+7. runtime survives without HTTP
+8. kernel startup/shutdown transport-agnostic
