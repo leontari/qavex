@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 def test_modules_loaded_into_application() -> None:

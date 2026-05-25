@@ -1,7 +1,7 @@
 from tests.factories.kernel import (
     build_kernel_no_transport,
 )
-from template_app.transports.http.fastapi_transport import (
+from template_app.runtime.transports.http.fastapi_transport import (
     FastAPITransport,
 )
 

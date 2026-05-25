@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 def test_runtime_contains_infrastructure_registry() -> None:

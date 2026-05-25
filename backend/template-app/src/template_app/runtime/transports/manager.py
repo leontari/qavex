@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TypeVar
 
-if TYPE_CHECKING:
-    from template_app.transports.contracts import Transport
+from template_app.runtime.transports.contracts import Transport
+
+T = TypeVar("T", bound=Transport)
 
 
 @dataclass(slots=True)
 class TransportManager:
     """
-    Runtime transport registry/orchestrator.
+    Typed registry/orchestrator for runtime transports.
 
     Responsibilities:
         - transport ownership
@@ -20,7 +21,7 @@ class TransportManager:
         - transport isolation
     """
 
-    _transports: list[Transport] = field(default_factory=list)
+    _transports: dict[type[Transport], Transport] = field(default_factory=dict)
 
     ###############
     # transport API
@@ -28,7 +29,7 @@ class TransportManager:
 
     def install(self, transport: Transport) -> None:
         """Install runtime transport."""
-        self._transports.append(transport)
+        self._transports[type(transport)] = transport
 
     ################
     # public queries
@@ -37,18 +38,11 @@ class TransportManager:
     @property
     def transports(self) -> tuple[Transport, ...]:
         """Return immutable list of installed transports."""
-        return tuple(self._transports)
+        return tuple(self._transports.values())
 
-    def get(self, transport_type: type[Transport]) -> Transport | None:
+    def get(self, transport_type: type[T]) -> T | None:
         """Return installed transport by type."""
-        return next(
-            (
-                transport
-                for transport in self._transports
-                if isinstance(transport, transport_type)
-            ),
-            None,
-        )
+        return self._transports.get(transport_type)
 
     ################
     # lifecycle API
@@ -56,10 +50,10 @@ class TransportManager:
 
     async def startup(self) -> None:
         """Start installed transports."""
-        for transport in self._transports:
+        for transport in self._transports.values():
             await transport.startup()
 
     async def shutdown(self) -> None:
         """Shutdown installed transports."""
-        for transport in reversed(self._transports):
+        for transport in reversed(self._transports.values()):
             await transport.shutdown()

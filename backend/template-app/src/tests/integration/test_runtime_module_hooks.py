@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi.routing import APIRoute
 
-from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 def test_health_route_registered() -> None:

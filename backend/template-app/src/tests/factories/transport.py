@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from template_app.runtime.kernel.kernel import RuntimeKernel
-from template_app.transports.http.fastapi_transport import (
+from template_app.runtime.transports.http.fastapi_transport import (
     FastAPITransport,
 )
 from tests.fakes.transports import (

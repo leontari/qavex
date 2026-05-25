@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import asyncio
 
-from transports.kafka.transport import KafkaTransport
+from template_app.runtime.transports.kafka.transport import KafkaTransport
 
-from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 async def main() -> None:

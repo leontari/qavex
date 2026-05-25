@@ -6,7 +6,7 @@ import pytest
 
 from template_app.runtime.lifecycle import LifecycleHook
 from template_app.runtime.kernel import RuntimeKernel
-from template_app.runtime.bootstrap import bootstrap_kernel
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 @dataclass(slots=True)

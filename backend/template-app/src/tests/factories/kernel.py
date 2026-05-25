@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.runtime.bootstrap import (
+from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
 )
 from template_app.runtime.kernel import (
     RuntimeKernel,
 )
-from template_app.transports.http.factory import (
+from template_app.runtime.transports.http import (
     create_http_app,
 )
 from tests.factories.runtime import (

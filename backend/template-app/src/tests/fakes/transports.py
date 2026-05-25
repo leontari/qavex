@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from template_app.transports.contracts import Transport
+from template_app.runtime.transports.contracts import Transport
 
 
 @dataclass

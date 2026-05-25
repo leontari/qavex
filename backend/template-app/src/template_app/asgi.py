@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 
-from template_app.runtime.bootstrap import bootstrap_kernel
-from template_app.transports.http.factory import create_http_app
+from template_app.runtime.kernel.bootstrap import bootstrap_kernel
+from template_app.runtime.transports.http.factory import create_http_app
 
 if TYPE_CHECKING:
     from fastapi import FastAPI

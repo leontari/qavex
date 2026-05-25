@@ -1,5 +1,5 @@
 from tests.fakes.transports import FakeTransport
-from template_app.transports.manager import TransportManager
+from template_app.runtime.transports import TransportManager
 
 
 def test_transport_manager_installs_transport() -> None:

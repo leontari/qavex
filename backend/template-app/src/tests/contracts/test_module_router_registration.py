@@ -9,7 +9,7 @@ from template_app.runtime.module.capabilities import (
 from tests.factories.module_context import (
     build_module_context,
 )
-from template_app.runtime.bootstrap import (
+from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
 )
 

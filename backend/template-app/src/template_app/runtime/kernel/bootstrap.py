@@ -91,31 +91,6 @@ def bootstrap_kernel() -> RuntimeKernel:
         query_bus=query_bus,
     )
 
-    # #####################
-    # # kernel (pure core)
-    # #####################
-    #
-    # # HTTP transport
-    # app = create_transport()
-    #
-    # # create kernel runtime
-    # kernel = RuntimeKernel.create(
-    #     runtime=runtime_state,
-    # )
-    #
-    # # bind transport runtime integrations
-    # configure_transport(
-    #     app=kernel.app,
-    #     kernel=kernel,
-    # )
-    #
-    # #############
-    # # transports
-    # #############
-    # app = create_transport()
-    #
-    # kernel.install_transport(FastApiTransport(app=app, kernel=kernel))
-    #
     # ##################
     # # modules system
     # ##################

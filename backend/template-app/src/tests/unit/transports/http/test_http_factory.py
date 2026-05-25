@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
-from template_app.transports.http.factory import (
+from template_app.runtime.transports.http.factory import (
     create_http_app,
 )
-from template_app.transports.http.transport import (
+from template_app.runtime.transports.http.transport import (
     FastAPITransport,
 )
 from tests.factories.kernel import (

@@ -3,7 +3,7 @@ from __future__ import annotations
 from template_app.runtime.kernel import (
     RuntimeKernel,
 )
-from template_app.transports.http.transport import (
+from template_app.runtime.transports.http import (
     FastAPITransport,
 )
 from tests.factories.runtime import (

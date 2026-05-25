@@ -1,4 +1,4 @@
-from template_app.transports.manager import TransportManager
+from template_app.runtime.transports import TransportManager
 
 
 def test_transport_manager_hides_internal_list() -> None:

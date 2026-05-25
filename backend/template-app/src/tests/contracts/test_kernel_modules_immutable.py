@@ -1,6 +1,6 @@
 import pytest
 
-from template_app.runtime.bootstrap import (
+from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
 )
 

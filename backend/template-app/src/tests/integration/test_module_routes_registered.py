@@ -1,9 +1,9 @@
 from fastapi.routing import APIRoute
 
-from template_app.runtime.bootstrap import (
+from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
 )
-from template_app.transports.http.factory import (
+from template_app.runtime.transports.http import (
     create_http_app,
 )
 from tests.factories.transport import (
