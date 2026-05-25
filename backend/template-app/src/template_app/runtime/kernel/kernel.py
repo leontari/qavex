@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from template_app.core_.app_.factory import lifecycle
 from template_app.runtime.kernel import KernelContext
-from template_app.runtime.lifecycle import LifecycleManager
+from template_app.runtime.lifecycle import LifecycleManager, LifecycleRegistry
 from template_app.runtime.lifecycle.readiness import ReadinessGate
 from template_app.runtime.module.apis import (
     ModuleInfraAPI,
@@ -43,6 +43,11 @@ class RuntimeKernel:
     _transports: TransportManager = field(default_factory=TransportManager)
     _lifecycle: LifecycleManager = field(default_factory=LifecycleManager)
     _readiness: ReadinessGate = field(default_factory=ReadinessGate)
+
+    transports: TransportManager = field(default_factory=TransportManager)
+    lifecycle_registry: LifecycleRegistry = field(
+        default_factory=LifecycleRegistry,
+    )
 
     ########
     # kernel
@@ -99,21 +104,31 @@ class RuntimeKernel:
 
     async def startup(self) -> None:
         """Execute kernel startup lifecycle."""
-        lifecycle = self.build_lifecycle()
+        executor = LifecycleExecutor(
+            graph=self.lifecycle_registry.startup_graph(),
+        )
 
-        await _lifecycle.startup()
+        await executor.startup()
 
         self.readiness.mark_ready()
 
-        await self._transports.startup()
+        await self.transports.startup()
 
         # await self._transports.startup()
         # await self._context.runtime.lifecycle_manager.startup()
 
     async def shutdown(self) -> None:
         """Execute kernel shutdown lifecycle."""
-        await self._transports.shutdown()
-        await self._context.runtime.lifecycle_manager.shutdown()
+
+        self.readiness.mark_not_ready()
+
+        await self.transports.shutdown()
+
+        executor = LifecycleExecutor(
+            graph=self.lifecycle_registry.shutdown_graph(),
+        )
+
+        await executor.shutdown()
 
     #####################
     # create module APIs
