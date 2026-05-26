@@ -2,9 +2,9 @@
 Launcher system.
 
 Launcher system is responsible for:
-    - process startup orchestration TODO: check
+    - process startup orchestration
     - mode selection
-    - transport installation TODO: check
+    - transport installation
     - runtime startup
 """
 

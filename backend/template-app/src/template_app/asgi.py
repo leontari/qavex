@@ -1,5 +1,6 @@
 """ASGI entrypoint."""
 
+# legacy, should be deleted after Make commands updates
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

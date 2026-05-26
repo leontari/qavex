@@ -1,4 +1,4 @@
-"""gRPC runtime entrypoint."""
+"""HTTP runtime entrypoint."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 def main() -> None:
-    """Run gRPC runtime."""
+    """Run HTTP runtime."""
     kernel = bootstrap_kernel()
 
     launcher = KernelLauncher(
         _kernel=kernel,
-        _config=LauncherConfig(mode=LaunchMode.GRPC),
+        _config=LauncherConfig(mode=LaunchMode.HTTP),
     )
 
     launcher.run()
