@@ -13,47 +13,40 @@ T = TypeVar("T", bound=Transport)
 @dataclass(slots=True)
 class TransportManager:
     """
-    Typed registry/orchestrator for runtime transports.
+    Transport runtime manager.
 
     Responsibilities:
         - transport ownership
-        - lifecycle orchestration
-        - transport isolation
+        - startup coordination
+        - shutdown coordination
     """
 
-    _transports: dict[type[Transport], Transport] = field(default_factory=dict)
-
-    ###############
-    # transport API
-    ###############
+    _transports: list[Transport] = field(
+        default_factory=list,
+    )
 
     def install(self, transport: Transport) -> None:
-        """Install runtime transport."""
-        self._transports[type(transport)] = transport
-
-    ################
-    # public queries
-    ################
+        """Append runtime transport."""
+        self._transports.append(transport)
 
     @property
     def transports(self) -> tuple[Transport, ...]:
         """Return immutable list of installed transports."""
-        return tuple(self._transports.values())
+        return tuple(self._transports)
 
     def get(self, transport_type: type[T]) -> T | None:
         """Return installed transport by type."""
-        return self._transports.get(transport_type)
-
-    ################
-    # lifecycle API
-    ################
+        for transport in self._transports:
+            if isinstance(transport, transport_type):
+                return transport
+        return None
 
     async def startup(self) -> None:
         """Start installed transports."""
-        for transport in self._transports.values():
+        for transport in self._transports:
             await transport.startup()
 
     async def shutdown(self) -> None:
         """Shutdown installed transports."""
-        for transport in reversed(self._transports.values()):
+        for transport in reversed(self._transports):
             await transport.shutdown()

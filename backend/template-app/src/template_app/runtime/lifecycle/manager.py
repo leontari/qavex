@@ -1,11 +1,13 @@
-"""Stateless lifecycle hooks execution."""
+"""Lifecycle manager."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.runtime.lifecycle.snapshot import LifecycleRegistrySnapshot
+from template_app.runtime.lifecycle.dag import LifecycleDAGExecutor
+from template_app.runtime.lifecycle.exceptions import ReadinessProbeFailedError
+from template_app.runtime.lifecycle.state import LifecycleState
 
 if TYPE_CHECKING:
     from template_app.runtime.lifecycle.registry import LifecycleRegistry
@@ -14,44 +16,107 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class LifecycleManager:
     """
-    Stateless lifecycle hooks executor.
+    Runtime lifecycle orchestration manager.
 
-    Features:
-        dependency-safe execution order
-        parallel execution
-        failure isolation
-        retry policy
+    Responsibilities:
+        - startup orchestration
+        - shutdown orchestration
+        - readiness orchestration
+        - lifecycle DAG execution
+        - runtime lifecycle state management
 
     """
 
-    snapshot: LifecycleRegistrySnapshot
+    _registry: LifecycleRegistry
+
+    _state: LifecycleState = field(
+        default_factory=LifecycleState,
+    )
+
+    _dag_executor: LifecycleDAGExecutor = field(
+        default_factory=LifecycleDAGExecutor,
+    )
+
+    ##################
+    # public accessors
+    ##################
+    @property
+    def state(self) -> LifecycleState:
+        """
+        Return runtime lifecycle state.
+
+        Returns:
+            Current lifecycle runtime state.
+
+        """
+        return self._state
+
+    @property
+    def registry(self) -> LifecycleRegistry:
+        """
+        Return lifecycle registry.
+
+        Returns:
+            Registered lifecycle objects registry.
+
+        """
+        return self._registry
+
+    ###############
+    # startup phase
+    ###############
 
     async def startup(self) -> None:
-        """Execute lifecycle startup hooks."""
-        await self._execute_startup()
+        """
+        Execute application startup lifecycle.
+
+        Responsibilities:
+            - execute startup DAG
+            - execute readiness probes
+            - transition runtime state to ready
+
+        """
+        await self._dag_executor.execute(self.registry.startup_hooks)
+        await self._execute_readiness_probes()
+
+        self._state.started = True
+        self._state.ready = True
+
+    ################
+    # shutdown phase
+    ################
 
     async def shutdown(self) -> None:
-        """Execute shutdown lifecycle hooks."""
-        await self._execute_shutdown()
+        """
+        Execute application shutdown lifecycle.
 
-    async def _execute_startup(self) -> None:
-        """Startup."""
-        for hook in self.snapshot.startup:
-            await self._execute_hook_with_retry(hook)
+        Responsibilities:
+            - execute shutdown DAG
+            - transition runtime state to stopped
 
-    async def _execute_shutdown(self) -> None:
-        """Shutdown."""
-        for hook in reversed(self.snapshot.shutdown):
-            await self._execute_hook_with_retry(hook)
+        """
+        await self._dag_executor.execute(self.registry.shutdown_hooks)
 
-    async def _execute_hook_with_retry(self, hook) -> None:
-        """Execute hooks."""
-        retries = getattr(hook, "retries", 1)
+        self._state.ready = False
+        self._state.started = False
 
-        for attempt in range(retries):
-            try:
-                await hook.handler()
-                return
-            except Exception:
-                if attempt + 1 >= retries:
-                    raise
+    ####################
+    # readiness handling
+    ####################
+
+    async def _execute_readiness_probes(self) -> None:
+        """
+        Execute registered readiness probes.
+
+        Raises:
+            ReadinessProbeFailedError:
+                If a critical readiness probe fails.
+
+        """
+        for probe in self._registry.readiness_probes:
+            result = await probe.handler()
+
+            if not result and probe.critical:
+                msg = f"Probe failed: {probe.name}"
+
+                raise ReadinessProbeFailedError(msg)

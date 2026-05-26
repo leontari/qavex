@@ -1,11 +1,15 @@
-"""Application runtime kernel."""
+"""
+Runtime kernel.
+
+* transport startup ONLY after lifecycle ready
+* Kafka/gRPC wait for readiness automatically
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.core_.app_.factory import lifecycle
 from template_app.runtime.kernel import KernelContext
 from template_app.runtime.lifecycle import LifecycleManager, LifecycleRegistry
 from template_app.runtime.lifecycle.readiness import ReadinessGate
@@ -25,13 +29,13 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class RuntimeKernel:
     """
-    Runtime kernel of the application.
+    Central runtime kernel.
 
     Responsibilities:
-        - runtime orchestration
         - lifecycle orchestration
-        - transport ownership
-        - installed module ownership
+        - transport orchestration
+        - runtime ownership
+        - modules ownership
     """
 
     _context: KernelContext
@@ -44,9 +48,8 @@ class RuntimeKernel:
     _lifecycle: LifecycleManager = field(default_factory=LifecycleManager)
     _readiness: ReadinessGate = field(default_factory=ReadinessGate)
 
-    transports: TransportManager = field(default_factory=TransportManager)
-    lifecycle_registry: LifecycleRegistry = field(
-        default_factory=LifecycleRegistry,
+    _transport_manager: TransportManager = field(
+        default_factory=TransportManager
     )
 
     ########
@@ -93,7 +96,7 @@ class RuntimeKernel:
 
     def install_transport(self, transport: Transport) -> None:
         """Install transport."""
-        self._transports.install(transport)
+        self._transport_manager.install(transport)
 
     #################
     # lifecycle build
@@ -103,16 +106,17 @@ class RuntimeKernel:
         return LifecycleManager(snapshot=self._lifecycle.snapshot())
 
     async def startup(self) -> None:
-        """Execute kernel startup lifecycle."""
-        executor = LifecycleExecutor(
-            graph=self.lifecycle_registry.startup_graph(),
-        )
+        """
+        Execute runtime startup.
 
-        await executor.startup()
+        Order:
+            1. lifecycle startup
+            2. readiness validation
+            3. transport startup
+        """
+        await self._context.runtime.lifecycle_manager.startup()
 
-        self.readiness.mark_ready()
-
-        await self.transports.startup()
+        await self._transport_manager.startup()
 
         # await self._transports.startup()
         # await self._context.runtime.lifecycle_manager.startup()
@@ -120,15 +124,15 @@ class RuntimeKernel:
     async def shutdown(self) -> None:
         """Execute kernel shutdown lifecycle."""
 
-        self.readiness.mark_not_ready()
+        #        self.readiness.mark_not_ready()
 
-        await self.transports.shutdown()
+        await self._transport_manager.shutdown()
 
-        executor = LifecycleExecutor(
-            graph=self.lifecycle_registry.shutdown_graph(),
-        )
+        # executor = LifecycleExecutor(
+        #     graph=self.lifecycle_registry.shutdown_graph(),
+        # )
 
-        await executor.shutdown()
+        await self._context.runtime.lifecycle_manager.shutdown()
 
     #####################
     # create module APIs

@@ -11,11 +11,9 @@ class LifecycleHook:
     """Lifecycle hook descriptor."""
 
     name: str
-
     handler: LifecycleHandler
-
-    depends_on: frozenset[str] = field(default_factory=frozenset)
 
     retries: int = 1
 
+    depends_on: frozenset[str] = field(default_factory=frozenset)
     critical: bool = True

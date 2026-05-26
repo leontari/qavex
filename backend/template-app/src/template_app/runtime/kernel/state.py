@@ -10,10 +10,8 @@ if TYPE_CHECKING:
     from template_app.runtime.infrastructure.registry import (
         InfrastructureRegistry,
     )
-    from template_app.runtime.lifecycle import (
-        LifecycleManager,
-        LifecycleRegistry,
-    )
+    from template_app.runtime.lifecycle.manager import LifecycleManager
+    from template_app.runtime.lifecycle.registry import LifecycleRegistry
     from template_app.runtime.messaging.runtime import (
         RuntimeCommandBus,
         RuntimeEventBus,

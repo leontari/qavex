@@ -1,47 +1,155 @@
+"""Application lifecycle registry."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.runtime.lifecycle.graph import LifecycleGraph
-from template_app.runtime.lifecycle.snapshot import LifecycleRegistrySnapshot
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
     from template_app.runtime.lifecycle.hooks import LifecycleHook
+    from template_app.runtime.lifecycle.models import ReadinessProbe
 
 
 @dataclass(slots=True)
 class LifecycleRegistry:
-    """Application lifecycle hooks registry (state only)."""
+    """
+    Stores lifecycle definition graph.
 
-    _startup_hooks: list[LifecycleHook] = field(default_factory=list)
-    _shutdown_hooks: list[LifecycleHook] = field(default_factory=list)
+    Responsibilities:
+        - store startup lifecycle hooks
+        - store shutdown lifecycle hooks
+        - store readiness probes
+        - separation of startup/shutdown graph
+        - immutable runtime snapshots generation
 
-    def register_startup(self, hook: LifecycleHook) -> None:
-        """Append startup hook."""
-        self._startup_hooks.append(hook)
+    """
 
-    def register_shutdown(self, hook: LifecycleHook) -> None:
-        """Append shutdown hook."""
-        self._shutdown_hooks.append(hook)
+    _startup_hooks: dict[str, LifecycleHook] = field(
+        default_factory=dict,
+    )
 
-    def extend_startup(self, hooks: Iterable[LifecycleHook]) -> None:
-        """Extend list of startup hooks."""
-        self._startup_hooks.extend(hooks)
+    _shutdown_hooks: dict[str, LifecycleHook] = field(
+        default_factory=dict,
+    )
 
-    def extend_shutdown(self, hooks: Iterable[LifecycleHook]) -> None:
-        """Extend list of startup hooks."""
-        self._startup_hooks.extend(hooks)
+    _readiness_probes: dict[str, ReadinessProbe] = field(
+        default_factory=dict,
+    )
 
-    def startup_graph(self) -> LifecycleGraph:
-        return LifecycleGraph(hook=tuple(self._startup_hooks))
+    ###############
+    # startup hooks
+    ###############
 
-    def shutdown_graph(self) -> LifecycleGraph:
-        return LifecycleGraph(hooks=tuple(self._shutdown_hooks))
+    def register_startup_hook(self, hook: LifecycleHook) -> None:
+        """
+        Register a startup lifecycle hook.
 
-    def snapshot(self) -> LifecycleRegistrySnapshot:
-        return LifecycleRegistrySnapshot(
-            startup=tuple(self._startup_hooks),
-            shutdown=tuple(self._shutdown_hooks),
-        )
+        Args:
+            hook:
+                Lifecycle hook instance.
+
+        """
+        self._startup_hooks[hook.name] = hook
+
+    def register_startup_hooks(self, hooks: Iterable[LifecycleHook]) -> None:
+        """
+        Register multiple startup lifecycle hooks.
+
+        Args:
+            hooks:
+                Iterable of lifecycle hooks.
+
+        """
+        for hook in hooks:
+            self.register_startup_hook(hook)
+
+    @property
+    def startup_hooks(self) -> tuple[LifecycleHook, ...]:
+        """
+        Return immutable snapshot of startup hooks.
+
+        Returns:
+            Tuple containing registered startup hooks.
+
+        """
+        return tuple(self._startup_hooks.values())
+
+    ################
+    # shutdown hooks
+    ################
+
+    def register_shutdown_hook(self, hook: LifecycleHook) -> None:
+        """
+        Register a shutdown lifecycle hook.
+
+        Args:
+            hook:
+                Lifecycle hook instance.
+
+        """
+        self._shutdown_hooks[hook.name] = hook
+
+    def register_shutdown_hooks(self, hooks: Iterable[LifecycleHook]) -> None:
+        """
+        Register multiple shutdown lifecycle hooks.
+
+        Args:
+            hooks:
+                Iterable of lifecycle hooks.
+
+        """
+        for hook in hooks:
+            self.register_shutdown_hook(hook)
+
+    @property
+    def shutdown_hooks(self) -> tuple[LifecycleHook, ...]:
+        """
+        Return immutable snapshot of shutdown hooks.
+
+        Returns:
+            Tuple containing registered shutdown hooks.
+
+        """
+        return tuple(self._shutdown_hooks.values())
+
+    ##################
+    # readiness probes
+    ##################
+
+    def register_readiness_probe(self, probe: ReadinessProbe) -> None:
+        """
+        Register readiness probe.
+
+        Args:
+            probe:
+                Readiness probe instance.
+
+        """
+        self._readiness_probes[probe.name] = probe
+
+    def register_readiness_probes(
+        self, probes: Iterable[ReadinessProbe]
+    ) -> None:
+        """
+        Register multiple readiness probes.
+
+        Args:
+            probes:
+                Iterable of readiness probes.
+
+        """
+        for probe in probes:
+            self.register_readiness_probe(probe)
+
+    @property
+    def readiness_probes(self) -> tuple[ReadinessProbe, ...]:
+        """
+        Return immutable snapshot of readiness probes.
+
+        Returns:
+            Tuple containing registered readiness probes.
+
+        """
+        return tuple(self._readiness_probes.values())
