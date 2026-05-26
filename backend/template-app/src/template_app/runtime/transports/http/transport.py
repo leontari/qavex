@@ -11,10 +11,21 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class FastAPITransport:
-    name: str = "http"
-    app: FastAPI | None = None
+    """
+    HTTP transport runtime.
+
+    Responsibilities:
+        - ASGI runtime ownership
+        - HTTP lifecycle
+        - readiness gating
+
+    """
+
+    app: FastAPI
 
     gate: TransportGate | None = None
+
+    name: str = "http"
 
     async def startup(self) -> None:
         """Start HTTP transport."""
@@ -23,4 +34,3 @@ class FastAPITransport:
 
     async def shutdown(self) -> None:
         """Shutdown HTTP transport."""
-        return

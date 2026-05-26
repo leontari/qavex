@@ -13,7 +13,8 @@ def main() -> None:
     kernel = bootstrap_kernel()
 
     launcher = KernelLauncher(
-        _kernel=kernel, _config=LauncherConfig(mode=LaunchMode.KAFKA)
+        _kernel=kernel,
+        _config=LauncherConfig(mode=LaunchMode.KAFKA),
     )
 
     launcher.run()
