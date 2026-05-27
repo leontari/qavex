@@ -2,18 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from template_app.launcher.exceptions import UnsupportedLaunchModeError
 from template_app.launcher.modes import LaunchMode
-
-# from template_app.runtime.transports.cli.transport import CLITransport
-# from template_app.runtime.transports.grpc.transport import GRPCTransport
-# from template_app.runtime.transports.http.factory import create_http_app
-# from template_app.runtime.transports.http.transport import FastAPITransport
-# from template_app.runtime.transports.kafka.transport import KafkaTransport
 
 if TYPE_CHECKING:
     from template_app.launcher.config import LauncherConfig
@@ -67,7 +60,7 @@ class KernelLauncher:
 
     def _run_http(self) -> None:
         """Run HTTP runtime."""
-        from template_app.runtime.transports.http.entrypoint import (
+        from template_app.runtime.transports.http.entrypoint import (  # noqa: PLC0415
             run_http_runtime,
         )
 
@@ -75,25 +68,10 @@ class KernelLauncher:
             kernel=self._kernel,
             config=self._config,
         )
-        # app = create_http_app(self._kernel)
-        #
-        # transport = FastAPITransport(app)
-        # # transport = FastAPITransport(app, self.kernel)
-        # self._kernel.install_transport(transport)
-        #
-        # import uvicorn  # noqa: PLC0415
-        #
-        # uvicorn.run(
-        #     app,
-        #     host=self._config.host,
-        #     port=self._config.port,
-        #     reload=self._config.reload,
-        #     workers=self._config.workers,
-        # )
 
     def _run_kafka(self) -> None:
         """Run Kafka runtime."""
-        from template_app.runtime.transports.kafka.entrypoint import (
+        from template_app.runtime.transports.kafka.entrypoint import (  # noqa: PLC0415
             run_kafka_runtime,
         )
 
@@ -103,14 +81,20 @@ class KernelLauncher:
 
     def _run_grpc(self) -> None:
         """Run gRPC runtime."""
-        from template_app.runtime.transports.grpc.entrypoint import (
+        from template_app.runtime.transports.grpc.entrypoint import (  # noqa: PLC0415
             run_grpc_runtime,
         )
 
-        run_grpc_runtime(kernel=self._kernel)
+        run_grpc_runtime(
+            kernel=self._kernel,
+        )
 
     def _run_cli(self) -> None:
         """Run CLI runtime."""
-        from template_app.runtime.transports.cli.entrypoint import (
+        from template_app.runtime.transports.cli.entrypoint import (  # noqa: PLC0415
             run_cli_runtime,
+        )
+
+        run_cli_runtime(
+            kernel=self._kernel,
         )

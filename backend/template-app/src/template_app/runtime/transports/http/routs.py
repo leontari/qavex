@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
-
 from typing import TYPE_CHECKING
+
+from fastapi import APIRouter, HTTPException
 
 if TYPE_CHECKING:
     from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-def create_runtime_router(
-    kernel: RuntimeKernel,
-) -> APIRouter:
+def create_runtime_router(kernel: RuntimeKernel) -> APIRouter:
 
     router = APIRouter()
 

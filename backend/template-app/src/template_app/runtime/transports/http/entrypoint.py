@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import uvicorn
 
+from template_app.runtime.transports.http.config import HTTPTransportConfig
 from template_app.runtime.transports.http.factory import create_http_app
 from template_app.runtime.transports.http.transport import FastAPITransport
 
@@ -29,9 +30,11 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
         kernel:
             Runtime kernel instance.
         config:
-            uvicorn server configurations
+            HTTP runtime configuration
 
     """
+    config = config or HTTPTransportConfig()
+
     app: FastAPI = create_http_app(kernel=kernel)
 
     transport = FastAPITransport(app=app)
@@ -44,4 +47,5 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
         port=config.port,
         reload=config.reload,
         workers=config.workers,
+        access_log=config.access_log,
     )

@@ -3,24 +3,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.kernel import RuntimeKernel
+    from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-class CLITransport:
-    def __init__(self, kernel: RuntimeKernel):
+class CLITransport:  # noqa: D101
+    def __init__(self, kernel: RuntimeKernel):  # noqa: ANN204, D107
         self.kernel = kernel
 
-    async def startup(self) -> None:
-        print("CLI started")
+    async def startup(self) -> None:  # noqa: D102
+        print("CLI started")  # noqa: T201
         await self._loop()
 
-    async def _loop(self):
+    async def _loop(self):  # noqa: ANN202
         while True:
-            cmd = input("> ")
+            cmd = input("> ")  # noqa: ASYNC250
             if cmd == "exit":
                 break
             result = await self.kernel.context.runtime.messaging.dispatch(cmd)
-            print(result)
+            print(result)  # noqa: T201
 
-    async def shutdown(self) -> None:
-        print("CLI shutdown")
+    async def shutdown(self) -> None:  # noqa: PLR6301, D102
+        print("CLI shutdown")  # noqa: T201

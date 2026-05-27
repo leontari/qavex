@@ -10,32 +10,11 @@ from template_app.launcher.modes import LaunchMode
 @dataclass(frozen=True, slots=True)
 class LauncherConfig:
     """
-    Uvicorn server runtime configuration.
+    Runtime launcher configuration.
 
-    Attributes:
-        mode:
-            Runtime launch mode.
-
-        host:
-            Bind host.
-
-        port:
-            Bind port.
-
-        reload:
-            Enable development reload.
-
-        workers:
-            Number of runtime workers.
-
+    Responsibilities:
+        - runtime mode selection
+        - orchestration-level configuration
     """
 
     mode: LaunchMode = LaunchMode.HTTP
-
-    host: str = "127.0.0.1"  # TODO: update after profiling is finished
-
-    port: int = 8000
-
-    reload: bool = False
-
-    workers: int = 1
