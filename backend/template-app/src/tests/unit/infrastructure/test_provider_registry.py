@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from template_app.runtime.infrastructure.registry import (
+from template_app.runtime.infrastructure import (
     InfrastructureRegistry,
 )
 

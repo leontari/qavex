@@ -2,7 +2,7 @@ from tests.factories.module_context import (
     build_module_context,
 )
 
-from template_app.infrastructure.cache.provider import (
+from template_app.runtime.infrastructure import (
     CacheProvider,
 )
 

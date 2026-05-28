@@ -170,3 +170,17 @@ def test_grpc_supports_probes() -> None:
 
 def test_cli_does_not_support_probes() -> None:
     assert LaunchMode.CLI.supports_probes is False
+
+
+def test_all_launch_modes_present() -> None:
+    assert LaunchMode.HTTP
+    assert LaunchMode.KAFKA
+    assert LaunchMode.GRPC
+    assert LaunchMode.CLI
+
+
+def test_launch_mode_classification() -> None:
+    assert LaunchMode.HTTP.is_http is True
+    assert LaunchMode.KAFKA.is_worker is True
+    assert LaunchMode.GRPC.is_network_transport is True
+    assert LaunchMode.CLI.is_worker is True

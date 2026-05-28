@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.messaging.runtime.command_bus import (
+    from template_app.runtime.messaging.buses.command_bus import (
         RuntimeCommandBus,
     )
-    from template_app.runtime.messaging.runtime.event_bus import (
+    from template_app.runtime.messaging.buses.event_bus import (
         RuntimeEventBus,
     )
-    from template_app.runtime.messaging.runtime.query_bus import (
+    from template_app.runtime.messaging.buses.query_bus import (
         RuntimeQueryBus,
     )
 

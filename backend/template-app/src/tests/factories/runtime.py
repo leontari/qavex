@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-from template_app.runtime.infrastructure.registry import (
+from template_app.runtime.infrastructure import (
     InfrastructureRegistry,
 )
 from template_app.runtime.container.container import Container
 from template_app.runtime.lifecycle.manager import LifecycleManager
 from template_app.runtime.lifecycle.registry import LifecycleRegistry
-from template_app.runtime.messaging.runtime.command_bus import (
+from template_app.runtime.messaging.buses.command_bus import (
     RuntimeCommandBus,
 )
-from template_app.runtime.messaging.runtime.event_bus import (
+from template_app.runtime.messaging.buses.event_bus import (
     RuntimeEventBus,
 )
-from template_app.runtime.messaging.runtime.query_bus import (
+from template_app.runtime.messaging.buses.query_bus import (
     RuntimeQueryBus,
 )
-from template_app.runtime.messaging.runtime.registry import (
+from template_app.runtime.messaging.registry import (
     RuntimeHandlerRegistry,
 )
 from template_app.runtime.kernel.state import RuntimeState

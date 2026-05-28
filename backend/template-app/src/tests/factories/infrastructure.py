@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from template_app.runtime.infrastructure.registry import (
+from template_app.runtime.infrastructure import (
     InfrastructureRegistry,
 )
-from template_app.infrastructure.cache.provider import (
+from template_app.runtime.infrastructure import (
     CacheProvider,
 )
-from template_app.infrastructure.database.provider import (
+from template_app.runtime.infrastructure import (
     DatabaseProvider,
 )
-from template_app.infrastructure.queue.provider import (
+from template_app.runtime.infrastructure import (
     QueueProvider,
 )
 

@@ -31,8 +31,6 @@ def run_cli_runtime(kernel: RuntimeKernel) -> None:
     Args:
         kernel:
             Runtime kernle instance
-        config:
-            interactive runtime configuration
 
     """
     parser: ArgumentParser = build_cli_parser()

@@ -1,4 +1,4 @@
-"""Provider Registry."""
+"""Infrastructure registry."""
 
 from __future__ import annotations
 
@@ -7,11 +7,25 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .contracts import InfrastructureProvider
+    from .infra.cache import CacheProvider
+    from .infra.database import DatabaseProvider
+    from .infra.queue import QueueProvider
 
 
 @dataclass(slots=True)
 class InfrastructureRegistry:
-    """Infrastructure provider registry."""
+    """
+    Infrastructure provider registry.
+
+    Responsibilities:
+        - infrastructure provider ownership
+        - infrastructure exposure boundary
+
+    """
+
+    cache: CacheProvider
+    database: DatabaseProvider
+    queue: QueueProvider
 
     _providers: dict[str, InfrastructureProvider] = field(
         default_factory=dict,

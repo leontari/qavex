@@ -1,4 +1,4 @@
-"""Abstractions existing while kernel is running."""
+"""Application runtime composition graph."""
 
 from __future__ import annotations
 
@@ -7,37 +7,35 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from template_app.runtime.container.container import Container
-    from template_app.runtime.infrastructure.registry import (
-        InfrastructureRegistry,
+    from template_app.runtime.infrastructure.runtime import (
+        InfrastructureRuntime,
     )
-    from template_app.runtime.lifecycle.manager import LifecycleManager
-    from template_app.runtime.lifecycle.registry import LifecycleRegistry
-    from template_app.runtime.messaging.runtime import (
-        RuntimeCommandBus,
-        RuntimeEventBus,
-        RuntimeQueryBus,
-    )
-    from template_app.runtime.messaging.runtime.registry import (
-        RuntimeHandlerRegistry,
-    )
+    from template_app.runtime.lifecycle.runtime import LifecycleRuntime
+    from template_app.runtime.messaging.runtime import MessagingRuntime
+    from template_app.runtime.modules.runtime import ModuleRuntime
+    from template_app.runtime.transports.runtime import TransportRuntime
 
 
 @dataclass(slots=True)
 class RuntimeState:
-    """Application runtime state."""
+    """
+    Application runtime state.
+
+    Responsibilities:
+        - runtime ownership
+        - composition graph ownership
+        - runtime domains ownership
+
+    """
 
     container: Container
 
-    lifecycle_registry: LifecycleRegistry
+    lifecycle: LifecycleRuntime
 
-    lifecycle_manager: LifecycleManager
+    infrastructure: InfrastructureRuntime
 
-    infrastructure_registry: InfrastructureRegistry
+    messaging: MessagingRuntime
 
-    messaging_registry: RuntimeHandlerRegistry
+    transports: TransportRuntime
 
-    event_bus: RuntimeEventBus
-
-    command_bus: RuntimeCommandBus
-
-    query_bus: RuntimeQueryBus
+    modules: ModuleRuntime

@@ -8,14 +8,14 @@ from fastapi import APIRouter
 from template_app.runtime.container.container import (
     Container,
 )
-from template_app.runtime.infrastructure.registry import (
+from template_app.runtime.infrastructure import (
     InfrastructureRegistry,
 )
 from template_app.runtime.lifecycle import (
     LifecycleManager,
     LifecycleRegistry,
 )
-from template_app.runtime.messaging.runtime import (
+from template_app.runtime.messaging.buses import (
     RuntimeCommandBus,
     RuntimeEventBus,
     RuntimeHandlerRegistry,

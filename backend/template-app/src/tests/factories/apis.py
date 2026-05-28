@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
-from template_app.runtime.infrastructure.registry import (
+from template_app.runtime.infrastructure import (
     InfrastructureRegistry,
 )
-from template_app.runtime.messaging.runtime import (
+from template_app.runtime.messaging.buses import (
     RuntimeCommandBus,
     RuntimeEventBus,
     RuntimeQueryBus,

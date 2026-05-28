@@ -44,3 +44,11 @@
 - [ ] FactoryProvider
 - [ ] AsyncProvider
 - [ ] ScopedProvider
+
+## Launcher
+- [ ] runtime node graph executor instead of switch-case?
+- [ ] runtime phases
+- [ ] runtime conditions
+- [ ] runtime readiness
+- [ ] runtime health graph
+- [ ] runtime capability negotiation

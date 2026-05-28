@@ -22,11 +22,11 @@ if TYPE_CHECKING:
     from template_app.runtime.container.contracts import (
         DependencyProvider,
     )
-    from template_app.runtime.infrastructure.contracts import (
+    from template_app.runtime.infrastructure import (
         InfrastructureProvider,
     )
     from template_app.runtime.lifecycle import LifecycleHook
-    from template_app.runtime.messaging.runtime.event_bus import (
+    from template_app.runtime.messaging.buses.event_bus import (
         RuntimeEventBus,
     )
     from template_app.runtime.module.apis import (

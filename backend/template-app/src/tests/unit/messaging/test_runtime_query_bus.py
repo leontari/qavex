@@ -5,10 +5,10 @@ import pytest
 from template_app.runtime.messaging.contracts.queries import (
     Query,
 )
-from template_app.runtime.messaging.runtime.query_bus import (
+from template_app.runtime.messaging.buses.query_bus import (
     RuntimeQueryBus,
 )
-from template_app.runtime.messaging.runtime.registry import (
+from template_app.runtime.messaging.registry import (
     RuntimeHandlerRegistry,
 )
 

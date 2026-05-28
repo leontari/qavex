@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from template_app.runtime.messaging.contracts.commands import Command
 
-    from .registry import RuntimeHandlerRegistry
+    from template_app.runtime.messaging.registry import RuntimeHandlerRegistry
 
 
 @dataclass(slots=True)
