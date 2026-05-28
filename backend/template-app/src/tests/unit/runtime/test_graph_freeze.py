@@ -1,6 +1,6 @@
 import pytest
 
-from template_app.runtime.runtime.graph.freeze import (
+from template_app.runtime.kernel.runtime.graph.freeze import (
     RuntimeGraphFreeze,
 )
 

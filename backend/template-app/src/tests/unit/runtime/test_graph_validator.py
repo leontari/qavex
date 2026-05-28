@@ -1,4 +1,4 @@
-from template_app.runtime.runtime.graph.validator import (
+from template_app.runtime.kernel.runtime.graph.validator import (
     RuntimeGraphValidator,
 )
 from tests.factories.runtime import build_runtime_state

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from template_app.runtime.runtime.capabilities.models import (
+from template_app.runtime.kernel.runtime.capabilities.models import (
     RuntimeCapabilities,
 )
 from template_app.runtime.transports.http.transport import (

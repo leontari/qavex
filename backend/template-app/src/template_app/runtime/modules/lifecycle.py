@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.module.activation import activate_module
-from template_app.runtime.module.discovery import discover_modules
-from template_app.runtime.module.loader import load_modules
+from template_app.runtime.modules.activation import activate_module
+from template_app.runtime.modules.discovery import discover_modules
+from template_app.runtime.modules.loader import load_modules
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from template_app.runtime.module import ModuleContext
-    from template_app.runtime.module.manifests import ModuleManifest
-    from template_app.runtime.module.registry import ModuleRegistry
+    from template_app.runtime.modules.context import ModuleContext
+    from template_app.runtime.modules.manifests import ModuleManifest
+    from template_app.runtime.modules.registry import ModuleRegistry
 
 
 def discover(registry: ModuleRegistry) -> tuple[ModuleManifest, ...]:

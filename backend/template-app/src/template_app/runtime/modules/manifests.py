@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.module.capabilities import ModuleCapability
-    from template_app.runtime.module.contracts import ModuleProtocol
+    from template_app.runtime.modules.capabilities import ModuleCapability
+    from template_app.runtime.modules.contracts import ModuleProtocol
 
 
 @dataclass(frozen=True, slots=True)

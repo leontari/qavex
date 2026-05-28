@@ -1,4 +1,4 @@
-from template_app.runtime.runtime.capabilities.runtime import (
+from template_app.runtime.kernel.runtime.capabilities.runtime import (
     build_runtime_capabilities,
 )
 from tests.factories.runtime import build_runtime_state

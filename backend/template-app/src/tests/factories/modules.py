@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from template_app.runtime.lifecycle.hooks import LifecycleHook
-from template_app.runtime.module.context import ModuleContext
+from template_app.runtime.modules.context import ModuleContext
 
 
 class FakeModule:

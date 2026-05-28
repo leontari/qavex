@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from template_app.runtime.runtime.descriptors.models import (
+from template_app.runtime.kernel.runtime.descriptors.models import (
     RuntimeDescriptor,
 )
 

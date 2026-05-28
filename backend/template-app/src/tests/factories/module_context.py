@@ -21,11 +21,11 @@ from template_app.runtime.messaging.buses import (
     RuntimeHandlerRegistry,
     RuntimeQueryBus,
 )
-from template_app.runtime.module import (
+from template_app.runtime.modules import (
     ModuleCapability,
     ModuleContext,
 )
-from template_app.runtime.module.apis import (
+from template_app.runtime.modules.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
     ModuleRuntimeAPI,

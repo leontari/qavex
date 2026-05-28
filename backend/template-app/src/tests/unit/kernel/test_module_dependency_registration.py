@@ -2,11 +2,11 @@ from tests.factories.module_context import (
     build_module_context,
 )
 
-from template_app.runtime.infrastructure import (
+from template_app.runtime.infrastructure.infra import (
     CacheProvider,
 )
 
-from template_app.runtime.module.capabilities import (
+from template_app.runtime.modules.capabilities import (
     ModuleCapability,
 )
 

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from template_app.runtime.infrastructure.runtime import (
         InfrastructureRuntime,
     )
-    from template_app.runtime.kernel.state import RuntimeState
+    from template_app.runtime.kernel.runtime.state import RuntimeState
     from template_app.runtime.lifecycle.runtime import LifecycleRuntime
     from template_app.runtime.messaging.runtime import MessagingRuntime
     from template_app.runtime.modules.manifests import ModuleManifest

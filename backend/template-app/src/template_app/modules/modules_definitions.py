@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 from fastapi import APIRouter
 
 from template_app.runtime.lifecycle.hooks import LifecycleHook
-from template_app.runtime.module.capabilities import ModuleCapability
-from template_app.runtime.module.manifests import ModuleManifest
-from template_app.runtime.module.registry import ModuleRegistry
+from template_app.runtime.modules.capabilities import ModuleCapability
+from template_app.runtime.modules.manifests import ModuleManifest
+from template_app.runtime.modules.registry import ModuleRegistry
 
 if TYPE_CHECKING:
-    from template_app.runtime.module.context import ModuleContext
+    from template_app.runtime.modules.context import ModuleContext
 
 
 class HealthModule:

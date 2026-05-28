@@ -1,5 +1,5 @@
-from template_app.runtime.module.manifests import ModuleManifest
-from template_app.runtime.module.registry import ModuleRegistry
+from template_app.runtime.modules.manifests import ModuleManifest
+from template_app.runtime.modules.registry import ModuleRegistry
 
 
 class FakeModule:

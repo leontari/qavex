@@ -1,4 +1,4 @@
-from template_app.runtime.module.context import (
+from template_app.runtime.modules.context import (
     ModuleContext,
 )
 

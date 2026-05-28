@@ -18,7 +18,7 @@ from template_app.runtime.messaging.buses.query_bus import (
 from template_app.runtime.messaging.registry import (
     RuntimeHandlerRegistry,
 )
-from template_app.runtime.kernel.state import RuntimeState
+from template_app.runtime.kernel.runtime.state import RuntimeState
 
 
 def build_runtime_state() -> RuntimeState:

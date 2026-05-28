@@ -1,4 +1,4 @@
-from template_app.runtime.runtime.descriptors.runtime import (
+from template_app.runtime.kernel.runtime.descriptors import (
     build_runtime_descriptor,
 )
 from tests.factories.runtime import build_runtime_state

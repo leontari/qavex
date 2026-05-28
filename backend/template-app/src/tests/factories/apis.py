@@ -9,7 +9,7 @@ from template_app.runtime.messaging.buses import (
     RuntimeQueryBus,
     RuntimeHandlerRegistry,
 )
-from template_app.runtime.module.apis import (
+from template_app.runtime.modules.apis import (
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
     ModuleInfraAPI,

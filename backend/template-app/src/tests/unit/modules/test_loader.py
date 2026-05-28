@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from template_app.runtime.module import (
+from template_app.runtime.modules import (
     ModuleCapability,
     ModuleManifest,
 )
-from template_app.runtime.module.lifecycle import (
+from template_app.runtime.modules.lifecycle import (
     load,
 )
 

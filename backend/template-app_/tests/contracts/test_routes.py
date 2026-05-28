@@ -1,4 +1,4 @@
-from template_app.runtime.runtime import (
+from template_app.runtime.kernel.runtime import (
     bootstrap_application,
 )
 

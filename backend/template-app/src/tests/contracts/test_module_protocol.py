@@ -5,10 +5,10 @@ from fastapi import APIRouter
 from template_app.runtime.container.contracts import (
     DependencyProvider,
 )
-from template_app.runtime.module.contracts import (
+from template_app.runtime.modules.contracts import (
     ModuleProtocol,
 )
-from template_app.runtime.module.capabilities import (
+from template_app.runtime.modules.capabilities import (
     ModuleCapability,
 )
 from tests.factories.module_context import (

@@ -1,7 +1,7 @@
-from template_app.runtime.module.setup import (
+from template_app.runtime.modules.setup import (
     setup_modules,
 )
-from template_app.runtime.module.registry import (
+from template_app.runtime.modules.registry import (
     ModuleRegistry,
 )
 from tests.factories.kernel import (

@@ -1,4 +1,4 @@
-from template_app.runtime.module.manifests import (
+from template_app.runtime.modules.manifests import (
     ModuleManifest,
 )
 from template_app.runtime.kernel.bootstrap import (

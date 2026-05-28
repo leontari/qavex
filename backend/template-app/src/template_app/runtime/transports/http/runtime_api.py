@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from template_app.runtime.module.apis.runtime import ModuleRuntimeAPI
+from template_app.runtime.modules.apis.runtime import ModuleRuntimeAPI
 
 if TYPE_CHECKING:
     from fastapi import APIRouter, FastAPI

@@ -1,5 +1,5 @@
 """helper presets."""
-from template_app.runtime.module.capabilities import (
+from template_app.runtime.modules.capabilities import (
     ModuleCapability,
 )
 

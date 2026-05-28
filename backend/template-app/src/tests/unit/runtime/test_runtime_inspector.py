@@ -1,4 +1,4 @@
-from template_app.runtime.runtime.graph.inspector import (
+from template_app.runtime.kernel.runtime.graph.inspector import (
     RuntimeGraphInspector,
 )
 from tests.factories.runtime import build_runtime_state

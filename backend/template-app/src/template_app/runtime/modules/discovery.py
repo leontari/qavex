@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.module.manifests import ModuleManifest
-    from template_app.runtime.module.registry import ModuleRegistry
+    from template_app.runtime.modules.manifests import ModuleManifest
+    from template_app.runtime.modules.registry import ModuleRegistry
 
 
 def discover_modules(registry: ModuleRegistry) -> tuple[ModuleManifest, ...]:
