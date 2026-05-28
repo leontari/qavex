@@ -32,6 +32,14 @@ from template_app.runtime.messaging.registry import RuntimeHandlerRegistry
 from template_app.runtime.messaging.runtime import MessagingRuntime
 from template_app.runtime.modules.registry import ModuleRegistry
 from template_app.runtime.modules.runtime import ModuleRuntime
+from template_app.runtime.runtime.capabilities.runtime import (
+    build_runtime_capabilities,
+)
+from template_app.runtime.runtime.descriptors.runtime import (
+    build_runtime_descriptor,
+)
+from template_app.runtime.runtime.graph.freeze import RuntimeGraphFreeze
+from template_app.runtime.runtime.graph.validator import RuntimeGraphValidator
 from template_app.runtime.transports.manager import TransportManager
 from template_app.runtime.transports.runtime import TransportRuntime
 
@@ -132,5 +140,11 @@ def bootstrap_kernel() -> RuntimeKernel:
     ###############
     # create kernel
     ###############
+
+    runtime.freeze = RuntimeGraphFreeze()
+    runtime.capabilities = build_runtime_capabilities(runtime)
+    runtime.descriptor = build_runtime_descriptor(runtime)
+    RuntimeGraphValidator.validate(runtime)
+    runtime.freeze.freeze()
 
     return RuntimeKernel.create(runtime=runtime)

@@ -33,22 +33,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.module.factory import (
+from template_app.runtime.modules.factory import (
     build_module_context,
 )
-from template_app.runtime.module.lifecycle import (
+from template_app.runtime.modules.lifecycle import (
     activate,
     discover,
     load,
 )
 
 if TYPE_CHECKING:
-    from template_app.runtime.kernel import RuntimeKernel
-    from template_app.runtime.module.context import ModuleContext
-    from template_app.runtime.module.manifests import (
+    from template_app.runtime.kernel.kernel import RuntimeKernel
+    from template_app.runtime.modules.context import ModuleContext
+    from template_app.runtime.modules.manifests import (
         ModuleManifest,
     )
-    from template_app.runtime.module.registry import (
+    from template_app.runtime.modules.registry import (
         ModuleRegistry,
     )
 

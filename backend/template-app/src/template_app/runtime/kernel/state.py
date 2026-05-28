@@ -5,6 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from template_app.runtime.runtime.capabilities.models import (
+    RuntimeCapabilities,
+)
+from template_app.runtime.runtime.descriptors.models import RuntimeDescriptor
+from template_app.runtime.runtime.graph.freeze import RuntimeGraphFreeze
+
 if TYPE_CHECKING:
     from template_app.runtime.container.container import Container
     from template_app.runtime.infrastructure.runtime import (
@@ -27,6 +33,12 @@ class RuntimeState:
         - runtime domains ownership
 
     """
+
+    freeze: RuntimeGraphFreeze
+
+    capabilities: RuntimeCapabilities
+
+    descriptor: RuntimeDescriptor
 
     container: Container
 

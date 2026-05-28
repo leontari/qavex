@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from template_app.runtime.module.capabilities import ModuleCapability
+from template_app.runtime.modules.capabilities import ModuleCapability
 
 if TYPE_CHECKING:
     from fastapi import APIRouter
@@ -22,14 +22,14 @@ if TYPE_CHECKING:
     from template_app.runtime.container.contracts import (
         DependencyProvider,
     )
-    from template_app.runtime.infrastructure import (
+    from template_app.runtime.infrastructure.contracts import (
         InfrastructureProvider,
     )
-    from template_app.runtime.lifecycle import LifecycleHook
+    from template_app.runtime.lifecycle.registry import LifecycleHook
     from template_app.runtime.messaging.buses.event_bus import (
         RuntimeEventBus,
     )
-    from template_app.runtime.module.apis import (
+    from template_app.runtime.modules.apis import (
         ModuleInfraAPI,
         ModuleMessagingAPI,
         ModuleRuntimeAPI,
