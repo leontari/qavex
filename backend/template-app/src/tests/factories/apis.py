@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 
-from template_app.runtime.infrastructure import (
+from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
 from template_app.runtime.messaging.buses import (
     RuntimeCommandBus,
     RuntimeEventBus,
     RuntimeQueryBus,
-    RuntimeHandlerRegistry,
 )
+from template_app.runtime.messaging.registry import RuntimeHandlerRegistry
 from template_app.runtime.modules.apis import (
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
@@ -17,7 +17,7 @@ from template_app.runtime.modules.apis import (
 from template_app.runtime.container.container import (
     Container,
 )
-from template_app.runtime.lifecycle import (
+from template_app.runtime.lifecycle.registry import (
     LifecycleRegistry,
 )
 

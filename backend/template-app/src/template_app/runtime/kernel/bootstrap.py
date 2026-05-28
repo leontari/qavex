@@ -101,9 +101,9 @@ def bootstrap_kernel() -> RuntimeKernel:
     ######################
 
     infra_registry = InfrastructureRegistry(
-        cache=CacheProvider(),
-        database=DatabaseProvider(),
-        queue=QueueProvider(),
+        cache=CacheProvider("url_address"),
+        database=DatabaseProvider("dsn_address"),
+        queue=QueueProvider(["Broker_ONE", "Broker_TWO"]),
     )
 
     infrastructure_runtime = InfrastructureRuntime(
@@ -143,10 +143,10 @@ def bootstrap_kernel() -> RuntimeKernel:
     # create kernel
     ###############
 
-    runtime.freeze = RuntimeGraphFreeze()
-    runtime.capabilities = build_runtime_capabilities(runtime)
-    runtime.descriptor = build_runtime_descriptor(runtime)
-    RuntimeGraphValidator.validate(runtime)
-    runtime.freeze.freeze()
+    # runtime.freeze = RuntimeGraphFreeze()
+    # runtime.capabilities = build_runtime_capabilities(runtime)
+    # runtime.descriptor = build_runtime_descriptor(runtime)
+    # RuntimeGraphValidator.validate(runtime)
+    # runtime.freeze.freeze()
 
     return RuntimeKernel.create(runtime=runtime)

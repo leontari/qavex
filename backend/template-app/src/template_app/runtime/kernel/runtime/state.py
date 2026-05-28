@@ -36,11 +36,11 @@ class RuntimeState:
 
     """
 
-    freeze: RuntimeGraphFreeze
-
-    capabilities: RuntimeCapabilities
-
-    descriptor: RuntimeDescriptor
+    # freeze: RuntimeGraphFreeze
+    #
+    # capabilities: RuntimeCapabilities
+    #
+    # descriptor: RuntimeDescriptor
 
     container: Container
 
