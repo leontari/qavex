@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.infrastructure import (
+    from template_app.runtime.infrastructure.contracts import (
         InfrastructureProvider,
     )
-    from template_app.runtime.infrastructure import (
+    from template_app.runtime.infrastructure.registry import (
         InfrastructureRegistry,
     )
 

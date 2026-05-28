@@ -161,3 +161,9 @@ push:
 .PHONE: tree
 tree:
 	python scripts/dev/python/generate_tree.py $(filter-out $@,$(MAKECMDGOALS))
+
+.PHONE: pytest
+pytest:
+	@if "$(SERVICE)" == "" ( echo Usage: make pytest ^<service^> & exit 1 )
+	cd backend/$(SERVICE)
+	pytest

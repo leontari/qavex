@@ -25,10 +25,8 @@ def run_kafka_runtime(kernel: RuntimeKernel) -> None:
             Runtime kernel instance.
 
     """
-    consumer = None
 
     transport = KafkaTransport(
-        consumer=consumer,
         kernel=kernel,
     )
 

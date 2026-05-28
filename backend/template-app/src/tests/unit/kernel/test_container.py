@@ -7,7 +7,7 @@ import pytest
 from template_app.runtime.container.types import DependencyScope
 from template_app.runtime.container.contracts import DependencyProvider
 from template_app.runtime.container.container import Container
-from template_app.runtime.infrastructure import CacheProvider
+from template_app.runtime.infrastructure.infra import CacheProvider
 
 
 @dataclass(slots=True)

@@ -54,3 +54,16 @@ version_scheme = "towncrier-fragments"
 tag_regex = "^template-app-(?P<version>v?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
 fallback_version = "0.0.0"
 scm.git.describe_command = [ "git", "describe", "--dirty", "--tags", "--long", "--match", "template-app-*" ]
+
+[tool.pytest]
+ini_options.pythonpath = [ "src" ]
+ini_options.testpaths = [ "src/tests" ]
+ini_options.asyncio_mode = "auto"
+ini_options.addopts = [ "-ra", "-q", "--strict-markers" ]
+ini_options.markers = [
+  "unit: fast isolated tests",
+  "integration: integration runtime tests",
+  "contract: API/behavior contracts",
+  "e2e: full system tests",
+  "smoke: startup validation tests",
+]

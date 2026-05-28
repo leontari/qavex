@@ -1,4 +1,4 @@
-from template_app.transports.kafka.config import KafkaTransportConfig
+from template_app.runtime.transports.kafka.config import KafkaTransportConfig
 
 
 def test_kafka_config_defaults() -> None:

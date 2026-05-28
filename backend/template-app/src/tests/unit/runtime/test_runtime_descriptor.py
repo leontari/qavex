@@ -1,7 +1,7 @@
-from template_app.runtime.kernel.runtime.descriptors import (
+from template_app.runtime.kernel.runtime.descriptors.runtime import (
     build_runtime_descriptor,
 )
-from tests.factories.runtime import build_runtime_state
+from tests.support.factories.runtime import build_runtime_state
 
 
 def test_runtime_descriptor_created() -> None:

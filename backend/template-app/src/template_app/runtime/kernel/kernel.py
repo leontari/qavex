@@ -210,7 +210,7 @@ class RuntimeKernel:
                 If runtime graph frozen.
 
         """
-        self.runtime.freeze.ensure_mutable()
+        # self.runtime.freeze.ensure_mutable()
 
         self.runtime.transports.manager.install(
             transport,

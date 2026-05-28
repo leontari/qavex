@@ -6,7 +6,7 @@ from template_app.runtime.transports.http.factory import (
 from template_app.runtime.transports.http.transport import (
     FastAPITransport,
 )
-from tests.factories.kernel import (
+from tests.support.factories.kernel import (
     build_kernel_no_transport,
 )
 

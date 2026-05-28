@@ -1,4 +1,4 @@
-from template_app.transports.cli.config import CLITransportConfig
+from template_app.runtime.transports.cli.config import CLITransportConfig
 
 
 def test_cli_config_defaults() -> None:

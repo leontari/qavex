@@ -1,5 +1,6 @@
-from tests.fakes.transports import FakeTransport
-from template_app.runtime.transports import TransportManager
+import pytest
+from tests.support.fakes.transports import FakeTransport
+from template_app.runtime.transports.manager import TransportManager
 
 
 def test_transport_manager_installs_transport() -> None:
@@ -33,29 +34,6 @@ def test_transport_manager_get_transport() -> None:
     )
 
     assert resolved is transport
-
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-
-import pytest
-
-from template_app.runtime.transports.manager import (
-    TransportManager,
-)
-
-
-@dataclass
-class FakeTransport:
-
-    started: bool = False
-
-    async def startup(self) -> None:
-        self.started = True
-
-    async def shutdown(self) -> None:
-        self.started = False
 
 
 @pytest.mark.asyncio

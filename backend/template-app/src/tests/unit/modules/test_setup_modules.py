@@ -4,7 +4,7 @@ from template_app.runtime.modules.setup import (
 from template_app.runtime.modules.registry import (
     ModuleRegistry,
 )
-from tests.factories.kernel import (
+from tests.support.factories.kernel import (
     build_testing_kernel,
 )
 

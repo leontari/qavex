@@ -1,4 +1,4 @@
-from tests.factories.kernel import build_kernel_no_transport
+from tests.support.factories.kernel import build_kernel_no_transport
 
 
 def test_kernel_boots_without_http() -> None:

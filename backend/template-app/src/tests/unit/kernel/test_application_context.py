@@ -5,7 +5,7 @@ import pytest
 from template_app.runtime.kernel.context import (
     KernelContext,
 )
-from tests.factories.runtime import (
+from tests.support.factories.runtime import (
     build_runtime_state,
 )
 

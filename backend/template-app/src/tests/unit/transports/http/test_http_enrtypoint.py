@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from template_app.transports.http.entrypoint import run_http_runtime
+from template_app.runtime.transports.http.entrypoint import run_http_runtime
 
 
 def test_http_entrypoint_executes(monkeypatch) -> None:
@@ -8,17 +8,17 @@ def test_http_entrypoint_executes(monkeypatch) -> None:
     config = Mock()
 
     monkeypatch.setattr(
-        "template_app.transports.http.entrypoint.create_http_app",
+        "template_app.runtime.transports.http.entrypoint.create_http_app",
         lambda k: Mock(),
     )
 
     monkeypatch.setattr(
-        "template_app.transports.http.entrypoint.FastAPITransport",
+        "template_app.runtime.transports.http.entrypoint.FastAPITransport",
         lambda app: Mock(),
     )
 
     monkeypatch.setattr(
-        "template_app.transports.http.entrypoint.uvicorn.run",
+        "template_app.runtime.transports.http.entrypoint.uvicorn.run",
         lambda *a, **kw: None,
     )
 

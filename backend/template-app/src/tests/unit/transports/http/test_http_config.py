@@ -1,4 +1,4 @@
-from template_app.transports.http.config import HTTPTransportConfig
+from template_app.runtime.transports.http.config import HTTPTransportConfig
 
 
 def test_http_config_defaults() -> None:

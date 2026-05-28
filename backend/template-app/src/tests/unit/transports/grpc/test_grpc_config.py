@@ -1,4 +1,4 @@
-from template_app.transports.grpc.config import GRPCTransportConfig
+from template_app.runtime.transports.grpc.config import GRPCTransportConfig
 
 
 def test_grpc_config_defaults() -> None:

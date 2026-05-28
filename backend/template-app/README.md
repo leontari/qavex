@@ -229,3 +229,14 @@ Disabled by default.
 Goal
 
 Turn modules into self-contained runtime units.
+
+# TARGET:
+
+`microservice kernel` which is:
+
+- transport-agnostic runtime
+- modular runtime graph
+- runtime domains
+- lifecycle orchestration
+- distributed-ready kernel
+- kubernetes-oriented architecture

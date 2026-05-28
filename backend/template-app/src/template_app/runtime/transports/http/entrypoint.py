@@ -47,5 +47,5 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
         port=config.port,
         reload=config.reload,
         workers=config.workers,
-        access_log=config.access_log,
+        # access_log=config.access_log,
     )

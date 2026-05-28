@@ -1,13 +1,13 @@
 from unittest.mock import Mock
 
-from template_app.transports.kafka.entrypoint import run_kafka_runtime
+from template_app.runtime.transports.kafka.entrypoint import run_kafka_runtime
 
 
 def test_kafka_entrypoint_executes(monkeypatch) -> None:
     kernel = Mock()
 
     monkeypatch.setattr(
-        "template_app.transports.kafka.entrypoint.KafkaTransport",
+        "template_app.runtime.transports.kafka.entrypoint.KafkaTransport",
         lambda: Mock(),
     )
 

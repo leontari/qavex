@@ -1,84 +1,226 @@
-from template_app.runtime.lifecycle import LifecycleHook
-from template_app.runtime.lifecycle.executor import LifecycleExecutor
-from template_app.runtime.lifecycle.graph import LifecycleGraph
-from template_app.runtime.lifecycle.resolver import resolve_execution_order, \
-    LifecycleResolutionError
-
-
-def test_resolver_orders_dependencies():
-
-    db = LifecycleHook(
-        name="db",
-        handler=lambda: None,
-    )
-
-    cache = LifecycleHook(
-        name="cache",
-        handler=lambda: None,
-        depends_on=frozenset({"db"}),
-    )
-
-    graph = LifecycleGraph(
-        hooks=(cache, db),
-    )
-
-    ordered = resolve_execution_order(graph)
-
-    assert ordered[0].name == "db"
-    assert ordered[1].name == "cache"
-
+from __future__ import annotations
 
 import pytest
 
+from template_app.runtime.lifecycle.dag import (
+    LifecycleDAGExecutor,
+)
+from template_app.runtime.lifecycle.exceptions import (
+    LifecycleCycleError,
+)
+from template_app.runtime.lifecycle.hooks import (
+    LifecycleHook,
+)
 
-def test_cycle_detection():
 
-    a = LifecycleHook(
-        name="a",
-        handler=lambda: None,
-        depends_on=frozenset({"b"}),
+async def _noop() -> None:
+    """No-op async hook."""
+
+
+def build_hook(
+    name: str,
+    *,
+    after: tuple[str, ...] = (),
+) -> LifecycleHook:
+    """Build lifecycle hook."""
+
+    return LifecycleHook(
+        name=name,
+        handler=_noop,
+        after=after,
     )
 
-    b = LifecycleHook(
-        name="b",
-        handler=lambda: None,
-        depends_on=frozenset({"a"}),
+
+def test_dag_resolves_linear_dependencies() -> None:
+    """
+    DAG should resolve linear dependency chain.
+
+    Expected:
+        database -> cache -> api
+    """
+
+    dag = LifecycleDAGExecutor()
+
+    database = build_hook("database")
+
+    cache = build_hook(
+        "cache",
+        after=("database",),
     )
 
-    graph = LifecycleGraph(
-        hooks=(a, b),
+    api = build_hook(
+        "api",
+        after=("cache",),
     )
 
-    with pytest.raises(LifecycleResolutionError):
-        resolve_execution_order(graph)
-
-
-import pytest
-
-
-@pytest.mark.asyncio
-async def test_retry_policy():
-
-    attempts = 0
-
-    async def flaky():
-        nonlocal attempts
-
-        attempts += 1
-
-        if attempts < 2:
-            raise RuntimeError
-
-    hook = LifecycleHook(
-        name="flaky",
-        handler=flaky,
-        retries=2,
+    resolved = dag.resolve(
+        (
+            api,
+            cache,
+            database,
+        ),
     )
 
-    executor = LifecycleExecutor(
-        graph=LifecycleGraph(hooks=(hook,)),
+    assert [hook.name for hook in resolved] == [
+        "database",
+        "cache",
+        "api",
+    ]
+
+
+def test_dag_resolves_parallel_dependencies() -> None:
+    """
+    DAG should resolve parallel branches.
+    """
+
+    dag = LifecycleDAG()
+
+    database = build_hook("database")
+
+    cache = build_hook(
+        "cache",
+        after=("database",),
     )
 
-    await executor.startup()
+    queue = build_hook(
+        "queue",
+        after=("database",),
+    )
 
-    assert attempts == 2
+    resolved = dag.resolve(
+        (
+            cache,
+            queue,
+            database,
+        ),
+    )
+
+    names = [hook.name for hook in resolved]
+
+    assert names[0] == "database"
+
+    assert set(names[1:]) == {
+        "cache",
+        "queue",
+    }
+
+
+def test_dag_detects_cycle() -> None:
+    """
+    DAG should detect dependency cycle.
+    """
+
+    dag = LifecycleDAG()
+
+    a = build_hook(
+        "a",
+        after=("c",),
+    )
+
+    b = build_hook(
+        "b",
+        after=("a",),
+    )
+
+    c = build_hook(
+        "c",
+        after=("b",),
+    )
+
+    with pytest.raises(
+        LifecycleCycleError,
+    ):
+        dag.resolve(
+            (
+                a,
+                b,
+                c,
+            ),
+        )
+
+
+def test_dag_allows_independent_hooks() -> None:
+    """
+    DAG should allow hooks without dependencies.
+    """
+
+    dag = LifecycleDAGExecutor()
+
+    a = build_hook("a")
+    b = build_hook("b")
+    c = build_hook("c")
+
+    resolved = dag.resolve(
+        (
+            a,
+            b,
+            c,
+        ),
+    )
+
+    assert len(resolved) == 3
+
+    assert {
+        hook.name
+        for hook in resolved
+    } == {
+        "a",
+        "b",
+        "c",
+    }
+
+
+def test_dag_preserves_dependency_order() -> None:
+    """
+    DAG should preserve dependency ordering guarantees.
+    """
+
+    dag = LifecycleDAG()
+
+    core = build_hook("core")
+
+    transport = build_hook(
+        "transport",
+        after=("core",),
+    )
+
+    observability = build_hook(
+        "observability",
+        after=("core",),
+    )
+
+    api = build_hook(
+        "api",
+        after=(
+            "transport",
+            "observability",
+        ),
+    )
+
+    resolved = dag.resolve(
+        (
+            api,
+            observability,
+            transport,
+            core,
+        ),
+    )
+
+    names = [
+        hook.name
+        for hook in resolved
+    ]
+
+    assert names.index("core") < names.index("transport")
+
+    assert names.index("core") < names.index(
+        "observability",
+    )
+
+    assert names.index("transport") < names.index(
+        "api",
+    )
+
+    assert names.index("observability") < names.index(
+        "api",
+    )

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from template_app.runtime.infrastructure import (
+from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from template_app.runtime.infrastructure import (
+from template_app.runtime.infrastructure.infra import (
     CacheProvider,
 )
 
