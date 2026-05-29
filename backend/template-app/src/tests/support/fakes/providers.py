@@ -11,10 +11,12 @@ from template_app.runtime.container.contracts import (
 @dataclass(slots=True)
 class FakeDependencyProvider(DependencyProvider):
     """
-    Fake DI provider.
+    Generic infrastructure provider fake.
     """
 
-    value: Any
+    initialized: bool = False
+
+    shutdown_called: bool = False
 
     @property
     def name(self) -> str:
@@ -26,3 +28,9 @@ class FakeDependencyProvider(DependencyProvider):
 
     def provide(self) -> Any:
         return self.value
+
+    async def startup(self) -> None:
+        self.initialized = True
+
+    async def shutdown(self) -> None:
+        self.shutdown_called = True

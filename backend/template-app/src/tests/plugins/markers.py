@@ -2,28 +2,23 @@ from __future__ import annotations
 
 
 def pytest_configure(config) -> None:
+    """
+    Register test markers.
+    """
 
-    config.addinivalue_line(
-        "markers",
+    markers = [
         "unit: fast isolated tests",
-    )
-
-    config.addinivalue_line(
-        "markers",
-        "integration: runtime integration tests",
-    )
-
-    config.addinivalue_line(
-        "markers",
+        "integration: runtime integration tests"
         "e2e: end-to-end tests",
-    )
-
-    config.addinivalue_line(
-        "markers",
         "spec: architecture/specification tests",
-    )
+        "slow: expensive tests"
+        "transport",
+        "messaging",
+        "lifecycle",
+        "infrastructure",
+        "modules",
+        "runtime",
+    ]
 
-    config.addinivalue_line(
-        "markers",
-        "slow: expensive tests",
-    )
+    for marker in markers:
+        config.addinivalue_line("markers", marker)

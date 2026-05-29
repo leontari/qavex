@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.cli.transport import (
     CLITransport,
 )
@@ -20,11 +21,16 @@ from template_app.runtime.transports.http.transport import (
 from template_app.runtime.transports.kafka.transport import (
     KafkaTransport,
 )
+from template_app.runtime.transports.manager import TransportManager
 from tests.support.harness.kernel_test_harness import (
     KernelTestHarness,
 )
 
 TransportFactory = Callable[..., Transport]
+
+@pytest.fixture
+def transport_manager(kernel: RuntimeKernel) -> TransportManager:
+    return kernel.transport_manager
 
 
 @pytest.fixture
@@ -61,21 +67,22 @@ def transport_factory() -> TransportFactory:
             KeyError:
                 Unknown transport type.
         """
-        transport_cls = registry[
-            transport_type
-        ]
 
-        return transport_cls(
-            **kwargs,
-        )
+        return registry[transport_type](**kwargs)
 
     return factory
 
 
+@pytest.fixture(params=["http", "grpc", "kafka", "cli",])
+def transport_type(request: pytest.FixtureRequest) -> str:
+    """
+    Parametrized runtime transport type.
+    """
+    return str(request.param)
+
+
 @pytest.fixture
-def installed_transport(
-    kernel_harness: KernelTestHarness,
-):
+def installed_transport(kernel_harness: KernelTestHarness):
     """
     Install runtime transport dynamically.
 
@@ -93,23 +100,6 @@ def installed_transport(
         return transport
 
     return installer
-
-
-@pytest.fixture(
-    params=[
-        "http",
-        "grpc",
-        "kafka",
-        "cli",
-    ],
-)
-def transport_type(
-    request: pytest.FixtureRequest,
-) -> str:
-    """
-    Parametrized runtime transport type.
-    """
-    return str(request.param)
 
 
 @pytest.fixture

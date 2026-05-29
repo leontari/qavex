@@ -17,10 +17,15 @@ from __future__ import annotations
 
 from typing import TypeVar
 
+from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
 from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 from template_app.runtime.kernel.kernel import RuntimeKernel
+from template_app.runtime.lifecycle.runtime import LifecycleRuntime
+from template_app.runtime.messaging.runtime import MessagingRuntime
+from template_app.runtime.modules.runtime import ModuleRuntime
 from template_app.runtime.transports.contracts import Transport
+from template_app.runtime.transports.runtime import TransportRuntime
 
 TTransport = TypeVar("TTransport", bound=Transport)
 
@@ -65,16 +70,31 @@ class KernelTestHarness:
     # runtime domains
     #################
 
+    @property
+    def lifecycle(self) -> LifecycleRuntime:
+        return self._kernel.lifecycle
 
+    @property
+    def infrastructure(self) -> InfrastructureRuntime:
+        return self._kernel.infrastructure
+
+    @property
+    def messaging(self) -> MessagingRuntime:
+        return self._kernel.messaging
+
+    @property
+    def modules(self) -> ModuleRuntime:
+        return self._kernel.module_runtime
+
+    @property
+    def transports(self) -> TransportRuntime:
+        return self._kernel.transport_runtime
 
     ############
     # transports
     ############
 
-    def install_transport(
-        self,
-        transport: Transport,
-    ) -> None:
+    def install_transport(self, transport: Transport) -> None:
         """
         Install runtime transport.
 

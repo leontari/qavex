@@ -9,7 +9,7 @@ class FakeTransport:
     Runtime fake transport.
     """
 
-    name: str
+    name: str = "fake"
 
     started: bool = False
 

@@ -16,5 +16,5 @@ def kernel_harness() -> KernelTestHarness:
 
 @pytest.fixture
 def kernel(kernel_harness: KernelTestHarness) -> RuntimeKernel:
-    """Return kernel fixture."""
+    """Return runtime kernel facade."""
     return kernel_harness.kernel
