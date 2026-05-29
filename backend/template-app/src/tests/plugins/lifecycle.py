@@ -1,25 +1,31 @@
 from __future__ import annotations
 
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncIterator
 
 import pytest
 
-from template_app.runtime.lifecycle.runtime import LifecycleRuntime
+from tests.support.fakes.lifecycle import FakeLifecycleHook
 from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 @pytest.fixture
-def lifecycle(kernel_harness: KernelTestHarness) -> LifecycleRuntime:
+def startup_hook() -> FakeLifecycleHook:
     """
-    Lifecycle runtime domain.
+    Return fake startup hook.
     """
-    return kernel_harness.lifecycle
+    return FakeLifecycleHook()
 
 
 @pytest.fixture
-async def started_kernel(
-    kernel_harness: KernelTestHarness
-) -> AsyncGenerator[KernelTestHarness, Any]:
+def shutdown_hook() -> FakeLifecycleHook:
+    """
+    Return fake shutdown hook.
+    """
+    return FakeLifecycleHook()
+
+
+@pytest.fixture
+async def started_kernel(kernel_harness: KernelTestHarness) -> AsyncIterator:
     """
     Started runtime harness.
     """

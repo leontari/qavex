@@ -680,3 +680,21 @@ integration/
 e2e/
     actual FastAPI/gRPC/Kafka runtime
 ```
+
+## Test init flow
+```text
+KernelTestHarness
+├── kernel
+├── runtime
+├── lifecycle
+├── transports
+├── messaging
+├── modules
+├── infrastructure
+├── startup()
+├── shutdown()
+├── install_transport()
+├── register_hook()
+├── register_module()
+└── override_provider()
+```

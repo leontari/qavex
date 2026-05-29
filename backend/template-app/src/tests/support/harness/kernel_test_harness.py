@@ -15,12 +15,14 @@ domain runtimes (lifecycle / infra / messaging / modules / transports)
 """
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
 from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 from template_app.runtime.kernel.kernel import RuntimeKernel
+from template_app.runtime.lifecycle.hooks import LifecycleHook
 from template_app.runtime.lifecycle.runtime import LifecycleRuntime
 from template_app.runtime.messaging.runtime import MessagingRuntime
 from template_app.runtime.modules.runtime import ModuleRuntime
@@ -29,10 +31,9 @@ from template_app.runtime.transports.runtime import TransportRuntime
 
 TTransport = TypeVar("TTransport", bound=Transport)
 
-
 class KernelTestHarness:
     """
-    Unifies runtime-aware testing harness.
+    Unifies runtime-aware testing entrypoint.
 
     Responsibilities:
         - kernel bootstrap
@@ -61,14 +62,14 @@ class KernelTestHarness:
         """Return runtime kernel."""
         return self._kernel
 
+    #################
+    # runtime domains
+    #################
+
     @property
     def runtime(self) -> RuntimeState:
         """Return runtime graph."""
         return self._kernel.runtime
-
-    #################
-    # runtime domains
-    #################
 
     @property
     def lifecycle(self) -> LifecycleRuntime:
@@ -121,6 +122,27 @@ class KernelTestHarness:
 
         """
         return self._kernel.transport_manager.get(transport_type)
+
+    #########################
+    # lifecycle orchestration
+    #########################
+
+    def register_startup_hook(self, hook: LifecycleHook) -> None:
+        """Register startup hook"""
+        self._kernel.lifecycle.registry.register_startup_hook(hook)
+
+    def register_shutdown_hook(self, hook: LifecycleHook) -> None:
+        """Register shutdown hook."""
+        self._kernel.lifecycle.registry.register_shutdown_hook(hook)
+
+    ###########
+    # readiness
+    ###########
+
+    @property
+    def readiness(self):
+        """Return readiness gate."""
+        return self._kernel.lifecycle.readiness
 
     #####################
     # lifecycle execution

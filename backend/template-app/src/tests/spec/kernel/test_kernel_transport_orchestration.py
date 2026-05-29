@@ -2,12 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support.fakes.transports import (
-    FakeTransport,
-)
-from tests.support.harness.kernel_test_harness import (
-    KernelTestHarness,
-)
+from tests.support.fakes.transports import FakeTransport
+from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 def test_kernel_installs_transport(
@@ -16,13 +12,9 @@ def test_kernel_installs_transport(
     """
     Kernel should own transport installation.
     """
-    transport = FakeTransport(
-        name="fake",
-    )
+    transport = FakeTransport(name="fake")
 
-    kernel_harness.install_transport(
-        transport,
-    )
+    kernel_harness.install_transport(transport)
 
     assert transport in kernel_harness.kernel.transports
 
@@ -34,13 +26,9 @@ async def test_kernel_starts_transports(
     """
     Kernel startup should startup transports.
     """
-    transport = FakeTransport(
-        name="fake",
-    )
+    transport = FakeTransport(name="fake")
 
-    kernel_harness.install_transport(
-        transport,
-    )
+    kernel_harness.install_transport(transport)
 
     await kernel_harness.startup()
 
@@ -54,13 +42,9 @@ async def test_kernel_shutdowns_transports(
     """
     Kernel shutdown should shut down transports.
     """
-    transport = FakeTransport(
-        name="fake",
-    )
+    transport = FakeTransport(name="fake")
 
-    kernel_harness.install_transport(
-        transport,
-    )
+    kernel_harness.install_transport(transport)
 
     await kernel_harness.shutdown()
 
