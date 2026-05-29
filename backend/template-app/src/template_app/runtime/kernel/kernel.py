@@ -205,10 +205,6 @@ class RuntimeKernel:
             transport:
                 Runtime transport.
 
-        Raises:
-            RuntimeError:
-                If runtime graph frozen.
-
         """
         # self.runtime.freeze.ensure_mutable()
 

@@ -1,1 +1,1 @@
-"""kernel-specific asserts."""
+"""Kernel specific asserts."""

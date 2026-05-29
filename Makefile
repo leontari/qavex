@@ -165,5 +165,4 @@ tree:
 .PHONE: pytest
 pytest:
 	@if "$(SERVICE)" == "" ( echo Usage: make pytest ^<service^> & exit 1 )
-	cd backend/$(SERVICE)
-	pytest
+	uv run --directory $(SRC_DIR) pytest

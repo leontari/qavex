@@ -1,96 +1,105 @@
-"""Main entrypoint"""
+"""
+Unified runtime-aware test harness.
 
+Architecture:
+-------------
+
+RuntimeKernel
+    ↓
+KernelContext (IMMUTABLE boundary)
+    ↓
+RuntimeState (mutable runtime graph)
+    ↓
+domain runtimes (lifecycle / infra / messaging / modules / transports)
+
+"""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Any
+from typing import TypeVar
 
+from template_app.runtime.kernel.context import RuntimeState
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 from template_app.runtime.kernel.kernel import RuntimeKernel
-from tests.support.fakes.providers import build_fake_infrastructure
+from template_app.runtime.transports.contracts import Transport
+
+TTransport = TypeVar("TTransport", bound=Transport)
 
 
-@dataclass
-class KernelTestClient:
+class KernelTestHarness:
     """
-    Golden test harness for full runtime kernel.
+    Single runtime-aware test entrypoint.
 
-    TestClient for Kernel runtime graph.
+    THIS IS THE ONLY WAT TO CREATE KERNEL IN TESTS.
+
+    Responsibilities:
+        - kernel bootstrap
+        - runtime overrides
+        - transport installation
+        - lifecycle startup/shutdown
+        - fake injection
+        - transport lookup
+        - runtime introspection
+        - async orchestration
+
     """
 
-    kernel: RuntimeKernel
+    def __init__(self) -> None:
+        self._kernel = bootstrap_kernel()
 
-    ##################
-    # BUILD ENTRYPOINT
-    ##################
-    @classmethod
-    def build(
-        cls,
-        *,
-        use_fakes: bool = True,
-        install_transports: bool = False,
-    ) -> "KernelTestClient":
+    ###############
+    # kernel access
+    ###############
 
-        kernel = bootstrap_kernel()
+    @property
+    def kernel(self) -> RuntimeKernel:
+        """Return runtime kernel."""
+        return self._kernel
 
-        ########################
-        # Inject fakes if needed
-        ########################
-        if use_fakes:
-            kernel.runtime.infrastructure = build_fake_infrastructure()
+    @property
+    def runtime(self) -> RuntimeState:
+        """Return runtime graph."""
+        return self._kernel.runtime
 
-        # -------------------------
-        # optional transport install
-        # -------------------------
-        if install_transports:
-            kernel.install_transports()
+    ############
+    # transports
+    ############
 
-        return cls(kernel=kernel)
+    def install_transport(
+        self,
+        transport: Transport,
+    ) -> None:
+        """
+        Inject transport without binding to execution model.
 
-    ###################
-    # Lifecycle control
-    ###################
+        Args:
+            transport:
+                Runtime transport.
+        """
+        self._kernel.install_transport(transport)
+
+    def get_transport(self,
+        transport_type: type[TTransport],
+    ) -> TTransport | None:
+        """
+        Resolve installed transport.
+        """
+        for transport in self.kernel.transports:
+            if isinstance(
+                transport,
+                transport_type,
+            ):
+                return transport
+
+        return None
+
+    #####################
+    # lifecycle execution
+    #####################
+
     async def startup(self) -> None:
-        await self.kernel.start()
+        """Execute runtime startup."""
+        await self._kernel.startup()
 
     async def shutdown(self) -> None:
-        await self.kernel.stop()
-
-    ######################
-    # Runtime access layer
-    ######################
-    @property
-    def runtime(self):
-        return self.kernel.runtime
-
-    @property
-    def modules(self):
-        return self.kernel.runtime.modules
-
-    @property
-    def messaging(self):
-        return self.kernel.runtime.messaging
-
-    @property
-    def infra(self):
-        return self.kernel.runtime.infrastructure
-
-    @property
-    def container(self):
-        return self.kernel.runtime.container
-
-    ##############
-    # Test helpers
-    ##############
-    def install_module(self, module) -> None:
-        self.kernel.runtime.modules.install(module)
-
-    def get_provider(self, name: str) -> Any:
-        return self.kernel.runtime.infrastructure.registry.get(name)
-
-    def snapshot(self) -> dict:
-        return {
-            "modules": len(self.kernel.runtime.modules),
-            "providers": len(self.kernel.runtime.infrastructure.registry),
-            "handlers": len(self.kernel.runtime.messaging.registry),
-        }
+        """Execute runtime shutdown."""
+        await self._kernel.shutdown()
