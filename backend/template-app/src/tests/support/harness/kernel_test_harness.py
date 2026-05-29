@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import TypeVar
 
-from template_app.runtime.kernel.context import RuntimeState
+from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.contracts import Transport
@@ -27,28 +27,29 @@ TTransport = TypeVar("TTransport", bound=Transport)
 
 class KernelTestHarness:
     """
-    Single runtime-aware test entrypoint.
-
-    THIS IS THE ONLY WAT TO CREATE KERNEL IN TESTS.
+    Unifies runtime-aware testing harness.
 
     Responsibilities:
         - kernel bootstrap
         - runtime overrides
+        - runtime inspection
         - transport installation
+        - transport resolution
         - lifecycle startup/shutdown
         - fake injection
         - transport lookup
         - runtime introspection
         - async orchestration
 
+    This is the ONLY valid kernel creation entrypoint in tests.
     """
 
     def __init__(self) -> None:
         self._kernel = bootstrap_kernel()
 
-    ###############
-    # kernel access
-    ###############
+    ########
+    # kernel
+    ########
 
     @property
     def kernel(self) -> RuntimeKernel:
@@ -60,6 +61,12 @@ class KernelTestHarness:
         """Return runtime graph."""
         return self._kernel.runtime
 
+    #################
+    # runtime domains
+    #################
+
+
+
     ############
     # transports
     ############
@@ -69,7 +76,9 @@ class KernelTestHarness:
         transport: Transport,
     ) -> None:
         """
-        Inject transport without binding to execution model.
+        Install runtime transport.
+
+        Injects transport without binding to execution model.
 
         Args:
             transport:
@@ -82,22 +91,25 @@ class KernelTestHarness:
     ) -> TTransport | None:
         """
         Resolve installed transport.
-        """
-        for transport in self.kernel.transports:
-            if isinstance(
-                transport,
-                transport_type,
-            ):
-                return transport
 
-        return None
+        Args:
+            transport_type:
+                Runtime transport type.
+
+        Returns:
+            Installed transport or None
+
+        """
+        return self._kernel.transport_manager.get(transport_type)
 
     #####################
     # lifecycle execution
     #####################
 
     async def startup(self) -> None:
-        """Execute runtime startup."""
+        """
+        Execute runtime startup.
+        """
         await self._kernel.startup()
 
     async def shutdown(self) -> None:

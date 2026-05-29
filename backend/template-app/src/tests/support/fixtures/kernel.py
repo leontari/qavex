@@ -1,13 +1,13 @@
 import pytest
 
 from template_app.runtime.kernel.kernel import RuntimeKernel
-from tests.support.harness.kernel_test_client import KernelTestHarness
+from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 @pytest.fixture(scope="session")
 def kernel_harness() -> KernelTestHarness:
     """
-    Global runtime-aware harness.
+    Unified runtime-aware test harness.
 
     SINGLE SOURCE OF TRUTH FOR WHOLE TEST SUITE.
     """
@@ -16,5 +16,5 @@ def kernel_harness() -> KernelTestHarness:
 
 @pytest.fixture
 def kernel(kernel_harness: KernelTestHarness) -> RuntimeKernel:
-    """Return runtime kernel facade."""
+    """Return kernel fixture."""
     return kernel_harness.kernel
