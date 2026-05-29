@@ -13,7 +13,7 @@ SUPPORT     = "test helper tools to build reality"
 tests/
 ├── support/          # ONLY runtime builders (single source)
 ├── unit/             # isolated logic
-├── contracts/        # runtime guarantees
+├── spec/        # runtime guarantees
 ├── integration/      # full graph
 ├── e2e/              # external entrypoints
 └── smoke/            # startup
@@ -21,7 +21,7 @@ tests/
 
 ```text
 tests/
-├── contracts/                      # 🧠 ARCHITECTURE CONTRACTS
+├── spec/                      # 🧠 ARCHITECTURE CONTRACTS
 │   ├── kernel/
 │   ├── lifecycle/
 │   ├── runtime/
@@ -64,7 +64,7 @@ tests/
 │   ├── fixtures/
 │   ├── builders/
 │   ├── fakes/
-│   ├── kernel/
+│   ├── harness/
 │   └── assertions/
 │
 └── conftest.py
