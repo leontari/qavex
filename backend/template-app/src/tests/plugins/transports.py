@@ -1,123 +1,123 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any
+from collections.abc import Iterator
 
 import pytest
 
-from template_app.runtime.kernel.kernel import RuntimeKernel
-from template_app.runtime.transports.cli.transport import (
-    CLITransport,
-)
-from template_app.runtime.transports.contracts import (
-    Transport,
-)
-from template_app.runtime.transports.grpc.transport import (
-    GRPCTransport,
-)
-from template_app.runtime.transports.http.transport import (
-    FastAPITransport,
-)
-from template_app.runtime.transports.kafka.transport import (
-    KafkaTransport,
-)
 from template_app.runtime.transports.manager import TransportManager
-from tests.support.harness.kernel_test_harness import (
-    KernelTestHarness,
-)
+from tests.support.fakes.transports import FakeTransport
+from tests.support.testing.transport_builder import TransportBuilder
 
-TransportFactory = Callable[..., Transport]
+########################
+# transport infrastructure
+########################
 
 @pytest.fixture
-def transport_manager(kernel: RuntimeKernel) -> TransportManager:
+def transport_manager(kernel) -> TransportManager:
+    """
+    Return runtime transport manager.
+    """
     return kernel.transport_manager
 
+########################
+# fake transports
+########################
 
 @pytest.fixture
-def transport_factory() -> TransportFactory:
+def fake_transport() -> FakeTransport:
     """
-    Generic runtime transport factory.
-
-    Returns:
-        Transport factory callable.
+    Return generic fake transport.
     """
-
-    registry: dict[str, type[Transport]] = {
-        "http": FastAPITransport,
-        "grpc": GRPCTransport,
-        "kafka": KafkaTransport,
-        "cli": CLITransport,
-    }
-
-    def factory(
-        transport_type: str,
-        **kwargs: Any,
-    ) -> Transport:
-        """
-        Build runtime transport.
-
-        Args:
-            transport_type:
-                Runtime transport type.
-
-        Returns:
-            Runtime transport.
-
-        Raises:
-            KeyError:
-                Unknown transport type.
-        """
-
-        return registry[transport_type](**kwargs)
-
-    return factory
-
-
-@pytest.fixture(params=["http", "grpc", "kafka", "cli",])
-def transport_type(request: pytest.FixtureRequest) -> str:
-    """
-    Parametrized runtime transport type.
-    """
-    return str(request.param)
+    return TransportBuilder.fake()
 
 
 @pytest.fixture
-def installed_transport(kernel_harness: KernelTestHarness):
+def http_fake_transport() -> FakeTransport:
     """
-    Install runtime transport dynamically.
-
-    Returns:
-        Installed transport factory.
+    Return fake HTTP transport.
     """
-
-    def installer(
-        transport: Transport,
-    ) -> Transport:
-        kernel_harness.install_transport(
-            transport,
-        )
-
-        return transport
-
-    return installer
+    return TransportBuilder.fake(name="http")
 
 
 @pytest.fixture
-def transport(
-    transport_factory: TransportFactory,
-    installed_transport,
-    transport_type: str,
-) -> Transport:
+def grpc_fake_transport() -> FakeTransport:
     """
-    Parametrized installed runtime transport.
-
-    Returns:
-        Installed runtime transport.
+    Return fake gRPC transport.
     """
-    runtime_transport = transport_factory(
-        transport_type,
+    return TransportBuilder.fake(
+        name="grpc",
     )
 
-    return installed_transport(
-        runtime_transport,
+
+@pytest.fixture
+def kafka_fake_transport() -> FakeTransport:
+    """
+    Return fake Kafka transport.
+    """
+    return TransportBuilder.fake(
+        name="kafka",
     )
+
+
+@pytest.fixture
+def cli_fake_transport() -> FakeTransport:
+    """
+    Return fake CLI transport.
+    """
+    return TransportBuilder.fake(
+        name="cli",
+    )
+
+########################
+# installed transports
+########################
+
+@pytest.fixture
+def installed_transport(
+    transport_manager: TransportManager,
+    fake_transport: FakeTransport,
+) -> Iterator[FakeTransport]:
+    """
+    Install fake transport into runtime.
+    """
+    transport_manager.install(
+        fake_transport,
+    )
+
+    yield fake_transport
+
+########################
+# parametrized transports
+########################
+
+@pytest.fixture(params=["http", "grpc", "kafka", "cli"])
+def transport_kind(request) -> str:
+    """
+    Parametrized transport kind.
+    """
+    return request.param
+
+
+@pytest.fixture
+def parametrized_transport(transport_kind: str) -> FakeTransport:
+    """
+    Return parametrized fake transport.
+    """
+    return TransportBuilder.fake(
+        name=transport_kind,
+    )
+
+
+@pytest.fixture
+def installed_parametrized_transport(
+    transport_manager: TransportManager,
+    parametrized_transport: FakeTransport,
+) -> Iterator[FakeTransport]:
+    """
+    Install parametrized transport.
+    """
+    transport_manager.install(
+        parametrized_transport,
+    )
+
+    yield parametrized_transport

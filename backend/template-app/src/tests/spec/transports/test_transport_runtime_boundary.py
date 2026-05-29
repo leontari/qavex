@@ -5,32 +5,26 @@ from template_app.runtime.transports.contracts import (
 )
 
 
-def test_transport_runtime_exposes_immutable_snapshot(
-    kernel,
-) -> None:
+def test_transport_runtime_exposes_immutable_snapshot(kernel) -> None:
     """
     Kernel should expose immutable transport snapshot.
     """
     transports = kernel.transports
 
-    assert isinstance(
-        transports,
-        tuple,
-    )
+    assert isinstance(transports, tuple)
 
 
 def test_transport_manager_returns_transport_protocol(
-    transport,
+    installed_transport,
     kernel_harness,
 ) -> None:
     """
     Installed transport should satisfy contract.
     """
     resolved = kernel_harness.get_transport(
-        type(transport),
+        type(installed_transport),
     )
 
-    assert isinstance(
-        resolved,
-        Transport,
-    )
+    assert resolved is not None
+
+    assert isinstance(resolved, Transport)

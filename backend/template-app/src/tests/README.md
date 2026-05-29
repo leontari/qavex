@@ -662,3 +662,21 @@ tests/
 │
 └── conftest.py
 ```
+
+# Testing hierarchy
+
+```
+unit/
+    FakeTransport
+    TransportManager
+
+spec/
+    FakeTransport
+    Transport protocol
+
+integration/
+    real transport orchestration
+
+e2e/
+    actual FastAPI/gRPC/Kafka runtime
+```
