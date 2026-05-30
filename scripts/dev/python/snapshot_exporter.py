@@ -1,260 +1,206 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
-import ast
-import inspect
+import json
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-import pytest
+from typing import Any
 
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
-if TYPE_CHECKING:
-    from template_app.runtime.kernel.kernel import RuntimeKernel
-
-######################
-# ArchitectureSnapshot
-######################
+##################
+# FILESYSTEM GRAPH
+##################
 
 
-@dataclass(slots=True)
-class ArchitectureSnapshot:
-    "Snapshot of the project architecture."
+def build_file_graph(root: Path) -> dict[str, Any]:
+    """
+    Build filesystem graph snapshot.
 
-    filesystem: dict[str, Any]
+    Returns:
+        dict[str, Any]:
+            File and directory structure summary with flat listings.
 
-    import_graph: dict[str, Any]
-    dependency_graph: dict[str, Any]
+    """
+    files: list[str] = []
+    dirs: set[str] = set()
 
-    runtime_graph: dict[str, Any]
+    for path in root.rglob("*"):
+        if ".venv" in path.parts or "__pycache__" in path.parts:
+            continue
 
-    transport_graph: dict[str, Any]
-    module_graph: dict[str, Any]
+        rel = str(path.relative_to(root))
 
-    pytest_fixture_graph: dict[str, Any]
+        if path.is_dir():
+            dirs.add(rel)
+        else:
+            files.append(rel)
 
-    lifecycle_dag: dict[str, Any]
+    return {
+        "root": str(root),
+        "files_count": len(files),
+        "dirs_count": len(dirs),
+        "files": sorted(files),
+        "dirs": sorted(dirs),
+    }
 
 
-##########################
-# IMPORT GRAPH (AST-based)
-##########################
+##############
+# IMPORT GRAPH
+##############
 
 
 def build_import_graph(root: Path) -> dict[str, list[str]]:
-    graph: dict[str, list[str]] = {}
+    """
+    Build naive import graph (static scan).
 
-    for file in root.rglob("*.py"):
-        try:
-            tree = ast.parse(file.read_text(encoding="utf-8"))
-        except Exception:
+    Returns:
+        dict[str, list[str]]:
+            Mapping file -> list of raw import lines.
+
+    """
+    import_graph: dict[str, list[str]] = {}
+
+    for py_file in root.rglob("*.py"):
+        if "__pycache__" in py_file.parts:
             continue
 
-        imports: list[str] = []
+        rel = str(py_file.relative_to(root))
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for n in node.names:
-                    imports.append(n.name)
-
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    imports.append(node.module)
-
-        graph[str(file.relative_to(root))] = sorted(set(imports))
-
-    return graph
-
-
-##############################
-# RUNTIME GRAPH (kernel state)
-##############################
-
-
-def build_runtime_graph(kernel: RuntimeKernel) -> dict[str, object]:
-    return {
-        "modules": len(kernel.modules),
-        "transports": len(kernel.transports),
-        "has_lifecycle": kernel.lifecycle is not None,
-        "has_messaging": kernel.messaging is not None,
-        "has_infra": kernel.infrastructure is not None,
-    }
-
-
-#################
-# TRANSPORT GRAPH
-#################
-
-
-def build_transport_graph(kernel: RuntimeKernel) -> dict[str, object]:
-    return {
-        "count": len(kernel.transports),
-        "types": [type(t).__name__ for t in kernel.transports],
-        "names": [getattr(t, "name", None) for t in kernel.transports],
-    }
-
-
-##############
-# MODULE GRAPH
-##############
-
-
-def build_module_graph(kernel: RuntimeKernel) -> dict[str, object]:
-    return {
-        "count": len(kernel.modules),
-        "modules": [
-            {
-                "name": m.name,
-                "version": getattr(m, "version", None),
-            }
-            for m in kernel.modules
-        ],
-    }
-
-
-######################
-# PYTEST FIXTURE GRAPH
-######################
-
-
-def build_pytest_fixture_graph() -> dict[str, list[str]]:
-    graph: dict[str, list[str]] = {}
-
-    for name, obj in pytest.FIXTURES.items():  # internal pytest registry
         try:
-            sig = inspect.signature(obj)
-            graph[name] = list(sig.parameters.keys())
-        except Exception:
-            graph[name] = []
+            content = py_file.read_text(encoding="utf-8")
+        except Exception:  # noqa: BLE001, S112
+            continue
 
-    return graph
+        imports: list[str] = [
+            line.strip()
+            for line in content.splitlines()
+            if line.startswith(("import ", "from "))
+        ]
+
+        import_graph[rel] = imports
+
+    return import_graph
 
 
-##################################
-# DEPENDENCY GRAPH (kernel wiring)
-##################################
+##############
+# KERNEL GRAPH
+##############
 
 
-def build_dependency_graph(kernel: RuntimeKernel) -> dict[str, object]:
+def build_kernel_graph(kernel: Any) -> dict[str, Any]:
+    """
+    Build runtime kernel graph snapshot.
+
+    Returns:
+        dict[str, Any]:
+            Kernel runtime structure (modules, transports, lifecycle stats).
+
+    """
+    runtime = kernel.runtime
+
     return {
-        "kernel": {
-            "lifecycle": id(kernel.lifecycle),
-            "messaging": id(kernel.messaging),
-            "infra": id(kernel.infrastructure),
-            "transports": id(kernel.transport_manager),
-        }
+        "modules": [m.name for m in kernel.modules],
+        "transports": [t.__class__.__name__ for t in kernel.transports],
+        "lifecycle": {
+            "startup_hooks": len(runtime.lifecycle.registry.startup_hooks),
+            "shutdown_hooks": len(runtime.lifecycle.registry.shutdown_hooks),
+        },
+        "domains": {
+            "lifecycle": type(runtime.lifecycle).__name__,
+            "infrastructure": type(runtime.infrastructure).__name__,
+            "messaging": type(runtime.messaging).__name__,
+            "transports": type(runtime.transports).__name__,
+            "modules": type(runtime.modules).__name__,
+        },
     }
 
 
-############################
-# LIFECYCLE DAG (core value)
-############################
+###################
+# SNAPSHOT EXPORTER
+###################
 
 
-def build_lifecycle_dag(kernel: RuntimeKernel) -> dict[str, list[str]]:
-    registry = kernel.runtime.lifecycle.registry
-
-    return {
-        "startup": [
-            hook.__name__ for hook in getattr(registry, "startup_hooks", [])
-        ],
-        "shutdown": [
-            hook.__name__ for hook in getattr(registry, "shutdown_hooks", [])
-        ],
-        "readiness": [
-            probe.__name__
-            for probe in getattr(registry, "readiness_probes", [])
-        ],
-    }
-
-
-def export_architecture_snapshot(
+def export_snapshot(
     root: Path,
-    kernel: RuntimeKernel | None,
     output: Path,
+    include_kernel: bool,  # noqa: FBT001
 ) -> None:
+    """
+    Export full architecture snapshot.
 
-    snapshot = {
-        "filesystem": {},
+    Writes JSON snapshot to file system and emits status to stdout.
+
+    Args:
+        root:
+            Project root directory to analyze.
+
+        output:
+            Output file path for JSON snapshot.
+
+        include_kernel:
+            Whether to include runtime kernel graph.
+
+    """
+    snapshot: dict[str, Any] = {
+        "file_graph": build_file_graph(root),
         "import_graph": build_import_graph(root),
-        "dependency_graph": {},
-        "runtime_graph": {},
-        "transport_graph": {},
-        "module_graph": {},
-        "pytest_fixture_graph": build_pytest_fixture_graph(),
-        "lifecycle_dag": {},
     }
 
-    if kernel:
-        snapshot["runtime_graph"] = build_runtime_graph(kernel)
-        snapshot["transport_graph"] = build_transport_graph(kernel)
-        snapshot["module_graph"] = build_module_graph(kernel)
-        snapshot["dependency_graph"] = build_dependency_graph(kernel)
-        snapshot["lifecycle_dag"] = build_lifecycle_dag(kernel)
+    if include_kernel:
+        kernel = bootstrap_kernel()
+        snapshot["kernel_graph"] = build_kernel_graph(kernel)
 
-    output.write_text(str(snapshot), encoding="utf-8")
-
-    sys.stdout.write(f"[architecture snapshot] → {output}\n")
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="architecture-snapshot",
-        description="Export kernel + code architecture snapshot",
+    output.write_text(
+        json.dumps(snapshot, indent=2),
+        encoding="utf-8",
     )
 
-    sub = parser.add_subparsers(
-        dest="command",
-        required=True,
-    )
-
-    snapshot = sub.add_parser(
-        "snapshot",
-        help="Export architecture snapshot",
-    )
-
-    snapshot.add_argument(
-        "--root",
-        type=str,
-        default=".",
-        help="Project root directory",
-    )
-
-    snapshot.add_argument(
-        "--output",
-        type=str,
-        default="architecture_snapshot.json",
-        help="Output file",
-    )
-
-    snapshot.add_argument(
-        "--kernel",
-        action="store_true",
-        help="Include runtime kernel graph",
-    )
-
-    return parser
+    sys.stdout.write(f"[snapshot-exporter] written: {output}\n")
 
 
-def cmd_snapshot(args: argparse.Namespace) -> None:
-    kernel = bootstrap_kernel() if args.kernel else None
-
-    export_architecture_snapshot(
-        root=Path(args.root),
-        kernel=kernel,
-        output=Path(args.output),
-    )
+######
+# CLI
+######
 
 
 def main() -> None:
-    parser = build_parser()
+    """
+    CLI entrypoint for architecture snapshot exporter.
+
+    Exits after writing snapshot to disk.
+
+    """
+    parser = argparse.ArgumentParser(
+        description="Architecture Snapshot Exporter (dev tool)",
+    )
+
+    parser.add_argument(
+        "root",
+        type=str,
+        help="Target project root (e.g. backend/template-app/src)",
+    )
+
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="architecture_snapshot.json",
+    )
+
+    parser.add_argument(
+        "--kernel",
+        action="store_true",
+        help="Include runtime kernel graph snapshot",
+    )
+
     args = parser.parse_args()
 
-    if args.command == "snapshot":
-        cmd_snapshot(args)
+    export_snapshot(
+        root=Path(args.root),
+        output=Path(args.output),
+        include_kernel=args.kernel,
+    )
 
 
 if __name__ == "__main__":
