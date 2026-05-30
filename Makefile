@@ -1,6 +1,6 @@
-# =============================================================================
-#    ROOT MAKEFILE: service utilities
-# =============================================================================
+###############################################################################
+##################   ROOT MAKEFILE:  SERVICE UTILITIES    #####################
+###############################################################################
 .DEFAULT_GOAL := help
 
 SERVICE := $(word 2, $(MAKECMDGOALS))
@@ -18,45 +18,18 @@ else
     SET_PYTHONPATH = PYTHONPATH=$(SRC_DIR)
 endif
 
-# =============================================================================
-#    HELP
-# =============================================================================
+######
+# HELP
+######
+
 .PHONY: help
 help:
-	@echo " ============================================================================= "
-	@echo "     AVAILABLE COMMANDS:                                                       "
-	@echo " ============================================================================= "
-	@echo " >>> make help                            :show this help                      "
-	@echo "                                                                               "
-	@echo " --- Dev Tools --------------------------------------------------------------- "
-	@echo " >>> make sync                            :install all deps using lockfile     "
-	@echo " >>> make lock                            :discover deps and update uv.lock    "
-	@echo " >>> make export-deps <service>           :export requirements.txt             "
-	@echo "                                                                               "
-	@echo " >>> make install-git-hooks               :install pre-commit git hooks        "
-	@echo " >>> make check                           :run prek checks                     "
-	@echo "                                                                               "
-	@echo " >>> make uvicorn <service>               :run service locally via uvicorn     "
-	@echo " >>> make fastapi <service>               :run service locally via fastapi dev "
-	@echo " >>> make test <service>                  :run pytest                          "
-	@echo " >>> make lint <service>                  :run ruff check                      "
-	@echo " >>> make fmt <service>                   :run ruff format                     "
-	@echo "                                                                               "
-	@echo " --- Docker ------------------------------------------------------------------ "
-	@echo " >>> make build <service> TAG=<tag>       :build a Docker image                "
-	@echo " >>> make run <service> TAG=<tag>         :run service containerized           "
-	@echo " >>> make sh <service>                    :view an image's contents            "
-	@echo " >>> make log <service>                   :view container logs                 "
-	@echo " >>> make stop <service>                  :stop image container                "
-	@echo "                                                                               "
-	@echo " >>> make build-run <service> TAG=<tag>   :build and run service containerized "
-	@echo " >>> make build-git <service>             :build an image with git tag         "
-	@echo " >>> make push <service> TAG=<tag>        :push image to registry              "
-	@echo " ============================================================================= "
+	@echo make help: see Makefile in the root directory for available commands
 
-# =============================================================================
-#    DEV COMMANDS
-# =============================================================================
+#############
+# UV COMMANDS
+#############
+
 .PHONY: sync
 sync:
 	uv sync --locked --all-packages
@@ -70,7 +43,10 @@ export-deps:
 	@if "$(SERVICE)"=="" ( echo Usage: make export-deps ^<service^> exit 1 )
 	uv export --no-hashes --format requirements.txt --package $(SERVICE) --output-file backend/$(SERVICE)/requirements.txt
 
-# -----------------------------------------------------------------------------
+###########
+# GIT HOOKS
+###########
+
 .PHONY: install-git-hooks
 install-git-hooks:
 	prek install -f
@@ -84,7 +60,6 @@ dist:
 	@if "$(SERVICE)"=="" ( echo Usage: make pack ^<service-name^> exit 1 )
 	uv build --project backend/$(SERVICE)
 
-# -----------------------------------------------------------------------------
 #$(SET_PYTHONPATH) uv run uvicorn template_app.main:app --reload --host 127.0.0.1 --port 8000
 .PHONY: uvicorn
 uvicorn:
@@ -112,9 +87,19 @@ fmt:
 	@if "$(SERVICE)"=="" ( echo Usage: make fmt ^<service^> & exit 1 )
 	uv run ruff format $(SRC_DIR)
 
-# =============================================================================
-#    DOCKER COMMANDS
-# =============================================================================
+###########
+# RUN TESTS
+###########
+
+.PHONE: pytest
+pytest:
+	@if "$(SERVICE)" == "" ( echo Usage: make pytest ^<service^> & exit 1 )
+	uv run --directory $(SRC_DIR) pytest
+
+#################
+# DOCKER COMMANDS
+#################
+
 .PHONY: build
 build:
 	@if "$(SERVICE)" == "" ( echo Usage: make build ^<service^> TAG=^<tag^> & exit 1 )
@@ -140,7 +125,6 @@ stop:
 	@if "$(SERVICE)" == "" ( echo Usage: make stop ^<service^> & exit 1 )
 	docker stop $(SERVICE)
 
-# -----------------------------------------------------------------------------
 .PHONY: build-run
 build-run:
 	@if "$(SERVICE)" == "" ( echo Usage: make build-run ^<service^> TAG=^<tag^> & exit 1 )
@@ -157,12 +141,14 @@ push:
 	@if "$(SERVICE)" == "" ( echo Usage: make push ^<service^> TAG=^<tag^> & exit 1 )
 	docker push $(SERVICE):$(TAG)
 
-# --- Scripts -----------------------------------------------------------------
+#########
+# SCRIPTS
+#########
+
 .PHONE: tree
 tree:
 	python scripts/dev/python/generate_tree.py $(filter-out $@,$(MAKECMDGOALS))
 
-.PHONE: pytest
-pytest:
-	@if "$(SERVICE)" == "" ( echo Usage: make pytest ^<service^> & exit 1 )
-	uv run --directory $(SRC_DIR) pytest
+.PHONE: dump
+dump:
+	python scripts/dev/python/dump_project.py $(filter-out $@,$(MAKECMDGOALS))
