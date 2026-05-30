@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from template_app.runtime.kernel.context import KernelContext
+from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
 from template_app.runtime.modules.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
@@ -49,11 +50,16 @@ class RuntimeKernel:
     ########
 
     @classmethod
-    def create(cls, runtime: RuntimeState) -> RuntimeKernel:
+    def create(
+        cls,
+        runtime: RuntimeState,
+        metadata: RuntimeMetadata,
+    ) -> RuntimeKernel:
         """
         Create runtime kernel.
 
         Args:
+            metadata:
             runtime:
                 Runtime composition graph.
 
@@ -64,6 +70,7 @@ class RuntimeKernel:
         return cls(
             _context=KernelContext(
                 runtime=runtime,
+                metadata=metadata,
             ),
         )
 
@@ -93,9 +100,17 @@ class RuntimeKernel:
         """
         return self._context.runtime
 
-    #################
-    # runtime domains
-    #################
+    ###########################
+    # kernel metadata accessors
+    ###########################
+
+    @property
+    def metadata(self):
+        return self._context.metadata
+
+    ###########################
+    # runtime domains accessors
+    ###########################
 
     @property
     def lifecycle(self) -> LifecycleRuntime:
@@ -206,11 +221,8 @@ class RuntimeKernel:
                 Runtime transport.
 
         """
-        # self.runtime.freeze.ensure_mutable()
-
-        self.runtime.transports.manager.install(
-            transport,
-        )
+        self.metadata.freeze.ensure_mutable()
+        self.runtime.transports.manager.install(transport)
 
     #########################
     # runtime lifecycle phase
@@ -227,7 +239,6 @@ class RuntimeKernel:
 
         """
         await self.runtime.lifecycle.manager.startup()
-
         await self.runtime.transports.manager.startup()
 
     async def shutdown(self) -> None:
@@ -240,7 +251,6 @@ class RuntimeKernel:
 
         """
         await self.runtime.transports.manager.shutdown()
-
         await self.runtime.lifecycle.manager.shutdown()
 
     #####################

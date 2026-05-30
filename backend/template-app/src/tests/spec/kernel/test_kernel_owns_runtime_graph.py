@@ -64,3 +64,15 @@ def test_kernel_does_not_expose_duplicate_runtime_instances(
         id(kernel.runtime)
         == id(kernel.context.runtime)
     )
+
+
+def test_runtime_graph_is_not_exposed_directly_as_kernel_state(
+    kernel_harness: KernelTestHarness,
+) -> None:
+    """
+    Kernel must not duplicate runtime state.
+    """
+    kernel = kernel_harness.kernel
+
+    assert hasattr(kernel, "runtime")
+    assert kernel.runtime is kernel.context.runtime

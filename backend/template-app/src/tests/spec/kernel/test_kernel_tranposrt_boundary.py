@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.contracts import Transport
 from tests.support.harness.kernel_test_harness import KernelTestHarness
 from tests.support.fakes.transports import FakeTransport
@@ -85,3 +86,20 @@ def test_kernel_transport_boundary_is_runtime_owned(
         kernel_harness.kernel.transport_runtime.manager.transports
         is kernel_harness.kernel.runtime.transports.manager.transports
     )
+
+
+def test_kernel_exposes_only_transport_snapshot(
+    kernel: RuntimeKernel
+) -> None:
+    """
+    Kernel must expose transport snapshot only (no mutation leak).
+    """
+    assert isinstance(kernel.transports, tuple)
+
+
+def test_transport_snapshot_satisfies_contract(kernel: RuntimeKernel) -> None:
+    """
+    All exposed transports must satisfy Transport protocol.
+    """
+    for transport in kernel.transports:
+        assert isinstance(transport, Transport)

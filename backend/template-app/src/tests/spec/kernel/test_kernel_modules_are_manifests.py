@@ -28,7 +28,7 @@ def test_kernel_modules_are_manifests(
     Kernel should expose only ModuleManifest objects.
     """
     assert all(
-        isinstance(module,ModuleManifest)
+        isinstance(module, ModuleManifest)
         for module in kernel_harness.kernel.modules
     )
 

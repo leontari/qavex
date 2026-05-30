@@ -64,3 +64,15 @@ def test_kernel_is_runtime_owner(
         kernel_harness.kernel.context.runtime
         is kernel_harness.kernel.runtime
     )
+
+def test_kernel_exposes_all_runtime_domains(
+    kernel_harness: KernelTestHarness,
+) -> None:
+    """Kernel must expose runtime domains from runtime graph."""
+    kernel = kernel_harness.kernel
+
+    assert kernel.lifecycle is kernel.runtime.lifecycle
+    assert kernel.infrastructure is kernel.runtime.infrastructure
+    assert kernel.messaging is kernel.runtime.messaging
+    assert kernel.transport_runtime is kernel.runtime.transports
+    assert kernel.module_runtime is kernel.runtime.modules

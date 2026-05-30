@@ -2,8 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from template_app.runtime.kernel.runtime.capabilities.models import (
     RuntimeCapabilities,
+)
+from template_app.runtime.transports.cli.transport import (
+    CLITransport,
+)
+from template_app.runtime.transports.grpc.transport import (
+    GRPCTransport,
 )
 from template_app.runtime.transports.http.transport import (
     FastAPITransport,
@@ -11,15 +19,12 @@ from template_app.runtime.transports.http.transport import (
 from template_app.runtime.transports.kafka.transport import (
     KafkaTransport,
 )
-from template_app.runtime.transports.grpc.transport import (
-    GRPCTransport,
-)
-from template_app.runtime.transports.cli.transport import (
-    CLITransport,
-)
+
+if TYPE_CHECKING:
+    from template_app.runtime.kernel.runtime.state import RuntimeState
 
 
-def build_runtime_capabilities(runtime) -> RuntimeCapabilities:
+def build_runtime_capabilities(runtime: RuntimeState) -> RuntimeCapabilities:
     """
     Build runtime capability descriptor.
 

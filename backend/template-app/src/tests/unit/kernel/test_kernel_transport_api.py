@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.manager import TransportManager
 from tests.support.fakes.transports import FakeTransport
 from tests.support.harness.kernel_test_harness import KernelTestHarness
@@ -119,3 +120,10 @@ def test_kernel_transport_manager_preserves_identity(
     manager_b = kernel_harness.kernel.transport_manager
 
     assert manager_a is manager_b
+
+
+def test_kernel_transport_manager_access(kernel: RuntimeKernel) -> None:
+    """
+    Kernel must expose transport manager.
+    """
+    assert kernel.transport_manager is kernel.runtime.transports.manager

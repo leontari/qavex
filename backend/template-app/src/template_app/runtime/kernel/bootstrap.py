@@ -9,6 +9,8 @@ Responsibilities:
 
 from __future__ import annotations
 
+from sqlalchemy.testing.suite.test_reflection import metadata
+
 from template_app.runtime.container.container import Container
 from template_app.runtime.infrastructure.infra import (
     CacheProvider,
@@ -18,6 +20,19 @@ from template_app.runtime.infrastructure.infra import (
 from template_app.runtime.infrastructure.registry import InfrastructureRegistry
 from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
 from template_app.runtime.kernel.kernel import RuntimeKernel
+from template_app.runtime.kernel.runtime.capabilities.runtime import (
+    build_runtime_capabilities,
+)
+from template_app.runtime.kernel.runtime.descriptors.runtime import (
+    build_runtime_descriptor,
+)
+from template_app.runtime.kernel.runtime.graph.freeze import (
+    RuntimeGraphFreeze,
+)
+from template_app.runtime.kernel.runtime.graph.validator import (
+    RuntimeGraphValidator,
+)
+from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
 from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.lifecycle.manager import LifecycleManager
 from template_app.runtime.lifecycle.readiness import ReadinessGate
@@ -32,16 +47,6 @@ from template_app.runtime.messaging.registry import RuntimeHandlerRegistry
 from template_app.runtime.messaging.runtime import MessagingRuntime
 from template_app.runtime.modules.registry import ModuleRegistry
 from template_app.runtime.modules.runtime import ModuleRuntime
-from template_app.runtime.kernel.runtime.capabilities.runtime import (
-    build_runtime_capabilities,
-)
-from template_app.runtime.kernel.runtime.descriptors.runtime import (
-    build_runtime_descriptor,
-)
-from template_app.runtime.kernel.runtime.graph.freeze import RuntimeGraphFreeze
-from template_app.runtime.kernel.runtime.graph.validator import (
-    RuntimeGraphValidator,
-)
 from template_app.runtime.transports.manager import TransportManager
 from template_app.runtime.transports.runtime import TransportRuntime
 
@@ -139,14 +144,25 @@ def bootstrap_kernel() -> RuntimeKernel:
         modules=module_runtime,
     )
 
-    ###############
-    # create kernel
-    ###############
+    #######################
+    # kernel graph freezing
+    #######################
 
+    freeze = RuntimeGraphFreeze()
+    capabilities = build_runtime_capabilities(runtime)
+    descriptor = build_runtime_descriptor(runtime)
+    metadata = RuntimeMetadata(
+        freeze=freeze,
+        capabilities=capabilities,
+        descriptor=descriptor,
+    )
     # runtime.freeze = RuntimeGraphFreeze()
     # runtime.capabilities = build_runtime_capabilities(runtime)
     # runtime.descriptor = build_runtime_descriptor(runtime)
-    # RuntimeGraphValidator.validate(runtime)
-    # runtime.freeze.freeze()
+    RuntimeGraphValidator.validate(runtime)
+    freeze.freeze()
 
-    return RuntimeKernel.create(runtime=runtime)
+    return RuntimeKernel.create(
+        runtime=runtime,
+        metadata=metadata,
+    )

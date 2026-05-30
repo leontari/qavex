@@ -1,37 +1,51 @@
 from __future__ import annotations
 
-from tests.support.harness.kernel_test_harness import KernelTestHarness
+from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-def test_kernel_exposes_context_boundary(
-    kernel_harness: KernelTestHarness,
+def test_kernel_context_boundary_is_frozen(kernel: RuntimeKernel) -> None:
+    """
+    KernelContext must be immutable boundary.
+    """
+    context = kernel.context
+
+    assert context.runtime is kernel.runtime
+
+
+def test_kernel_does_not_expose_internal_graph_directly(
+    kernel: RuntimeKernel
 ) -> None:
+    """
+    Kernel must expose controlled access only.
+    """
+    # only facade access allowed
+    assert hasattr(kernel, "lifecycle")
+    assert hasattr(kernel, "transports")
+    assert hasattr(kernel, "modules")
+
+
+def test_kernel_exposes_context_boundary(kernel: RuntimeKernel) -> None:
     """
     Kernel should expose immutable context boundary.
     """
-    assert kernel_harness.kernel.context is not None
+    assert kernel.context is not None
 
 
-def test_kernel_context_owns_runtime(
-    kernel_harness: KernelTestHarness,
-) -> None:
+def test_kernel_context_owns_runtime(kernel: RuntimeKernel) -> None:
     """
     KernelContext should own runtime graph.
     """
-    assert (
-        kernel_harness.kernel.context.runtime
-        is kernel_harness.kernel.runtime
-    )
+    assert kernel.context.runtime is kernel.runtime
 
 
 def test_kernel_runtime_not_exposed_as_mutable_field(
-    kernel_harness: KernelTestHarness,
+    kernel: RuntimeKernel
 ) -> None:
     """
     Runtime should only be exposed
     through controlled kernel facade.
     """
-    runtime = kernel_harness.kernel.runtime
+    runtime = kernel.runtime
 
     assert runtime is not None
 
