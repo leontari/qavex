@@ -1,3 +1,3 @@
-"""The development helping standalone scripts."""
+"""The development helping scripts."""
 
 from __future__ import annotations
