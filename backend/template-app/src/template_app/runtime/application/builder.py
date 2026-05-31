@@ -27,6 +27,8 @@ class ApplicationBuilder:
     """
     Application builder.
 
+    ONLY responsible for application composition.
+
     Responsibilities:
         - kernel creation
         - transport composition
@@ -61,10 +63,7 @@ class ApplicationBuilder:
                 Runtime transport.
 
         """
-        TransportInstaller.install(
-            composition,
-            transport,
-        )
+        TransportInstaller.install(composition, transport)
 
     def freeze(
         self,

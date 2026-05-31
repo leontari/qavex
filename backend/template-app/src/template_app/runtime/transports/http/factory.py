@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 def _configure_http_routes(app: FastAPI) -> None:
     """Configure builtin http transport routes."""
 
+    # ONLY routes here
     @app.get("/health")
     async def health() -> dict[str, str]:
         return {
@@ -41,9 +42,9 @@ def create_http_app(kernel: RuntimeKernel) -> FastAPI:
         lifespan=create_lifespan(kernel),
     )
 
-    transport = FastAPITransport(app=app)
-
-    kernel.install_transport(transport=transport)
+    # transport = FastAPITransport(app=app)
+    #
+    # kernel.install_transport(transport=transport)
 
     _configure_http_routes(app)
 

@@ -16,8 +16,6 @@ def run_kafka_runtime(kernel: RuntimeKernel) -> None:
     Run Kafka runtime.
 
     Responsibilities:
-        - Kafka transport creation
-        - transport installation
         - runtime lifecycle execution
 
     Args:
@@ -25,13 +23,10 @@ def run_kafka_runtime(kernel: RuntimeKernel) -> None:
             Runtime kernel instance.
 
     """
+    # transport = KafkaTransport(
+    #     kernel=kernel,
+    # )
 
-    transport = KafkaTransport(
-        kernel=kernel,
-    )
+    # kernel.install_transport(transport)
 
-    kernel.install_transport(transport)
-
-    asyncio.run(
-        kernel.startup(),
-    )
+    asyncio.run(kernel.startup())

@@ -16,8 +16,6 @@ def run_grpc_runtime(kernel: RuntimeKernel) -> None:
     Run gRPC runtime.
 
     Responsibilities:
-        - gRPC transport creation
-        - transport installation
         - runtime lifecycle execution
 
     Args:
@@ -25,10 +23,8 @@ def run_grpc_runtime(kernel: RuntimeKernel) -> None:
             Runtime kernel instance.
 
     """
-    transport = GRPCTransport()
+    # transport = GRPCTransport()
 
-    kernel.install_transport(transport)
+    # kernel.install_transport(transport)
 
-    asyncio.run(
-        kernel.startup(),
-    )
+    asyncio.run(kernel.startup())

@@ -3,7 +3,6 @@ from __future__ import annotations
 from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.manager import TransportManager
 from tests.support.fakes.transports import FakeTransport
-from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 def test_kernel_exposes_transport_manager(

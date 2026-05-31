@@ -16,13 +16,11 @@ class ApplicationFreeze:
 
     Responsibilities:
         - transport materialization
-        - runtime locking
+        - runtime locking (freezes kernel)
     """
 
     @staticmethod
-    def freeze(
-        composition: ApplicationComposition,
-    ) -> None:
+    def freeze(composition: ApplicationComposition) -> None:
         """
         Finalize composition.
 
@@ -33,9 +31,11 @@ class ApplicationFreeze:
         """
         kernel = composition.kernel
 
+        # 1. install all transports
         for transport in composition.transports:
             kernel.transport_manager.install(
                 transport,
             )
 
+        # 2. freeze kernel AFTER composition
         kernel.freeze()

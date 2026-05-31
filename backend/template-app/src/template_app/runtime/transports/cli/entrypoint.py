@@ -33,21 +33,19 @@ def run_cli_runtime(kernel: RuntimeKernel) -> None:
             Runtime kernle instance
 
     """
-    parser: ArgumentParser = build_cli_parser()
+    # parser: ArgumentParser = build_cli_parser()
+    #
+    # args = parser.parse_args()
+    #
+    # if args.version:
+    #     logger.info(
+    #         "template-app version: %s",
+    #         __version__,
+    #     )
+    #     return
 
-    args = parser.parse_args()
+    # transport = CLITransport(kernel)
 
-    if args.version:
-        logger.info(
-            "template-app version: %s",
-            __version__,
-        )
-        return
+    # kernel.install_transport(transport)
 
-    transport = CLITransport(kernel)
-
-    kernel.install_transport(transport)
-
-    asyncio.run(
-        kernel.startup(),
-    )
+    asyncio.run(kernel.startup())

@@ -23,8 +23,11 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
 
     Responsibilities:
         - FastAPI creation
-        - transport installation
         - uvicorn execution
+
+    Notes:
+        - NO transport installation here.
+        - ONLY app execution.
 
     Args:
         kernel:
@@ -39,7 +42,7 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
 
     transport = FastAPITransport(app=app)
 
-    kernel.install_transport(transport)
+    # kernel.install_transport(transport)
 
     uvicorn.run(
         app,

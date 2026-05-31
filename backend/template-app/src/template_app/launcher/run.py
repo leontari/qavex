@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 from template_app.launcher.exceptions import UnsupportedLaunchModeError
 from template_app.launcher.modes import LaunchMode
+from template_app.runtime.application.builder import ApplicationBuilder
+from template_app.runtime.transports.http.entrypoint import run_http_runtime
 
 if TYPE_CHECKING:
     from template_app.launcher.config import LauncherConfig
@@ -18,13 +20,15 @@ class KernelLauncher:
     """
     Runtime kernel launcher.
 
+    ONLY orchestration layer.
+
     Responsibilities:
         - runtime mode dispatch
         - runtime entrypoint execution
 
     """
 
-    _kernel: RuntimeKernel
+    # _kernel: RuntimeKernel
 
     _config: LauncherConfig
 
@@ -41,18 +45,52 @@ class KernelLauncher:
             If runtime mode is unsupported.
 
         """
+        builder = ApplicationBuilder()
+
+        composition = builder.create()
+
+        # transport creation is externalized
+        self._compose(builder, composition)
+
+        builder.freeze(composition)
+
+        # match self._config.mode:
+        #     case LaunchMode.HTTP:
+        #         self._run_http()
+        #     case LaunchMode.KAFKA:
+        #         self._run_kafka()
+        #     case LaunchMode.GRPC:
+        #         self._run_grpc()
+        #     case LaunchMode.CLI:
+        #         self._run_cli()
+        #     case _:
+        #         msg = f"Unsupported launch mode: {self._config.mode}"
+        #         raise UnsupportedLaunchModeError(msg)
+
         match self._config.mode:
             case LaunchMode.HTTP:
-                self._run_http()
+                run_http_runtime(kernel, self._config)
+
             case LaunchMode.KAFKA:
-                self._run_kafka()
+                run_kafka_runtime(kernel)
+
             case LaunchMode.GRPC:
-                self._run_grpc()
+                run_grpc_runtime(kernel)
+
             case LaunchMode.CLI:
-                self._run_cli()
+                run_cli_runtime(kernel)
+
             case _:
-                msg = f"Unsupported launch mode: {self._config.mode}"
-                raise UnsupportedLaunchModeError(msg)
+                raise UnsupportedLaunchModeError(self._config.mode)
+
+    def _compose(
+        self,
+        builder,
+        composition,
+    ) -> None:
+        """Compose Hook for DI / plugins later."""
+        # intentionally empty
+        return
 
     ################
     # runtime modes
