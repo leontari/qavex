@@ -8,9 +8,7 @@ from template_app.runtime.lifecycle.registry import (
 
 
 @pytest.fixture
-def lifecycle_registry(
-    runtime,
-) -> LifecycleRegistry:
+def lifecycle_registry(runtime) -> LifecycleRegistry:
     """
     Return runtime lifecycle registry.
     """
@@ -18,9 +16,7 @@ def lifecycle_registry(
 
 
 @pytest.fixture
-async def running_kernel(
-    kernel_harness,
-):
+async def running_kernel(kernel_harness):
     """
     Started runtime kernel.
     """

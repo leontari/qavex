@@ -1,3 +1,5 @@
+"""Runtime metadata."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -17,10 +19,23 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True, frozen=True)
 class RuntimeMetadata:
-    """Immutable runtime metadata."""
+    """
+    Runtime metadata.
 
-    freeze: RuntimeGraphFreeze
+    Responsibilities:
+        - runtime descriptor ownership
+        - runtime capability ownership
+        - freeze ownership
+
+    Notes:
+        Metadata is not part of RuntimeState.
+
+        Metadata belongs to RuntimeKernel.
+
+    """
+
+    descriptor: RuntimeDescriptor
 
     capabilities: RuntimeCapabilities
 
-    descriptor: RuntimeDescriptor
+    freeze: RuntimeGraphFreeze

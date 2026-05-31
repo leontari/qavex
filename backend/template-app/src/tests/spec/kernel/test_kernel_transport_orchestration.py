@@ -2,50 +2,41 @@ from __future__ import annotations
 
 import pytest
 
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from tests.support.fakes.transports import FakeTransport
-from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
-def test_kernel_installs_transport(
-    kernel_harness: KernelTestHarness,
-) -> None:
+def test_kernel_installs_transport(kernel: RuntimeKernel) -> None:
     """
     Kernel should own transport installation.
     """
     transport = FakeTransport(name="fake")
+    kernel.install_transport(transport)
 
-    kernel_harness.install_transport(transport)
-
-    assert transport in kernel_harness.kernel.transports
+    assert transport in kernel.transports
 
 
 @pytest.mark.asyncio
-async def test_kernel_starts_transports(
-    kernel_harness: KernelTestHarness,
-) -> None:
+async def test_kernel_starts_transports(kernel: RuntimeKernel) -> None:
     """
     Kernel startup should startup transports.
     """
     transport = FakeTransport(name="fake")
+    kernel.install_transport(transport)
 
-    kernel_harness.install_transport(transport)
-
-    await kernel_harness.startup()
+    await kernel.startup()
 
     assert transport.started is True
 
 
 @pytest.mark.asyncio
-async def test_kernel_shutdowns_transports(
-    kernel_harness: KernelTestHarness,
-) -> None:
+async def test_kernel_shutdowns_transports(kernel: RuntimeKernel) -> None:
     """
     Kernel shutdown should shut down transports.
     """
     transport = FakeTransport(name="fake")
+    kernel.install_transport(transport)
 
-    kernel_harness.install_transport(transport)
-
-    await kernel_harness.shutdown()
+    await kernel.shutdown()
 
     assert transport.stopped is True

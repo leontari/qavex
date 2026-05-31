@@ -9,8 +9,6 @@ Responsibilities:
 
 from __future__ import annotations
 
-from sqlalchemy.testing.suite.test_reflection import metadata
-
 from template_app.runtime.container.container import Container
 from template_app.runtime.infrastructure.infra import (
     CacheProvider,
@@ -28,9 +26,6 @@ from template_app.runtime.kernel.runtime.descriptors.runtime import (
 )
 from template_app.runtime.kernel.runtime.graph.freeze import (
     RuntimeGraphFreeze,
-)
-from template_app.runtime.kernel.runtime.graph.validator import (
-    RuntimeGraphValidator,
 )
 from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
 from template_app.runtime.kernel.runtime.state import RuntimeState
@@ -144,23 +139,15 @@ def bootstrap_kernel() -> RuntimeKernel:
         modules=module_runtime,
     )
 
-    #######################
-    # kernel graph freezing
-    #######################
+    ##########
+    # metadata
+    ##########
 
-    freeze = RuntimeGraphFreeze()
-    capabilities = build_runtime_capabilities(runtime)
-    descriptor = build_runtime_descriptor(runtime)
     metadata = RuntimeMetadata(
-        freeze=freeze,
-        capabilities=capabilities,
-        descriptor=descriptor,
+        descriptor=build_runtime_descriptor(runtime),
+        capabilities=build_runtime_capabilities(runtime),
+        freeze=RuntimeGraphFreeze(),
     )
-    # runtime.freeze = RuntimeGraphFreeze()
-    # runtime.capabilities = build_runtime_capabilities(runtime)
-    # runtime.descriptor = build_runtime_descriptor(runtime)
-    RuntimeGraphValidator.validate(runtime)
-    freeze.freeze()
 
     return RuntimeKernel.create(
         runtime=runtime,

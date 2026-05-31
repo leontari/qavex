@@ -5,14 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from template_app.runtime.kernel.runtime.capabilities.models import (
-    RuntimeCapabilities,
-)
-from template_app.runtime.kernel.runtime.descriptors.runtime import (
-    RuntimeDescriptor,
-)
-from template_app.runtime.kernel.runtime.graph.freeze import RuntimeGraphFreeze
-
 if TYPE_CHECKING:
     from template_app.runtime.container.container import Container
     from template_app.runtime.infrastructure.runtime import (
@@ -27,20 +19,20 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class RuntimeState:
     """
-    Application runtime state.
+    Application runtime composition graph.
 
     Responsibilities:
         - runtime ownership
-        - composition graph ownership
+        - dependency ownership
         - runtime domains ownership
+        - runtime topology
+
+    Notes:
+        RuntimeState contains only live runtime domains.
+
+        No metadata is stored here.
 
     """
-
-    # freeze: RuntimeGraphFreeze
-    #
-    # capabilities: RuntimeCapabilities
-    #
-    # descriptor: RuntimeDescriptor
 
     container: Container
 

@@ -15,10 +15,11 @@ domain runtimes (lifecycle / infra / messaging / modules / transports)
 """
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
+from template_app.runtime.kernel.context import KernelContext
+from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
 from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 from template_app.runtime.kernel.kernel import RuntimeKernel
@@ -61,6 +62,21 @@ class KernelTestHarness:
     def kernel(self) -> RuntimeKernel:
         """Return runtime kernel."""
         return self._kernel
+
+    @property
+    def context(self) -> KernelContext:
+        return self._kernel.context
+
+    @property
+    def metadata(self) -> RuntimeMetadata:
+        return self._kernel.metadata
+
+    @property
+    def is_frozen(self) -> bool:
+        return self._kernel.is_frozen
+
+    def freeze(self) -> None:
+        self._kernel.freeze()
 
     #################
     # runtime domains

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from template_app.runtime.kernel.context import KernelContext
-from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
 from template_app.runtime.modules.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
     from template_app.runtime.infrastructure.runtime import (
         InfrastructureRuntime,
     )
+    from template_app.runtime.kernel.runtime.metadata import RuntimeMetadata
     from template_app.runtime.kernel.runtime.state import RuntimeState
     from template_app.runtime.lifecycle.runtime import LifecycleRuntime
     from template_app.runtime.messaging.runtime import MessagingRuntime
@@ -44,10 +44,11 @@ class RuntimeKernel:
     """
 
     _context: KernelContext
+    _metadata: RuntimeMetadata
 
-    ########
-    # kernel
-    ########
+    ###############
+    # bootstrap api
+    ###############
 
     @classmethod
     def create(
@@ -60,6 +61,8 @@ class RuntimeKernel:
 
         Args:
             metadata:
+                Runtime metadata.
+
             runtime:
                 Runtime composition graph.
 
@@ -68,10 +71,8 @@ class RuntimeKernel:
 
         """
         return cls(
-            _context=KernelContext(
-                runtime=runtime,
-                metadata=metadata,
-            ),
+            _context=KernelContext(runtime=runtime),
+            _metadata=metadata,
         )
 
     ##################
@@ -100,13 +101,42 @@ class RuntimeKernel:
         """
         return self._context.runtime
 
-    ###########################
-    # kernel metadata accessors
-    ###########################
+    #################
+    # kernel metadata
+    #################
 
     @property
-    def metadata(self):
-        return self._context.metadata
+    def metadata(self) -> RuntimeMetadata:
+        """
+        Return runtime metadata snapshot.
+
+        Returns:
+            Runtime metadata.
+
+        """
+        return self._metadata
+
+    def freeze(self) -> None:
+        """
+        Freeze runtime graph.
+
+        Notes:
+            Freeze is executed only after full application composition.
+
+        """
+        self._metadata.freeze.freeze()
+
+    @property
+    def is_frozen(self) -> bool:
+        """
+        Whether the kernel is frozen.
+
+        Returns:
+            true:
+                if kernel context is frozen
+
+        """
+        return self._metadata.freeze.frozen
 
     ###########################
     # runtime domains accessors

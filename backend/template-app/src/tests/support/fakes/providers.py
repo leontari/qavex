@@ -26,9 +26,6 @@ class FakeDependencyProvider(DependencyProvider):
     def scope(self) -> str:
         return "singleton"
 
-    def provide(self) -> Any:
-        return self.value
-
     async def startup(self) -> None:
         self.initialized = True
 
