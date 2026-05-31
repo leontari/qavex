@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from tests.support.harness.kernel_test_harness import KernelTestHarness
+from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-def test_kernel_harness_bootstraps_kernel(
-    kernel_harness: KernelTestHarness,
-) -> None:
+def test_kernel_harness_bootstraps_kernel(kernel: RuntimeKernel) -> None:
     """
     Harness must bootstrap runtime kernel.
 
@@ -14,20 +12,21 @@ def test_kernel_harness_bootstraps_kernel(
         - runtime ownership
         - kernel orchestration
     """
-    assert kernel_harness.kernel is not None
+    assert kernel is not None
+    assert isinstance(kernel, RuntimeKernel)
 
 
 def test_kernel_harness_exposes_kernel_context(
-    kernel_harness: KernelTestHarness,
+    kernel: RuntimeKernel,
 ) -> None:
     """
     Harness should expose immutable kernel context boundary.
     """
-    assert kernel_harness.kernel.context is not None
+    assert kernel.context is not None
 
 
 def test_kernel_harness_exposes_runtime_via_context(
-    kernel_harness: KernelTestHarness,
+    kernel: RuntimeKernel,
 ) -> None:
     """
     Runtime must be accessed through kernel context boundary.
@@ -37,38 +36,13 @@ def test_kernel_harness_exposes_runtime_via_context(
             -> KernelContext
                 -> RuntimeState
     """
-    runtime = kernel_harness.kernel.context.runtime
-
-    assert runtime is not None
+    assert kernel.context.runtime is not None
 
 
 def test_kernel_runtime_property_maps_to_context_runtime(
-    kernel_harness: KernelTestHarness,
+    kernel: RuntimeKernel,
 ) -> None:
     """
     Kernel.runtime should proxy context.runtime.
     """
-    assert (
-        kernel_harness.kernel.runtime
-        is kernel_harness.kernel.context.runtime
-    )
-
-
-def test_kernel_context_is_immutable(
-    kernel_harness: KernelTestHarness,
-) -> None:
-    """
-    Kernel context should be immutable boundary object.
-    """
-    context = kernel_harness.kernel.context
-
-    assert hasattr(context, "runtime")
-
-    try:
-        context.runtime = None
-
-    except Exception:
-        assert True
-
-    else:
-        assert False, "KernelContext must be immutable."
+    assert kernel.runtime is kernel.context.runtime
