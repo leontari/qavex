@@ -42,10 +42,6 @@ def create_http_app(kernel: RuntimeKernel) -> FastAPI:
         lifespan=create_lifespan(kernel),
     )
 
-    # transport = FastAPITransport(app=app)
-    #
-    # kernel.install_transport(transport=transport)
-
     _configure_http_routes(app)
 
     return app

@@ -9,6 +9,7 @@ Responsibilities:
 
 from __future__ import annotations
 
+from template_app.launcher.exceptions import CompositionViolationError
 from template_app.runtime.container.container import Container
 from template_app.runtime.infrastructure.infra import (
     CacheProvider,
@@ -45,6 +46,18 @@ from template_app.runtime.modules.runtime import ModuleRuntime
 from template_app.runtime.transports.manager import TransportManager
 from template_app.runtime.transports.runtime import TransportRuntime
 
+__ALLOW_BOOTSTRAP = False
+
+
+def enable_builder_bootstrap() -> None:
+    global __ALLOW_BOOTSTRAP
+    __ALLOW_BOOTSTRAP = True
+
+
+def disable_builder_bootstrap() -> None:
+    global __ALLOW_BOOTSTRAP
+    __ALLOW_BOOTSTRAP = False
+
 
 def bootstrap_kernel() -> RuntimeKernel:
     """
@@ -60,6 +73,15 @@ def bootstrap_kernel() -> RuntimeKernel:
             fully initialized runtime kernel
 
     """
+    if not __ALLOW_BOOTSTRAP:
+        msg = (
+            "RuntimeKernel must be created only through "
+            "ApplicationBuilder.create()"
+        )
+        raise CompositionViolationError(
+            msg,
+        )
+
     #################
     # shared runtimes
     #################

@@ -40,9 +40,13 @@ def test_transport_installation_after_freeze_rejected() -> None:
         composition.kernel.install_transport(FakeTransport())
 
 
-# def test_builder_freezes_kernel(kernel: RuntimeKernel) -> None:
-#     builder = ApplicationBuilder()
-#     app = builder.create()
-#
-#     assert app.kernel.metadata.freeze.frozen is True
-#     assert kernel.is_frozen is True
+def test_builder_freezes_kernel() -> None:
+    builder = ApplicationBuilder()
+
+    composition = builder.create()
+
+    assert not composition.kernel.is_frozen
+
+    builder.freeze(composition)
+
+    assert composition.kernel.is_frozen

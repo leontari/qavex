@@ -31,5 +31,5 @@ class RuntimeGraphFreeze:
 
         """
         if self.frozen:
-            msg = "Runtime graph is frozen."
+            msg = "Runtime graph has already been frozen."
             raise RuntimeError(msg)

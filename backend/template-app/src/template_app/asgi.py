@@ -1,20 +1,20 @@
-"""ASGI entrypoint."""
+"""
+ASGI adapter.
 
-# legacy, should be deleted after Make commands updates
+Important:
+No composition logic allowed here.
+Composition happens only in:
+    KernelLauncher.build()
+
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import FastAPI
-
-from template_app.runtime.kernel.bootstrap import bootstrap_kernel
-from template_app.runtime.transports.http.factory import create_http_app
+from template_app.launcher import build_http_app
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-    from template_app.runtime.kernel.kernel import RuntimeKernel
-
-kernel: RuntimeKernel = bootstrap_kernel()
-
-app: FastAPI = create_http_app(kernel)
+app: FastAPI = build_http_app()

@@ -15,6 +15,8 @@ from template_app.runtime.application.installer import (
 )
 from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
+    disable_builder_bootstrap,
+    enable_builder_bootstrap,
 )
 
 if TYPE_CHECKING:
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
 
 class ApplicationBuilder:
     """
-    Application builder.
+    Single application composition root.
 
     ONLY responsible for application composition.
 
@@ -43,9 +45,14 @@ class ApplicationBuilder:
             Mutable application composition.
 
         """
-        return ApplicationComposition(
-            kernel=bootstrap_kernel(),
-        )
+        enable_builder_bootstrap()
+
+        try:
+            kernel = bootstrap_kernel()
+        finally:
+            disable_builder_bootstrap()
+
+        return ApplicationComposition(kernel=kernel)
 
     def install_transport(
         self,
