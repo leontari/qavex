@@ -52,3 +52,54 @@
 - [ ] runtime readiness
 - [ ] runtime health graph
 - [ ] runtime capability negotiation
+
+
+# Architecture upgrade plan
+
+## PHASE 1
+
+- [x] ApplicationBuilder V3
+- [x] Launcher V3
+- [x] Transport Factory
+- [x] ASGI import-safe mode
+
+## PHASE 2
+- [ ] DI Container V1
+- [ ] Scopes
+- [ ] Factories
+- [ ] Resolve
+
+## PHASE 3
+
+- [ ] Plugin Protocol
+- [ ] Module Discovery
+- [ ] Module Loader
+- [ ] Module Setup Context
+
+## PHASE 4
+
+- [ ] Builder Module Auto Loading
+
+## PHASE 5
+
+- [ ] Event Classification
+- [ ] DomainEvent
+- [ ] IntegrationEvent
+- [ ] SystemEvent
+
+## PHASE 6
+
+- [ ] GUI Transport
+
+## PHASE 7
+
+- [ ] Control Plane
+- [ ] Runtime Inspector
+- [ ] Observability
+
+## PHASE 8
+
+- [ ] Distributed Runtime
+- [ ] Kafka Bridge
+- [ ] gRPC Bridge
+- [ ] Cluster Features

@@ -20,4 +20,6 @@ from __future__ import annotations
 
 from template_app.asgi import app
 
+__version__ = "0.3.0"
+
 __all__ = ["app"]
