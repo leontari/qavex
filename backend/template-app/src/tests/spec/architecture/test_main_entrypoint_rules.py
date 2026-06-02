@@ -1,20 +1,28 @@
 from __future__ import annotations
 
-from pathlib import Path
+import ast
+import inspect
+
+import template_app.main
 
 
-MAIN_FILE = Path(
-    "template_app/main.py",
-)
+def _get_source_tree():
+    return ast.parse(inspect.getsource(template_app.main))
 
 
 def test_main_does_not_use_builder() -> None:
-    source = MAIN_FILE.read_text()
+    tree = _get_source_tree()
 
-    assert "ApplicationBuilder" not in source
+    assert not any(
+        isinstance(node, ast.Name) and node.id == "ApplicationBuilder"
+        for node in ast.walk(tree)
+    )
 
 
 def test_main_does_not_use_bootstrap_kernel() -> None:
-    source = MAIN_FILE.read_text()
+    tree = _get_source_tree()
 
-    assert "bootstrap_kernel" not in source
+    assert not any(
+        isinstance(node, ast.Name) and node.id == "bootstrap_kernel"
+        for node in ast.walk(tree)
+    )

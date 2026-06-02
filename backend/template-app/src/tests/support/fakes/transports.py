@@ -49,3 +49,11 @@ class FakeHttpTransport(FakeTransport):
 
 class FakeKafkaTransport(FakeTransport):
     pass
+
+
+class FakeGRPCTransport(FakeTransport):
+    pass
+
+
+class FakeCliTransport(FakeTransport):
+    pass

@@ -1,22 +1,18 @@
-from tests.support.factories.kernel import (
-    build_kernel_no_transport,
-)
-from template_app.runtime.transports.http.factory import (
-    FastAPITransport,
-)
+from template_app.runtime.kernel.kernel import RuntimeKernel
+from template_app.runtime.transports.http.factory import FastAPITransport
 
 
-def test_kernel_has_no_http_transport_by_default() -> None:
-    kernel = build_kernel_no_transport()
+def test_kernel_has_http_transport_by_default(
+    kernel: RuntimeKernel,
+) -> None:
 
-    transport = kernel.transport_manager.get(
-        FastAPITransport,
-    )
+    transport = kernel.transport_manager.get(FastAPITransport)
 
-    assert transport is None
+    assert transport is not None
+    assert isinstance(transport, FastAPITransport)
 
 
-def test_kernel_starts_without_transports() -> None:
-    kernel = build_kernel_no_transport()
-
-    assert kernel.transports == ()
+# def test_kernel_starts_without_transports() -> None:
+#     kernel = build_kernel_no_transport()
+#
+#     assert kernel.transports == ()

@@ -11,12 +11,9 @@ from __future__ import annotations
 
 from template_app.launcher.exceptions import CompositionViolationError
 from template_app.runtime.container.container import Container
-from template_app.runtime.infrastructure.infra import (
-    CacheProvider,
-    DatabaseProvider,
-    QueueProvider,
+from template_app.runtime.infrastructure.factories import (
+    bootstrap_infrastructure,
 )
-from template_app.runtime.infrastructure.registry import InfrastructureRegistry
 from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
 from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.kernel.runtime.capabilities.runtime import (
@@ -122,12 +119,7 @@ def bootstrap_kernel() -> RuntimeKernel:
     # infrastructure graph
     ######################
 
-    infra_registry = InfrastructureRegistry(
-        cache=CacheProvider("url_address"),
-        database=DatabaseProvider("dsn_address"),
-        queue=QueueProvider(["Broker_ONE", "Broker_TWO"]),
-    )
-
+    infra_registry = bootstrap_infrastructure()
     infrastructure_runtime = InfrastructureRuntime(
         registry=infra_registry,
     )

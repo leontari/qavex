@@ -1,4 +1,4 @@
-"""Application launcher."""
+"""Application launcher (public bootstrap layer)."""
 
 from __future__ import annotations
 

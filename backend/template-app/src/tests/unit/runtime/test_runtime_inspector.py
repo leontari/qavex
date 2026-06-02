@@ -1,12 +1,10 @@
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.kernel.runtime.graph.inspector import (
     RuntimeGraphInspector,
 )
-from tests.support.factories.runtime import build_runtime_state
 
 
-def test_runtime_inspector_returns_snapshot() -> None:
-    runtime = build_runtime_state()
-
-    snapshot = RuntimeGraphInspector.inspect(runtime)
+def test_runtime_inspector_returns_snapshot(kernel: RuntimeKernel) -> None:
+    snapshot = RuntimeGraphInspector.inspect(kernel.runtime)
 
     assert "modules" in snapshot

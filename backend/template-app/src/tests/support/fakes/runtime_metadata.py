@@ -13,7 +13,6 @@ from template_app.runtime.kernel.runtime.metadata import (
     RuntimeMetadata,
 )
 from template_app.runtime.kernel.runtime.state import RuntimeState
-from tests.support.fixtures.runtime import runtime
 
 
 def build_fake_metadata(runtime: RuntimeState) -> RuntimeMetadata:

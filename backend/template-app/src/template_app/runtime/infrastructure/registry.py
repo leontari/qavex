@@ -23,9 +23,9 @@ class InfrastructureRegistry:
 
     """
 
-    cache: CacheProvider
-    database: DatabaseProvider
-    queue: QueueProvider
+    # cache: CacheProvider
+    # database: DatabaseProvider
+    # queue: QueueProvider
 
     _providers: dict[str, InfrastructureProvider] = field(
         default_factory=dict,

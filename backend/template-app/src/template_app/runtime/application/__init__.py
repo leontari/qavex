@@ -1,4 +1,4 @@
-"""Application builder."""
+"""Application builder (inner composition layer)."""
 
 from __future__ import annotations
 

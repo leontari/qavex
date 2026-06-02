@@ -1,5 +1,6 @@
 import inspect
 
+from template_app.launcher.facade import run_http, run_grpc, run_kafka, run_cli
 from template_app.runtime.transports.cli.entrypoint import (
     run_cli_runtime,
 )
@@ -27,3 +28,10 @@ def test_runtime_entrypoints_have_same_signature():
         params = list(inspect.signature(fn).parameters)
 
         assert params == expected
+
+
+def test_runtime_facades_exist() -> None:
+    assert callable(run_http)
+    assert callable(run_grpc)
+    assert callable(run_kafka)
+    assert callable(run_cli)

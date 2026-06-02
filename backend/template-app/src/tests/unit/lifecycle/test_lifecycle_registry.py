@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.models import LifecycleHook
 from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
@@ -24,7 +24,7 @@ def test_registry_registers_startup_hook() -> None:
 
     hook = LifecycleHook(name="startup", handler=startup_handler)
 
-    registry.register_startup(hook)
+    registry.register_startup_hook(hook)
 
     assert len(registry.startup_hooks) == 1
     assert registry.startup_hooks[0] is hook
@@ -35,7 +35,7 @@ def test_registry_registers_shutdown_hook() -> None:
 
     hook = LifecycleHook(name="shutdown", handler=shutdown_handler)
 
-    registry.register_shutdown(hook)
+    registry.register_shutdown_hook(hook)
 
     assert len(registry.shutdown_hooks) == 1
     assert registry.shutdown_hooks[0] is hook

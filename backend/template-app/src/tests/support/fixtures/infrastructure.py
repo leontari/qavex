@@ -5,11 +5,11 @@ import pytest
 from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from tests.support.harness.kernel_test_harness import KernelTestHarness
+from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
 @pytest.fixture
-def infrastructure_registry(kernel: KernelTestHarness) -> InfrastructureRegistry:
+def infrastructure_registry(kernel: RuntimeKernel) -> InfrastructureRegistry:
     """
     Return runtime infrastructure registry.
     """

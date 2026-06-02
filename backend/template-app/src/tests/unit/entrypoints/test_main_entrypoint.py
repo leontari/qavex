@@ -1,26 +1,23 @@
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from template_app.main import main
 
 
-def test_main_runs_uvicorn(monkeypatch) -> None:
-    """
-    Local dev entrypoint must invoke uvicorn.
-    """
-
-    captured = {}
-
-    def fake_run(*args, **kwargs):
-        captured["args"] = args
-        captured["kwargs"] = kwargs
+def test_main_runs_launcher(monkeypatch) -> None:
+    launcher = MagicMock()
 
     monkeypatch.setattr(
-        "template_app.main.uvicorn.run",
-        fake_run,
+        "template_app.main.parse_launcher_config",
+        lambda: "config",
+    )
+
+    monkeypatch.setattr(
+        "template_app.main.KernelLauncher",
+        lambda config: launcher,
     )
 
     main()
 
-    assert captured["args"][0] == "template_app:app"
-
-    assert captured["kwargs"]["reload"] is True
+    launcher.run.assert_called_once()

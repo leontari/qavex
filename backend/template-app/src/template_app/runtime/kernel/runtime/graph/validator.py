@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from template_app.runtime.kernel.runtime.state import RuntimeState
+
 
 class RuntimeGraphValidator:
     """
@@ -14,7 +19,7 @@ class RuntimeGraphValidator:
     """
 
     @staticmethod
-    def validate(runtime) -> None:
+    def validate(runtime: RuntimeState) -> None:
         """
         Validate runtime graph.
 

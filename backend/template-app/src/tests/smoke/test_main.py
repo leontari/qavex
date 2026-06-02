@@ -1,30 +1,23 @@
-"""Tests for local development entrypoint."""
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 from template_app.main import main
 
 
-def test_main_starts_uvicorn() -> None:
+def test_main_runs_launcher() -> None:
+    launcher = MagicMock()
 
-    from template_app.main import main
-
-    with patch("uvicorn.run") as mocked:
+    with (
+        __import__("unittest.mock").mock.patch(
+            "template_app.main.parse_launcher_config",
+            return_value="config",
+        ),
+        __import__("unittest.mock").mock.patch(
+            "template_app.main.KernelLauncher",
+            return_value=launcher,
+        ),
+    ):
         main()
 
-    mocked.assert_called_once()
-
-
-def test_main_runs_uvicorn() -> None:
-    """Ensure uvicorn.run is called."""
-
-    with patch("template_app.main.uvicorn.run") as mock_run:
-        main()
-
-    _, kwargs = mock_run.call_args
-
-    assert kwargs["host"] == "127.0.0.1"
-    assert kwargs["port"] == 8000
-    assert kwargs["log_config"] is None
-    assert isinstance(kwargs["reload"], bool)
+    launcher.run.assert_called_once()

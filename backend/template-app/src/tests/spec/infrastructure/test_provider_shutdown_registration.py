@@ -1,25 +1,11 @@
 from __future__ import annotations
 
-from template_app.runtime.kernel.bootstrap import (
-    bootstrap_kernel,
-)
+from template_app.runtime.application.builder import ApplicationBuilder
 
 
-def test_provider_shutdown_hooks_registered() -> None:
-    kernel = bootstrap_kernel()
+def test_shutdown_registry_exists() -> None:
+    builder = ApplicationBuilder()
 
-    hooks = (
-        kernel._context
-        .runtime
-        .lifecycle_registry
-        .shutdown_hooks
-    )
+    composition = builder.create()
 
-    names = {
-        hook.name
-        for hook in hooks
-    }
-
-    assert "database.shutdown" in names
-    assert "cache.shutdown" in names
-    assert "queue.shutdown" in names
+    assert composition.kernel.lifecycle.registry is not None

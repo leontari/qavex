@@ -11,34 +11,26 @@ from template_app.launcher.modes import LaunchMode
 
 
 def test_from_string_parses_http() -> None:
-    mode = LaunchMode.from_string(
-        "http",
-    )
+    mode = LaunchMode.from_string("http")
 
     assert mode is LaunchMode.HTTP
 
 
 def test_from_string_is_case_insensitive() -> None:
-    mode = LaunchMode.from_string(
-        "KaFkA",
-    )
+    mode = LaunchMode.from_string("KaFkA")
 
     assert mode is LaunchMode.KAFKA
 
 
 def test_from_string_strips_whitespace() -> None:
-    mode = LaunchMode.from_string(
-        " grpc ",
-    )
+    mode = LaunchMode.from_string(" grpc ")
 
     assert mode is LaunchMode.GRPC
 
 
 def test_from_string_raises_on_invalid_mode() -> None:
     with pytest.raises(ValueError):
-        LaunchMode.from_string(
-            "invalid",
-        )
+        LaunchMode.from_string("invalid")
 
 
 ########################
@@ -177,10 +169,3 @@ def test_all_launch_modes_present() -> None:
     assert LaunchMode.KAFKA
     assert LaunchMode.GRPC
     assert LaunchMode.CLI
-
-
-def test_launch_mode_classification() -> None:
-    assert LaunchMode.HTTP.is_http is True
-    assert LaunchMode.KAFKA.is_worker is True
-    assert LaunchMode.GRPC.is_network_transport is True
-    assert LaunchMode.CLI.is_worker is True

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from template_app.runtime.application.builder import ApplicationBuilder
 from template_app.runtime.container.container import Container
-from template_app.runtime.kernel.bootstrap import bootstrap_kernel
 
 
 def test_runtime_contains_container() -> None:
-    kernel = bootstrap_kernel()
+    builder = ApplicationBuilder()
 
-    assert isinstance(kernel._context.runtime.container, Container)
+    composition = builder.create()
+
+    assert isinstance(composition.kernel.runtime.container, Container)

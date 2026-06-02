@@ -1,45 +1,32 @@
 from __future__ import annotations
 
-from unittest.mock import Mock
-
-from template_app.runtime.application.builder import (
-    ApplicationBuilder,
-)
+from template_app.runtime.application.builder import ApplicationBuilder
 from tests.support.fakes.transports import FakeTransport
 
-def test_transport_installed_before_freeze() -> None:
 
+def test_installed_transport_survives_freeze() -> None:
+    transport = FakeTransport()
     builder = ApplicationBuilder()
-
     composition = builder.create()
 
-    builder.install_transport(composition, FakeTransport())
-
-    builder.freeze(composition)
-
-    transports = (
-        composition.kernel.transport_manager.transports
-    )
-
-    assert len(transports) == 1
-
-
-def test_transport_is_installed_after_freeze() -> None:
-    builder = ApplicationBuilder()
-
-    composition = builder.create()
-
-    transport = TransportFactory.create_http(
-        composition.kernel,
-    )
-
-    builder.install_transport(
-        composition,
-        transport,
-    )
-
+    builder.install_transport(composition, transport)
     builder.freeze(composition)
 
     transports = composition.kernel.transports
 
     assert len(transports) == 1
+    assert transports[0] is transport
+    assert transport in transports
+
+
+def test_kernel_transports_returns_tuple() -> None:
+    transport = FakeTransport()
+    builder = ApplicationBuilder()
+    composition = builder.create()
+
+    builder.install_transport(composition, transport)
+    builder.freeze(composition)
+
+    transports = composition.kernel.transports
+
+    assert isinstance(transports, tuple)

@@ -2,18 +2,21 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.runtime.messaging.buses import RuntimeEventBus, \
-    RuntimeCommandBus, RuntimeQueryBus
+from template_app.runtime.kernel.kernel import RuntimeKernel
+from template_app.runtime.messaging.buses import (
+    RuntimeEventBus,
+    RuntimeCommandBus,
+    RuntimeQueryBus,
+)
 from template_app.runtime.messaging.runtime import MessagingRuntime
-from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 @pytest.fixture
-def messaging(kernel_harness: KernelTestHarness) -> MessagingRuntime:
+def messaging(kernel: RuntimeKernel) -> MessagingRuntime:
     """
     Return messaging runtime domain.
     """
-    return kernel_harness.messaging
+    return kernel.messaging
 
 
 @pytest.fixture

@@ -4,8 +4,8 @@ from collections.abc import AsyncIterator
 
 import pytest
 
+from template_app.runtime.kernel.kernel import RuntimeKernel
 from tests.support.fakes.lifecycle import FakeLifecycleHook
-from tests.support.harness.kernel_test_harness import KernelTestHarness
 
 
 @pytest.fixture
@@ -25,12 +25,12 @@ def shutdown_hook() -> FakeLifecycleHook:
 
 
 @pytest.fixture
-async def started_kernel(kernel_harness: KernelTestHarness) -> AsyncIterator:
+async def started_kernel(kernel: RuntimeKernel) -> AsyncIterator:
     """
     Started runtime harness.
     """
-    await kernel_harness.startup()
+    await kernel.startup()
 
-    yield kernel_harness
+    yield kernel
 
-    await kernel_harness.shutdown()
+    await kernel.shutdown()
