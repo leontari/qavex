@@ -4,15 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.application.composition import (
-    ApplicationComposition,
-)
-from template_app.runtime.application.freeze import (
-    ApplicationFreeze,
-)
-from template_app.runtime.application.installer import (
-    TransportInstaller,
-)
+from template_app.runtime.application.composition import ApplicationComposition
+from template_app.runtime.application.freeze import ApplicationFreeze
+from template_app.runtime.application.installer import TransportInstaller
 from template_app.runtime.kernel.bootstrap import (
     bootstrap_kernel,
     disable_builder_bootstrap,

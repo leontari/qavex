@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from template_app.runtime.application.transport_factory import TransportFactory
+from template_app.runtime.transports.factory import TransportFactory
 from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.transports.http.transport import FastAPITransport
 

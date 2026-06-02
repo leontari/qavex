@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from template_app.launcher.exceptions import UnsupportedLaunchModeError
 from template_app.launcher.modes import LaunchMode
 from template_app.runtime.application.builder import ApplicationBuilder
-from template_app.runtime.application.transport_factory import TransportFactory
+from template_app.runtime.transports.factory import TransportFactory
 from template_app.runtime.transports.http.transport import FastAPITransport
 
 if TYPE_CHECKING:
