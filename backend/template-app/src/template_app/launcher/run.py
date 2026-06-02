@@ -83,6 +83,10 @@ class KernelLauncher:
 
         kernel = composition.kernel
 
+        if not kernel.is_frozen:
+            msg = "Kernel must be frozen before transport access"
+            raise RuntimeError(msg)
+
         transport = kernel.transport_manager.get(FastAPITransport)
 
         if transport is None:

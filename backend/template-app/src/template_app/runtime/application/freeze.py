@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 
 class ApplicationFreeze:
     """
-    Freeze application composition.
+    Final application freeze phase.
 
     Responsibilities:
-        - transport materialization
-        - runtime locking (freezes kernel)
+        - transport materialization (install transports)
+        - runtime locking (freezes runtime kernel graph)
     """
 
     @staticmethod
@@ -31,11 +31,12 @@ class ApplicationFreeze:
         """
         kernel = composition.kernel
 
+        if kernel.is_frozen:
+            return
+
         # 1. install all transports
         for transport in composition.transports:
-            kernel.transport_manager.install(
-                transport,
-            )
+            kernel.install_transport(transport)
 
         # 2. freeze kernel AFTER composition
         kernel.freeze()

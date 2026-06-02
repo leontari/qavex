@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from template_app.launcher.exceptions import FrozenCompositionError
+
 if TYPE_CHECKING:
     from template_app.runtime.application.composition import (
         ApplicationComposition,
@@ -20,11 +22,10 @@ if TYPE_CHECKING:
 
 class TransportInstaller:
     """
-    Transport installer.
+    Mutable composition installer.
 
-    Responsibilities:
-        - transport registration
-        - composition ownership
+    Allowed only before freeze.
+
     """
 
     @staticmethod
@@ -43,5 +44,8 @@ class TransportInstaller:
                 Runtime transport.
 
         """
+        if composition.kernel.is_frozen:
+            msg = "Cannot mutate frozen application composition."
+            raise FrozenCompositionError(msg)
 
         composition.transports.append(transport)

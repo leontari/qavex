@@ -244,7 +244,9 @@ class RuntimeKernel:
 
     def install_transport(self, transport: Transport) -> None:
         """
-        Install runtime transport.
+        Install transport into kernel runtime.
+
+        Allowed only before freeze.
 
         Args:
             transport:
@@ -252,6 +254,7 @@ class RuntimeKernel:
 
         """
         self.metadata.freeze.ensure_mutable()
+
         self.runtime.transports.manager.install(transport)
 
     #########################

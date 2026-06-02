@@ -3,9 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
-ASGI_FILE = Path(
-    "template_app/asgi.py",
-)
+ASGI_FILE = Path("template_app/asgi.py")
 
 
 def test_asgi_does_not_use_builder() -> None:

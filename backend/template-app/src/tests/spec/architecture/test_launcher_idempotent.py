@@ -6,12 +6,13 @@ from template_app.launcher.run import (
 )
 
 
-def test_kernel_is_frozen_after_build():
+def test_build_returns_same_composition():
 
     launcher = KernelLauncher(
         LauncherConfig(),
     )
 
-    composition = launcher.build()
+    first = launcher.build()
+    second = launcher.build()
 
-    assert composition.kernel.is_frozen is True
+    assert first is second

@@ -21,11 +21,11 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
     """
     Run HTTP runtime.
 
-    Responsibilities:
-        - FastAPI creation
-        - uvicorn execution
+    Important:
+        No composition here.
 
     Notes:
+        - FastAPI instance must already exist inside kernel.
         - NO transport installation here.
         - ONLY app execution.
 
@@ -36,19 +36,18 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
             HTTP runtime configuration
 
     """
-    config = config or HTTPTransportConfig()
+    config = config or HTTPTransportConfig()  # TODO: check this
 
-    app: FastAPI = create_http_app(kernel=kernel)
+    transport = kernel.transport_manager.get(FastAPITransport)
 
-    transport = FastAPITransport(app=app)
-
-    # kernel.install_transport(transport)
+    if transport is None:
+        msg = "HTTP transport is not installed"
+        raise RuntimeError(msg)
 
     uvicorn.run(
-        app,
+        app=transport.app,
         host=config.host,
         port=config.port,
         reload=config.reload,
         workers=config.workers,
-        # access_log=config.access_log,
     )

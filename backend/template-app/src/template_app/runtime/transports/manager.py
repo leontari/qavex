@@ -27,6 +27,9 @@ class TransportManager:
 
     def install(self, transport: Transport) -> None:
         """Append runtime transport."""
+        if transport in self._transports:
+            return
+
         self._transports.append(transport)
 
     @property

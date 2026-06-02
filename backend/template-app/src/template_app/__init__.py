@@ -1,8 +1,12 @@
 """
 Template App package.
 
-Package import MUST NOT trigger:
+Import-safe package root.
 
+Important:
+    Application composition MUST NOT happen here.
+
+Package import MUST NOT trigger:
     - kernel bootstrap
     - transport creation
     - application composition
@@ -10,9 +14,9 @@ Package import MUST NOT trigger:
     - DI initialization
 
 Runtime entrypoints:
-
     template_app.asgi:app
     template_app.main:main
+
 """
 
 from __future__ import annotations
