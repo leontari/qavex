@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class CLITransport:  # noqa: D101
-    def __init__(self, kernel: RuntimeKernel):  # noqa: ANN204, D107
+    def __init__(self, kernel: RuntimeKernel) -> None:  # noqa: ANN204, D107
         self.kernel = kernel
 
     async def startup(self) -> None:  # noqa: D102
@@ -17,10 +17,14 @@ class CLITransport:  # noqa: D101
     async def _loop(self):  # noqa: ANN202
         while True:
             cmd = input("> ")  # noqa: ASYNC250
+
             if cmd == "exit":
                 break
-            result = await self.kernel.context.runtime.messaging.dispatch(cmd)
-            print(result)  # noqa: T201
+
+            # result = await self.kernel.context.runtime.messaging.dispatch(cmd)
+            # print(result)  # noqa: T201
+
+            print(f"command={cmd}")  # noqa: T201
 
     async def shutdown(self) -> None:  # noqa: PLR6301, D102
         print("CLI shutdown")  # noqa: T201

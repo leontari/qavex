@@ -181,16 +181,16 @@ class LaunchMode(StrEnum):
 
     @property
     def shutdown_timeout_seconds(self) -> int:  # noqa: D102
-        raise NotImplementedError
+        return 30
 
     @property
     def startup_timeout_seconds(self) -> int:  # noqa: D102
-        raise NotImplementedError
+        return 30
 
     @property
     def requires_distributed_lock(self) -> bool:  # noqa: D102
-        raise NotImplementedError
+        return False
 
     @property
     def supports_leader_election(self) -> bool:  # noqa: D102
-        raise NotImplementedError
+        return False

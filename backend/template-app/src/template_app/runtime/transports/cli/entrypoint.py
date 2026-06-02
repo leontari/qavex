@@ -7,6 +7,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from template_app._version import __version__
+from template_app.launcher.config import LauncherConfig
+from template_app.runtime.transports.cli.config import CLITransportConfig
 from template_app.runtime.transports.cli.parser import build_cli_parser
 from template_app.runtime.transports.cli.transport import CLITransport
 
@@ -19,7 +21,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def run_cli_runtime(kernel: RuntimeKernel) -> None:
+def run_cli_runtime(
+    kernel: RuntimeKernel,
+    config: LauncherConfig,
+) -> None:
     """
     Run CLI runtime.
 
@@ -29,6 +34,8 @@ def run_cli_runtime(kernel: RuntimeKernel) -> None:
         - CLI transport execution
 
     Args:
+        config:
+            LauncherConfig
         kernel:
             Runtime kernle instance
 
@@ -44,8 +51,9 @@ def run_cli_runtime(kernel: RuntimeKernel) -> None:
     #     )
     #     return
 
-    # transport = CLITransport(kernel)
-
-    # kernel.install_transport(transport)
+    # Config is accepted for API consistency
+    # temp solution while ConfigLoader is not implemented
+    _ = config
+    config = CLITransportConfig()
 
     asyncio.run(kernel.startup())

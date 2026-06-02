@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import uvicorn
 
 from template_app.runtime.transports.http.config import HTTPTransportConfig
-from template_app.runtime.transports.http.factory import create_http_app
 from template_app.runtime.transports.http.transport import FastAPITransport
 
 if TYPE_CHECKING:
@@ -17,7 +16,10 @@ if TYPE_CHECKING:
     from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
+def run_http_runtime(
+    kernel: RuntimeKernel,
+    config: LauncherConfig,
+) -> None:
     """
     Run HTTP runtime.
 
@@ -36,16 +38,21 @@ def run_http_runtime(kernel: RuntimeKernel, config: LauncherConfig) -> None:
             HTTP runtime configuration
 
     """
-    config = config or HTTPTransportConfig()  # TODO: check this
+    # Config is accepted for API consistency
+    # temp solution while ConfigLoader is not implemented
+    _ = config
+    config = HTTPTransportConfig()
 
     transport = kernel.transport_manager.get(FastAPITransport)
+
+    app: FastAPI = transport.app
 
     if transport is None:
         msg = "HTTP transport is not installed"
         raise RuntimeError(msg)
 
     uvicorn.run(
-        app=transport.app,
+        app=app,
         host=config.host,
         port=config.port,
         reload=config.reload,

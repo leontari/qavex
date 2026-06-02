@@ -5,13 +5,17 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from template_app.runtime.transports.kafka.transport import KafkaTransport
+from template_app.runtime.transports.kafka.config import KafkaTransportConfig
 
 if TYPE_CHECKING:
+    from template_app.launcher.config import LauncherConfig
     from template_app.runtime.kernel.kernel import RuntimeKernel
 
 
-def run_kafka_runtime(kernel: RuntimeKernel) -> None:
+def run_kafka_runtime(
+    kernel: RuntimeKernel,
+    config: LauncherConfig,
+) -> None:
     """
     Run Kafka runtime.
 
@@ -21,12 +25,13 @@ def run_kafka_runtime(kernel: RuntimeKernel) -> None:
     Args:
         kernel:
             Runtime kernel instance.
+        config:
+            LauncherConfig
 
     """
-    # transport = KafkaTransport(
-    #     kernel=kernel,
-    # )
-
-    # kernel.install_transport(transport)
+    # Config is accepted for API consistency
+    # temp solution while ConfigLoader is not implemented
+    _ = config
+    config = KafkaTransportConfig()
 
     asyncio.run(kernel.startup())
