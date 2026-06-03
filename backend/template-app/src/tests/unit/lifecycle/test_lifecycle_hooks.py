@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.bootstrap.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.models import LifecycleHook
 
 
 async def fake_handler() -> None:

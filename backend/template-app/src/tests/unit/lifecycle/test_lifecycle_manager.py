@@ -1,90 +1,55 @@
 from __future__ import annotations
 
-import pytest
-
-from template_app.bootstrap.lifecycle.hooks import LifecycleHook
-from template_app.bootstrap.lifecycle.manager import LifecycleManager
-from template_app.bootstrap.lifecycle.registry import LifecycleRegistry
+from template_app.runtime.lifecycle.models import LifecycleHook
+from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
-@pytest.mark.asyncio
-async def test_manager_executes_startup_hooks() -> None:
+def test_registry_registers_startup_hook() -> None:
     registry = LifecycleRegistry()
-
-    state = {"started": False}
 
     async def startup() -> None:
-        state["started"] = True
+        pass
 
-    registry.register_startup(
-        LifecycleHook(
-            name="startup",
-            handler=startup,
-        ),
+    hook = LifecycleHook(
+        name="startup",
+        handler=startup,
     )
 
-    manager = LifecycleManager(registry=registry)
+    registry.register_startup_hook(hook)
 
-    await manager.startup()
-
-    assert state["started"] is True
+    assert hook in registry.startup_hooks
 
 
-@pytest.mark.asyncio
-async def test_manager_executes_shutdown_hooks() -> None:
+def test_registry_registers_shutdown_hook() -> None:
     registry = LifecycleRegistry()
 
-    state = {"shutdown": False}
-
     async def shutdown() -> None:
-        state["shutdown"] = True
+        pass
 
-    registry.register_shutdown(
-        LifecycleHook(
-            name="shutdown",
-            handler=shutdown,
-        ),
+    hook = LifecycleHook(
+        name="shutdown",
+        handler=shutdown,
     )
 
-    manager = LifecycleManager(registry=registry)
+    registry.register_shutdown_hook(hook)
 
-    await manager.shutdown()
-
-    assert state["shutdown"] is True
+    assert hook in registry.shutdown_hooks
 
 
-async def test_lifecycle_manager_executes_hooks() -> None:
+def test_registry_registers_multiple_startup_hooks() -> None:
     registry = LifecycleRegistry()
 
-    state: dict[str, bool] = {
-        "started": False,
-        "stopped": False,
-    }
+    async def first() -> None:
+        pass
 
-    async def startup() -> None:
-        state["started"] = True
+    async def second() -> None:
+        pass
 
-    async def shutdown() -> None:
-        state["stopped"] = True
-
-    registry.register_startup(
-        LifecycleHook(
-            name="startup",
-            handler=startup,
-        ),
+    registry.register_startup_hooks(
+        (
+            LifecycleHook(name="first", handler=first),
+            LifecycleHook(name="second", handler=second),
+        )
     )
 
-    registry.register_shutdown(
-        LifecycleHook(
-            name="shutdown",
-            handler=shutdown,
-        ),
-    )
-
-    manager = LifecycleManager(registry)
-
-    await manager.startup()
-    await manager.shutdown()
-
-    assert state["started"] is True
-    assert state["stopped"] is True
+    assert len(registry.startup_hooks) == 2

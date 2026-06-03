@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.bootstrap.runtime import bootstrap_application
+from template_app.runtime.kernel.runtime import bootstrap_application
 from template_app.core_.app_.factory import create_app
 from template_app.core_.app_.logger import setup_logging
 

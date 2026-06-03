@@ -1,6 +1,6 @@
-from template_app.bootstrap.modules.discovery import discover_modules
-from template_app.bootstrap.modules.manifests import ModuleManifest
-from template_app.bootstrap.modules.registry import ModuleRegistry
+from template_app.runtime.modules.discovery import discover_modules
+from template_app.runtime.modules.manifests import ModuleManifest
+from template_app.runtime.modules.registry import ModuleRegistry
 
 
 class FakeModule:

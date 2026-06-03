@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from template_app.bootstrap.modules import (
+from template_app.runtime.modules import (
     ModuleCapability,
     ModuleManifest,
 )
-from template_app.bootstrap.modules.lifecycle import (
+from template_app.runtime.modules.lifecycle import (
     activate,
 )
 

@@ -87,7 +87,7 @@ def caplog_info(caplog):
 
 
 
-from template_app.bootstrap.testing import (
+from template_app.runtime.testing import (
     bootstrap_testing_application,
 )
 

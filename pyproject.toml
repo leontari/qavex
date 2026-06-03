@@ -52,7 +52,7 @@ typing = [
 ]
 
 [tool.uv]
-required-version = "==0.11.11"  # upgrade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
+required-version = "==0.11.16"  # upgrade uv's version manually and keep in sync with: pre-commit, docker, ci, locally
 workspace.members = [
   "backend/template-app",
 ]

@@ -9,7 +9,7 @@
                                     ▼
                          ┌──────────────────────┐
                          │       asgi.py        │
-                         │ bootstrap_application│
+                         │ bootstrap_kernel│
                          └──────────┬───────────┘
                                     │
                                     ▼
@@ -55,7 +55,7 @@
                             │
                             ▼
                ┌─────────────────────────┐
-               │ ModuleSetupContext      │
+               │ ModuleContext           │
                ├─────────────────────────┤
                │ register_router()       │
                │ register_dependency()   │
@@ -79,7 +79,7 @@
               │
               ▼
 2.         asgi.py
-    bootstrap_application()
+    bootstrap_kernel()
               │
               ▼
 3. create lifecycle registry
@@ -155,7 +155,7 @@ class ModuleProtocol(Protocol):
 
     def setup(
         self,
-        context: ModuleSetupContext,
+        context: ModuleContext,
     ) -> None:
         ...
 ```

@@ -1,23 +1,26 @@
 """
-Template App package entrypoint.
+Template App package.
 
-Production runtimes should import:
+Import-safe package root.
 
-    template_app:app
+Important:
+    Application composition MUST NOT happen here.
 
-Supported runtimes:
+Package import MUST NOT trigger:
+    - kernel bootstrap
+    - transport creation
+    - application composition
+    - plugin discovery
+    - DI initialization
 
-- uvicorn
-- gunicorn
-- kubernetes
-- docker
-- pytest
+Runtime entrypoints:
+    template_app.asgi:app
+    template_app.main:main
 
-The package entrypoint must remain lightweight and import-safe.
 """
 
 from __future__ import annotations
 
-from template_app.asgi import app
+__version__ = "0.3.0"
 
-__all__ = ["app"]
+__all__ = ("__version__",)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.infrastructure.cache.provider import CacheProvider
+from template_app.runtime.infrastructure.infra import CacheProvider
 
 
 @pytest.mark.asyncio

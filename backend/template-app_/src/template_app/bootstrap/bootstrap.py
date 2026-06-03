@@ -5,8 +5,8 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from template_app.api.router import register_routes
-from template_app.bootstrap.application import ApplicationContext
-from template_app.bootstrap.container import Container
+from template_app.runtime.application import ApplicationContext
+from template_app.runtime.container import Container
 from template_app.core_.app_.exception_handlers import (
     register_exception_handlers,
 )

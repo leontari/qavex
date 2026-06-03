@@ -1,0 +1,8 @@
+"""Minimal CLI runtime example."""
+
+from __future__ import annotations
+
+from template_app.launcher.facade import run_cli
+
+if __name__ == "__main__":
+    run_cli()

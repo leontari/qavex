@@ -1,0 +1,11 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: template-cli
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: cli
+          command: ["python", "-m", "template_app.cli", "cli"]

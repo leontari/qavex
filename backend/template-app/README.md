@@ -1,290 +1,242 @@
-# IT IS NOT a FastAPI CRUD app
+# Multi-Runtime Kernel — Migration Plan
 
-Plugin Runtime Platform
+Vision
 
-It is an other architecture level which can be described as:
+Build a production-grade distributed application runtime kernel for Python microservices with:
 
-- microservice runtime platform;
-- extensible service host;
-- plugin-oriented service architecture;
-- orchestration layer around FastAPI instance
+- multi-transport runtime
+- Kubernetes-native orchestration
+- DAG lifecycle execution
+- runtime task scheduler
+- unified observability
+- modular plugin architecture
+- distributed messaging
+- self-aware runtime state model
 
-## Architecture model
-```text
-FastAPI = transport/runtime kernel
+The system must support:
 
-services/* = plugins/modules/business capabilities
+- HTTP
+- Kafka workers
+- gRPC
+- CLI
+- future transports
 
-infrastructure/* = adapters/external integrations
+without changing kernel internals.
 
-bootstrap/* = composition root + orchestration
+# Architectural Principles
 
-domain/* = business contracts and abstractions
-```
+## 1. Runtime-first architecture
 
-## Core adea
+Kernel owns:
 
-FastAPI - is NOT an application
+- lifecycle
+- orchestration
+- state
+- telemetry
+- scheduling
+- readiness
+- messaging
 
-FastAPI  is used here as:
-- transport host;
-- DI entrypoint;
-- HTTP runtime;
-- middleware pipeline;
-- lifecycle runtime.
+Transports are adapters only.
 
-The application itself is represented by the `template_app`'s:
-- modules;
-- services;
-- plugins.
+## 2. Transport independence
 
-Services (or business-logic in other words) is represented by plugins here.
+## Kernel MUST NOT depend on:
 
-## What it looks like
+FastAPI
+Kafka SDK
+gRPC SDK
 
-Runtime Kernel:
+Transport layer is optional and replaceable.
 
-- FastApi
-- Lifecycle
-- DI Container
-- Observability
-- Configuration
-- Event Bus
-- Task Scheduler
+## 3. Kubernetes-native runtime
 
-```text
-RuntimeKernel
-    ├── transport orchestration
-    ├── module orchestration
-    ├── infrastructure orchestration
-    └── lifecycle orchestration
-```
+Runtime must:
 
-```text
-RuntimeKernel
-    ├── lifecycle
-    ├── modules
-    ├── DI container
-    └── infrastructure providers
-```
+- expose readiness
+- support draining
+- support graceful shutdown
+- support dependency graph execution
+- expose observability
+- support orchestration
 
-## Plugins / Modules:
+## 4. Self-aware runtime
 
-- UserService
-- AuthService
-- SyncService
-- ImportService
-- MetricsService
-- HealthService
+Runtime knows:
 
-Supports:
-- sandbox modules;
-- hot reload modules;
-- dynamic plugins;
-- remote plugins;
-- signed plugins;
-- multi-tenant modules.
+- which modules exist
+- which transports exist
+- readiness state
+- active tasks
+- dependency graph
+- failures
+- retries
+- worker state
 
-Modules work only via public setup API:
-- `register_router`
-- `register_startup_hook`
-- `register_shutdown_hook`
-- `register_dependency`
-- `get_provider`
+# Current State
 
-## Infrastructure Adapters:
+## Already implemented
 
-- Postrgres
-- Kafka
-- Redis
-- S3
-- ClickHouse
-- SMTP
-- REST clients
+### Runtime kernel
 
-## This is the foundation for
-
-The target to get as a result:
-
-- plugin loading
-- feature flags
-- runtime capability discovery
-- dynamic module enabling/disabling
-- background runtime services
-- event-driven orchestration
-- service runtime platform
-
-## Target system design
-
-Hexagonal Runtime Architecture
-
-`template-app` is a `Application Runtime Kernel`
-
-where:
-
-- FastAPI = transport adapter;
-- lifespan = runtime adapter;
-- services/modules = plugins;
-- infrastructure = adapters/providers;
-- runtime = orchestration layer.
-
-This will allow the change FastApi itself:
-
-For example:
-
-```text
-HTTP adapter
-gRPC adapter
-Kafka consumer runtime
-CLI runtime
-Worker runtime
-Scheduler runtime
-```
-will be on the same `kernel`
-
-## Current Architecture
-
-Current architecture design:
-
-```
-FastAPI = transport;
-providers = infrastructure adapters;
-modules = business plugins;
-lifecycle = orchestration engine;
-kernel = runtime platform.
-```
-
-modules/
-```text
-registry     -> runtime module graph
-manifest     -> static metadata
-discovery    -> enable/disable/filtering
-loader       -> runtime activation
-context      -> restricted runtime API
-```
-
-which is base for:
-
-- event-driven microservices;
-- microservice kernel;
-- plugin-based systems;
-- orchestration runtime.
-
-As for now has been implemented:
-
-- Runtime kernel
-- Plugin modules
-- Lifecycle orchestration
-- Infrastructure registry
-- Dependency container
-- Provider abstraction
-- Restricted module API
-- Runtime/application separation
-
-### Application package responsibility separation:
-FastAPI is used more like a transport plugin above the application runtime kernel now.
-
-| Layer          | 	Responsibility             |
-|----------------|-----------------------------|
-| kernel         | 	runtime orchestration      |
-| lifecycle      | 	startup/shutdown execution |
-| modules        | 	business plugins           |
-| infrastructure | 	external systems adapters  |
-| api            | 	transport layer            |
-| domain         | 	business contracts         |
-| services       | 	application capabilities   |
-| contracts      | system component protocols  |
-| runtime        | runtime kernel              |
-
-## Event Bus
-
-Target:
-- `inter-module communication` without `direct coupling`
-
-like:
-
-- `UserModule -> EventBus -> NotificatioonModule`
-
-and NOT:
-- `UserModule -> NotificationService`
-
-### Event Bus responsibilities
-
-| Responsibility	         | Description            |
-|-------------------------|------------------------|
-| publish events	         | runtime event emission |
-| subscribe handlers      | 	event routing         |
-| decouple modules	plugin | isolation              |
-| async orchestration	    | async execution        |
-| domain event transport  | 	business messaging    |
-| infrastructure bridge	  | Kafka/NATS later       |
-
-### Event system architecture
-
-```text
-bootstrap/
-├── events/
-│   ├── __init__.py
-│   ├── bus.py
-│   ├── protocols.py
-│   ├── registry.py
-│   ├── dispatcher.py
-│   ├── handlers.py
-│   ├── event.py
-│   └── exceptions.py
-```
-
-### System Graph
-```text
-Module A
-    │
-    ▼
-publish(event)
-    │
-    ▼
-┌──────────────────┐
-│    EventBus      │
-├──────────────────┤
-│ registry         │
-│ dispatcher       │
-└─────────┬────────┘
-          │
-          ▼
-┌──────────────────┐
-│ Event Handlers   │
-└─────────┬────────┘
-          │
- ┌────────┴────────┐
- ▼                 ▼
-Module B       Module C
-```
-
-## Current architecture layers
-
-### Kernel Layer
 - RuntimeKernel
 - KernelContext
 - RuntimeState
-- Container
 
-### Lifecycle Layer
-- startup/shutdown hooks
-- registry
-- manager
+### Lifecycle
+- LifecycleManager
+- LifecycleRegistry
+- DAG executor
+- retry policies
+- readiness probes
 
-### Messaging Layer
-- EventBus
-- CommandBus
-- QueryBus
-- HandlerRegistry
+### Messaging
 
-### Module Layer
-- ModuleProtocol
-- ModuleLoader
-- ModuleRegistry
-- ModuleSetupContext
+- command bus
+- query bus
+- event bus
 
-### Infrastructure Layer
-- providers
-- registry
-- lifecycle integration
+### Transports
+
+- HTTP
+- Kafka
+- gRPC
+- CLI
+
+### Module system
+
+- ModuleContext
+- capabilities
+- manifests
+- discovery
+
+# Migration Goal
+
+Move from:
+
+`hook-based orchestration`
+
+to:
+
+`runtime task orchestration platform`
+
+## PHASE 1 — Stabilize Current Runtime
+
+### Goal
+
+Freeze current architecture before major migration.
+
+## PHASE 2 — RuntimeTask Migration
+
+### Goal
+
+Replace hook-based runtime with scheduler-driven runtime.
+
+New Core Abstraction:
+
+`RuntimeTask`  - canonical orchestration primitive.
+
+#### Responsibilities
+
+A task describes:
+
+- executable runtime unit
+- dependencies
+- retries
+- health
+- transport affinity
+- scheduling policy
+
+#### RuntimeTask model
+```
+name
+phase
+handler
+dependencies
+retry_policy
+critical
+transport_affinity
+module_affinity
+health_policy
+timeouts
+restart_policy
+```
+
+Hooks become compatibility adapters
+```
+LifecycleHook
+    ↓
+RuntimeTask
+```
+
+## New Runtime Components:
+
+- RuntimeScheduler
+- RuntimeTaskRegistry
+- RuntimeTaskStateGraph
+- RuntimeSupervisor
+
+
+## PHASE 3 — Kubernetes-grade Runtime
+### Goal
+
+Transform runtime into cluster-native orchestration engine.
+
+Runtime states
+```
+BOOTING
+STARTING
+READY
+DEGRADED
+DRAINING
+STOPPING
+STOPPED
+FAILED
+```
+
+## PHASE 4 — Observability Runtime
+
+### Goal
+
+Make runtime fully observable via `Runtime telemetry layer`
+
+- RuntimeTelemetry
+- SRE Endpoints
+```
+/live
+/ready
+/startup
+/metrics
+/version
+/info
+Health
+/health/runtime
+/health/dependencies
+/health/transports
+/health/workers
+Debug
+/debug/tasks
+/debug/runtime
+/debug/events
+/debug/connections
+/debug/config
+
+Disabled by default.
+```
+
+## PHASE 5 — Universal Module Runtime
+
+Goal
+
+Turn modules into self-contained runtime units.
+
+# TARGET:
+
+`microservice kernel` which is:
+
+- transport-agnostic runtime
+- modular runtime graph
+- runtime domains
+- lifecycle orchestration
+- distributed-ready kernel
+- kubernetes-oriented architecture

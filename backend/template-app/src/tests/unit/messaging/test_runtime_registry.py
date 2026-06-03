@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from template_app.bootstrap.messaging.contracts.commands import (
+from template_app.runtime.messaging.contracts.commands import (
     Command,
 )
-from template_app.bootstrap.messaging.runtime.registry import (
+from template_app.runtime.messaging.registry import (
     RuntimeHandlerRegistry,
 )
 

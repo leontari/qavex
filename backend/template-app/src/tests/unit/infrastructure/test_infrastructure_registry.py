@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from template_app.bootstrap.infrastructure.registry import (
+from template_app.runtime.infrastructure.registry import (
     InfrastructureRegistry,
 )
-from template_app.infrastructure.cache.provider import (
+from template_app.runtime.infrastructure.infra import (
     CacheProvider,
 )
 

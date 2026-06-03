@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from template_app.infrastructure.database import DatabaseProvider
+from template_app.runtime.infrastructure.infra import DatabaseProvider
 
 
 @pytest.mark.asyncio
