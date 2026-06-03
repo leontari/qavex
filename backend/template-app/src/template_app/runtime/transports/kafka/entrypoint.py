@@ -32,6 +32,6 @@ def run_kafka_runtime(
     # Config is accepted for API consistency
     # temp solution while ConfigLoader is not implemented
     _ = config
-    config = KafkaTransportConfig()
+    kafka_config = KafkaTransportConfig()
 
     asyncio.run(kernel.startup())

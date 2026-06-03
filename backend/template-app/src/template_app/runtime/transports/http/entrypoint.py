@@ -41,20 +41,20 @@ def run_http_runtime(
     # Config is accepted for API consistency
     # temp solution while ConfigLoader is not implemented
     _ = config
-    config = HTTPTransportConfig()
+    http_config = HTTPTransportConfig()
 
     transport = kernel.transport_manager.get(FastAPITransport)
-
-    app: FastAPI = transport.app
 
     if transport is None:
         msg = "HTTP transport is not installed"
         raise RuntimeError(msg)
 
+    app: FastAPI = transport.app
+
     uvicorn.run(
         app=app,
-        host=config.host,
-        port=config.port,
-        reload=config.reload,
-        workers=config.workers,
+        host=http_config.host,
+        port=http_config.port,
+        reload=http_config.reload,
+        workers=http_config.workers,
     )

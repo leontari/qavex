@@ -54,6 +54,6 @@ def run_cli_runtime(
     # Config is accepted for API consistency
     # temp solution while ConfigLoader is not implemented
     _ = config
-    config = CLITransportConfig()
+    # config = CLITransportConfig()
 
     asyncio.run(kernel.startup())

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from template_app.runtime.kernel.kernel import RuntimeKernel
@@ -13,7 +13,7 @@ class GRPCTransport:
 
     def __init__(
         self,
-        server: None = None,
+        server: Any | None = None,
         kernel: RuntimeKernel | None = None,
     ) -> None:
 

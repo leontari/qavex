@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from template_app.runtime.lifecycle.hooks import (
+from template_app.runtime.lifecycle.models import (
     LifecycleHook,
 )
 from template_app.runtime.modules.context import (

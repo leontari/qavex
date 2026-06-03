@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -7,6 +8,8 @@ if TYPE_CHECKING:
 
 
 class CLITransport:  # noqa: D101
+    name: str = "http"
+
     def __init__(self, kernel: RuntimeKernel) -> None:  # noqa: ANN204, D107
         self.kernel = kernel
 
@@ -14,7 +17,7 @@ class CLITransport:  # noqa: D101
         print("CLI started")  # noqa: T201
         await self._loop()
 
-    async def _loop(self):  # noqa: ANN202
+    async def _loop(self) -> None:  # noqa: ANN202
         while True:
             cmd = input("> ")  # noqa: ASYNC250
 

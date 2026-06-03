@@ -32,6 +32,6 @@ def run_grpc_runtime(
     # Config is accepted for API consistency
     # temp solution while ConfigLoader is not implemented
     _ = config
-    config = GRPCTransportConfig()
+    # config = GRPCTransportConfig()
 
     asyncio.run(kernel.startup())

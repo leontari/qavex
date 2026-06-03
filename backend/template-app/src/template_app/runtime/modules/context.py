@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from template_app.runtime.infrastructure.contracts import (
         InfrastructureProvider,
     )
-    from template_app.runtime.lifecycle.registry import LifecycleHook
+    from template_app.runtime.lifecycle.models import LifecycleHook
     from template_app.runtime.messaging.buses.event_bus import (
         RuntimeEventBus,
     )

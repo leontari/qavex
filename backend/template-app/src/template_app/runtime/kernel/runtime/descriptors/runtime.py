@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+from template_app.runtime.kernel.runtime.state import RuntimeState
 from template_app.runtime.kernel.runtime.descriptors.models import (
     RuntimeDescriptor,
 )
 
 
-def build_runtime_descriptor(runtime) -> RuntimeDescriptor:
+def build_runtime_descriptor(runtime: RuntimeState) -> RuntimeDescriptor:
     """
     Build runtime descriptor.
 

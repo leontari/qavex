@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from template_app.runtime.kernel.runtime.state import RuntimeState
+
 
 class RuntimeGraphInspector:
     """
@@ -14,7 +16,7 @@ class RuntimeGraphInspector:
     """
 
     @staticmethod
-    def inspect(runtime) -> dict[str, object]:
+    def inspect(runtime: RuntimeState) -> dict[str, object]:
         """
         Inspect runtime graph.
 

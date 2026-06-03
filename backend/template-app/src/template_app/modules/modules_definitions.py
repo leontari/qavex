@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from fastapi import APIRouter
 
-from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.models import LifecycleHook
 from template_app.runtime.modules.capabilities import ModuleCapability
 from template_app.runtime.modules.manifests import ModuleManifest
 from template_app.runtime.modules.registry import ModuleRegistry

@@ -82,6 +82,8 @@ def setup_modules(
         context_factory=context_factory,
     )
 
-    kernel.install_modules(manifests)
+    # TODO:
+    # Reintroduce kernel-aware module context after DI container migration.
+    # kernel.install_modules(manifests)
 
     return manifests

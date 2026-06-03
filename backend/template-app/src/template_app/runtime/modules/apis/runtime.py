@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from template_app.runtime.container.container import Container
     from template_app.runtime.container.contracts import DependencyProvider
-    from template_app.runtime.lifecycle.hooks import LifecycleHook
+    from template_app.runtime.lifecycle.models import LifecycleHook
     from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
@@ -36,7 +36,7 @@ class ModuleRuntimeAPI:
     container: Container
     lifecycle_registry: LifecycleRegistry
 
-    register_router: Callable[[APIRouter], None]
+    # register_router: Callable[[APIRouter], None]
 
     def register_router(self, router: APIRouter) -> None:  # noqa: ARG002
         msg = "Router registration requires HTTP transport."
@@ -47,10 +47,10 @@ class ModuleRuntimeAPI:
     ################
 
     def register_startup_hook(self, hook: LifecycleHook) -> None:
-        self.lifecycle_registry.register_startup(hook)
+        self.lifecycle_registry.register_startup_hook(hook)
 
     def register_shutdown_hook(self, hook: LifecycleHook) -> None:
-        self.lifecycle_registry.register_shutdown(hook)
+        self.lifecycle_registry.register_shutdown_hook(hook)
 
     #################
     # dependency API

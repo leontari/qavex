@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.launcher.exceptions import UnsupportedLaunchModeError
 from template_app.launcher.modes import LaunchMode
 from template_app.runtime.application.builder import ApplicationBuilder
 from template_app.runtime.transports.factory import TransportFactory
@@ -18,6 +17,7 @@ if TYPE_CHECKING:
     from template_app.runtime.application.composition import (
         ApplicationComposition,
     )
+    from template_app.runtime.transports.contracts import Transport
 
 
 @dataclass(slots=True)
@@ -96,14 +96,7 @@ class KernelLauncher:
         return transport.app
 
     def run(self) -> None:
-        """
-        Run configured application runtime mode.
-
-        Raises:
-            UnsupportedLaunchModeError:
-            If runtime mode is unsupported.
-
-        """
+        """Run configured application runtime mode."""
         composition = self.build()
 
         kernel = composition.kernel
@@ -137,10 +130,6 @@ class KernelLauncher:
 
                 run_cli_runtime(kernel, self._config)
 
-            case _:
-                msg = f"Unsupported launch mode: {self._config.mode}"
-                raise UnsupportedLaunchModeError(msg)
-
     def _compose(
         self,
         builder: ApplicationBuilder,
@@ -155,6 +144,7 @@ class KernelLauncher:
             - DI registration
             - capability registration
         """
+        transport: Transport
         kernel = composition.kernel
 
         match self._config.mode:
@@ -173,6 +163,3 @@ class KernelLauncher:
             case LaunchMode.KAFKA:
                 transport = TransportFactory.create_kafka(kernel)
                 builder.install_transport(composition, transport)
-
-            case _:
-                return

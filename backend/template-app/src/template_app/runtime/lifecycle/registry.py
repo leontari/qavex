@@ -8,8 +8,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from template_app.runtime.lifecycle.hooks import LifecycleHook
-    from template_app.runtime.lifecycle.models import ReadinessProbe
+    from template_app.runtime.lifecycle.models import (
+        LifecycleHook,
+        ReadinessProbe,
+    )
 
 
 @dataclass(slots=True)

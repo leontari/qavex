@@ -1,28 +1,16 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from template_app.runtime.container.container import (
     Container,
 )
-
-from template_app.runtime.infrastructure.infra.cache.provider import (
-    CacheProvider,
+from template_app.runtime.infrastructure.factories import (
+    bootstrap_infrastructure,
 )
-from template_app.runtime.infrastructure.infra.database.provider import (
-    DatabaseProvider,
-)
-from template_app.runtime.infrastructure.infra.queue.provider import (
-    QueueProvider,
-)
-from template_app.runtime.infrastructure.runtime import (
-    InfrastructureRuntime,
-)
-
 from template_app.runtime.lifecycle.registry import (
     LifecycleRegistry,
 )
-
 from template_app.runtime.messaging.buses.command_bus import (
     RuntimeCommandBus,
 )
@@ -35,20 +23,27 @@ from template_app.runtime.messaging.buses.query_bus import (
 from template_app.runtime.messaging.registry import (
     RuntimeHandlerRegistry,
 )
-
 from template_app.runtime.modules import (
     ModuleCapability,
     ModuleContext,
+    ModuleManifest,
 )
-
 from template_app.runtime.modules.apis import (
     ModuleInfraAPI,
     ModuleMessagingAPI,
     ModuleRuntimeAPI,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from template_app.runtime.kernel.kernel import RuntimeKernel
+
 
 def build_module_context(
+    *,
+    kernel: RuntimeKernel,
+    manifest: ModuleManifest,
     capabilities: Iterable[ModuleCapability] | None = None,
 ) -> ModuleContext:
     """
@@ -62,8 +57,8 @@ def build_module_context(
 
     Returns:
         Initialized module context.
-    """
 
+    """
     resolved_capabilities = frozenset(
         capabilities
         or {
@@ -75,38 +70,25 @@ def build_module_context(
         },
     )
 
-    #
+    #############
     # runtime api
-    #
+    #############
 
     runtime_api = ModuleRuntimeAPI(
         container=Container(),
         lifecycle_registry=LifecycleRegistry(),
     )
 
-    #
+    ####################
     # infrastructure api
-    #
+    ####################
 
-    infrastructure_runtime = InfrastructureRuntime(
-        cache=CacheProvider(
-            url="redis://localhost:6379",
-        ),
-        database=DatabaseProvider(
-            dsn="postgresql://localhost/test",
-        ),
-        queue=QueueProvider(
-            brokers=["localhost:9092"],
-        ),
-    )
+    infra_registry = bootstrap_infrastructure()
+    infra_api = ModuleInfraAPI(registry=infra_registry)
 
-    infra_api = ModuleInfraAPI(
-        runtime=infrastructure_runtime,
-    )
-
-    #
+    ###############
     # messaging api
-    #
+    ###############
 
     handler_registry = RuntimeHandlerRegistry()
 

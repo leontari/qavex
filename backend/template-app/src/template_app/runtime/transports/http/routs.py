@@ -23,7 +23,7 @@ def create_runtime_router(kernel: RuntimeKernel) -> APIRouter:
     @router.get("/ready")
     async def ready() -> dict[str, str]:
 
-        state = kernel._context.runtime.lifecycle_manager.state
+        state = kernel.lifecycle.manager.state
 
         if not state.ready:
             raise HTTPException(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.lifecycle.hooks import LifecycleHook
+from template_app.runtime.lifecycle.models import LifecycleHook
 from template_app.runtime.lifecycle.registry import LifecycleRegistry
 
 
