@@ -1,52 +1,119 @@
+"""DI container."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar, cast
+
+from .graph import DependencyNode
+from .types import ContainerKey, DependencyContract, DependencyScope
 
 if TYPE_CHECKING:
     from .contracts import DependencyProvider
 
+T = TypeVar("T")
+
+DEFAULT_NAMESPACE = "core"
+
 
 @dataclass(slots=True)
 class Container:
-    """
-    Runtime dependency container.
+    """Runtime dependency container."""
 
-    Container is used for:
-    - runtime service registry;
-    - application runtime dependency graph.
+    _providers: dict[ContainerKey, DependencyProvider] = field(
+        default_factory=dict,
+    )
+    _singletons: dict[ContainerKey, object] = field(
+        default_factory=dict,
+    )
 
-    Stores runtime services and infrastructure adapters.
+    def register(
+        self,
+        contract: DependencyContract,
+        provider: DependencyProvider,
+        namespace: str = DEFAULT_NAMESPACE,
+    ) -> None:
+        """Register dependency provider."""
+        key = (namespace, contract)
 
-    FastAPI DI and Runtime DI are separated from each other.
-    FastAPI DI is used only as transport-layer dependency injection.
-    """
+        self._providers[key] = provider
 
-    _providers: dict[str, DependencyProvider] = field(default_factory=dict)
+    def resolve(
+        self,
+        contract: type[T],
+        namespace: str = DEFAULT_NAMESPACE,
+    ) -> T:
+        """
+        Resolve dependency.
 
-    def register(self, provider: DependencyProvider) -> None:
-        """Register provider."""
-        self._providers[provider.name] = provider
+        Returns:
+            Dependency instance.
 
-    def resolve(self, key: str) -> object:
-        """Resolve provider."""
+        """
+        key = (namespace, contract)
+
         try:
-            return self._providers[key]
+            provider = self._providers[key]
 
         except KeyError as error:
-            msg = f"Dependency '{key}' not found."
+            msg = f"Dependency not registered: {namespace}:{contract.__name__}"
             raise LookupError(msg) from error
 
-    def contains(self, key: str) -> bool:
-        """Check provider existence."""
-        return key in self._providers
+        if provider.scope == DependencyScope.SINGLETON:
+            if key not in self._singletons:
+                self._singletons[key] = provider.provide(self)
 
-    @property
-    def dependencies(self) -> dict[str, DependencyProvider]:
-        """Readonly dependency mapping."""
-        return dict(self._providers)
+            return cast("T", self._singletons[key])
 
-    @property
-    def providers(self) -> tuple[DependencyProvider, ...]:
-        """Immutable providers snapshot."""
-        return tuple(self._providers.values())
+        return cast("T", provider.provide(self))
+
+    def try_resolve(
+        self,
+        contract: type[T],
+        namespace: str = DEFAULT_NAMESPACE,
+    ) -> T | None:
+        """
+        Resolve dependency safely.
+
+        Returns:
+            Dependency instance or None.
+
+        """
+        try:
+            return self.resolve(contract, namespace)
+        except LookupError:
+            return None
+
+    def contains(
+        self,
+        contract: DependencyContract,
+        namespace: str = DEFAULT_NAMESPACE,
+    ) -> bool:
+        """
+        Check dependency existence.
+
+        Returns:
+            True if dependency exists.
+
+        """
+        return (namespace, contract) in self._providers
+
+    def snapshot(self) -> tuple[DependencyNode, ...]:
+        """
+        Build dependency graph snapshot.
+
+        Returns:
+            Immutable dependency graph.
+
+        """
+        return tuple(
+            DependencyNode(
+                namespace=namespace,
+                contract=contract,
+                scope=provider.scope,
+            )
+            for (
+                namespace,
+                contract,
+            ), provider in self._providers.items()
+        )

@@ -1,99 +1,85 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
-
-import pytest
-
-from template_app.runtime.container.types import DependencyScope
-from template_app.runtime.container.contracts import DependencyProvider
 from template_app.runtime.container.container import Container
-from template_app.runtime.infrastructure.infra import CacheProvider
+from template_app.runtime.container.providers import FactoryProvider
+from template_app.runtime.container.providers import SingletonProvider
 
 
-@dataclass(slots=True)
-class FakeProvider:
-    value: str
-
-    @property
-    def name(self) -> str:
-        return "fake"
-
-    @property
-    def scope(self) -> DependencyScope:
-        return DependencyScope.SINGLETON
-
-    def provide(self) -> str:
-        return self.value
+class Service:
+    pass
 
 
+def test_singleton_provider():
 
-
-def test_container_registers_provider() -> None:
     container = Container()
 
-    provider: DependencyProvider = FakeProvider("hello")
-
-    container.register(provider)
-
-    resolved = container.resolve("fake")
-
-    assert resolved is provider
-
-
-
-def test_container_contains_provider() -> None:
-    container = Container()
-
-    provider: DependencyProvider = FakeProvider("hello")
-
-    container.register(provider)
-
-    assert container.contains("fake") is True
-
-
-
-def test_container_returns_immutable_snapshot() -> None:
-    container = Container()
-
-    provider: DependencyProvider = FakeProvider("hello")
-
-    container.register(provider)
-
-    snapshot = container.providers
-
-    assert isinstance(snapshot, tuple)
-    assert len(snapshot) == 1
-
-
-def test_container_registers_dependency() -> None:
-    container = Container()
-
-    provider = CacheProvider(url="redis://localhost")
-
-    container.register(provider)
-
-    resolved = container.resolve("cache")
-
-    assert resolved is provider
-
-
-def test_container_raises_for_missing_dependency() -> None:
-    container = Container()
-
-    with pytest.raises(LookupError):
-        container.resolve("missing")
-
-
-
-def test_container_returns_readonly_mapping() -> None:
-    container = Container()
-
-    provider = CacheProvider(
-        url="redis://localhost",
+    container.register(
+        Service,
+        SingletonProvider(
+            lambda c: Service(),
+        ),
     )
 
-    container.register(provider)
+    first = container.resolve(Service)
+    second = container.resolve(Service)
 
-    dependencies = container.dependencies
+    assert first is second
 
-    assert "cache" in dependencies
+
+def test_factory_provider():
+
+    container = Container()
+
+    container.register(
+        Service,
+        FactoryProvider(
+            lambda c: Service(),
+        ),
+    )
+
+    first = container.resolve(Service)
+    second = container.resolve(Service)
+
+    assert first is not second
+
+
+def test_namespaces():
+
+    class UsersService:
+        pass
+
+    class BillingService:
+        pass
+
+    container = Container()
+
+    container.register(
+        UsersService,
+        SingletonProvider(
+            lambda c: UsersService(),
+        ),
+        namespace="users",
+    )
+
+    container.register(
+        BillingService,
+        SingletonProvider(
+            lambda c: BillingService(),
+        ),
+        namespace="billing",
+    )
+
+    assert container.resolve(
+        UsersService,
+        "users",
+    )
+
+    assert container.resolve(
+        BillingService,
+        "billing",
+    )
+
+
+def test_try_resolve():
+
+    container = Container()
+
+    assert container.try_resolve(Service) is None
