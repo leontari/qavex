@@ -10,7 +10,7 @@ Responsibilities:
 from __future__ import annotations
 
 from template_app.launcher.exceptions import CompositionViolationError
-from template_app.runtime.container.container import Container
+from template_app.runtime.container import Container
 from template_app.runtime.infrastructure.factories import (
     bootstrap_infrastructure,
 )

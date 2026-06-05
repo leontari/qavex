@@ -29,21 +29,21 @@
 - [ ] provider isolation
 
 ## container.py - runtime service registry, implement latter:
-- [ ] lazy providers
-- [ ] scoped dependencies
-- [ ] async providers
-- [ ] singleton lifecycle
-- [ ] transient services
-- [ ] provider factories
-- [ ] typed resolution
-- [ ] plugin isolation
-- [ ] module namespaces
+- [x] lazy providers
+- [x] scoped dependencies
+- [x] async providers
+- [x] singleton lifecycle
+- [x] transient services
+- [x] provider factories
+- [x] typed resolution
+- [x] plugin isolation
+- [x] module namespaces
 
 ## DependencyProvider - controlled dependency lifecycle
-- [ ] SingletonProvider
-- [ ] FactoryProvider
-- [ ] AsyncProvider
-- [ ] ScopedProvider
+- [x] SingletonProvider
+- [x] FactoryProvider
+- [x] AsyncProvider
+- [x] ScopedProvide
 
 ## Launcher
 - [ ] runtime node graph executor instead of switch-case?
@@ -64,10 +64,11 @@
 - [x] ASGI import-safe mode
 
 ## PHASE 2
-- [ ] DI Container V1
-- [ ] Scopes
-- [ ] Factories
-- [ ] Resolve
+- [x] DI Container V1
+- [x] Scopes
+- [x] Factories
+- [x] Resolve
+- [x] Diagnostics
 
 ## PHASE 3
 

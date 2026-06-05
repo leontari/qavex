@@ -1,0 +1,22 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .graph import DependencyGraph
+
+
+@dataclass(frozen=True, slots=True)
+class ContainerSnapshot:
+    """Immutable container snapshot."""
+
+    graph: DependencyGraph
+
+    @property
+    def total_dependencies(self) -> int:
+        return len(self.graph.nodes)
+
+    @property
+    def namespaces(self) -> tuple[str, ...]:
+        return tuple(sorted({node.namespace for node in self.graph.nodes}))

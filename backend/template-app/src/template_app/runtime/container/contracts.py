@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from typing import Any
 
-    from .container import Container
+    from .manager import DependencyManager
     from .types import DependencyScope
 
 
@@ -20,7 +20,7 @@ class DependencyProvider(Protocol):
     def scope(self) -> DependencyScope:
         """Dependency scope."""
 
-    def provide(self, container: Container) -> Any:
+    def provide(self, manager: DependencyManager) -> Any:
         """
         Build dependency instance.
 
