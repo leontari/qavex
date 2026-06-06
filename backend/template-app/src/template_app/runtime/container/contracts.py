@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import (
+    TYPE_CHECKING,
+    Protocol,
+    runtime_checkable,
+)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -11,6 +15,7 @@ if TYPE_CHECKING:
     from .types import DependencyScope
 
 
+@runtime_checkable
 class DependencyProvider(Protocol):
     """Dependency provider contract."""
 

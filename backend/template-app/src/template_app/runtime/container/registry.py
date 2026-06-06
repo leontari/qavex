@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from .diagnostics import ContainerSnapshot
 from .exceptions import (
     DependencyAlreadyRegisteredError,
     DependencyNotFoundError,
@@ -17,7 +18,13 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True, frozen=True)
 class DependencyDescriptor:
-    """Registered dependency descriptor."""
+    """
+    Registered dependency descriptor.
+
+    Stores metadata only.
+
+    Lifecycle is managed by DependencyManager.
+    """
 
     contract: type[Any]
     provider: DependencyProvider
@@ -34,17 +41,28 @@ class DependencyRegistry:
         - dependency ownership
         - namespace isolation
         - dependency metadata storage
+        - diagnostics snapshot creation
 
     No resolve logic is allowed here.
+
+    Does NOT:
+        - resolve dependencies
+        - create instances
+        - manage lifecycle
+        - manage scopes
     """
 
-    _namespaces: dict[str, dict[type[Any], DependencyDescriptor]] = field(
+    # _namespaces: dict[str, dict[type[Any], DependencyDescriptor]] = field(
+    #     default_factory=dict,
+    # )
+
+    _descriptors: dict[tuple[str, type[Any]], DependencyDescriptor] = field(
         default_factory=dict,
     )
 
     def register(
         self,
-        namespace: str,
+        namespace: Namespace,
         contract: type[Any],
         provider: DependencyProvider,
         visibility: DependencyVisibility,
@@ -52,20 +70,20 @@ class DependencyRegistry:
         overwrite: bool = False,
     ) -> None:
         """
-        Register dependency.
+        Register dependency metadata.
 
         Args:
             namespace:
-                Namespace name.
+                Dependency namespace name.
 
             contract:
                 Dependency contract.
 
             provider:
-                Provider implementation.
+                Provider instance.
 
             visibility:
-                Dependency visibility.
+                Visibility policy.
 
             overwrite:
                 Allow to overwrite.
@@ -74,25 +92,52 @@ class DependencyRegistry:
             DependencyAlreadyRegisteredError
 
         """
-        bucket = self._namespaces.setdefault(namespace, {})
+        # bucket = self._namespaces.setdefault(namespace, {})
+        key = (namespace.name, contract)
 
-        if contract in bucket and not overwrite:
-            msg = f"{contract.__name__} already registered in '{namespace}'"
+        if key in self._descriptors and not overwrite:
+            msg = (
+                f"{contract.__name__} already registered in '{namespace.name}'"
+            )
             raise DependencyAlreadyRegisteredError(msg)
 
-        bucket[contract] = DependencyDescriptor(
+        # bucket[contract] = DependencyDescriptor(
+        #     contract=contract,
+        #     provider=provider,
+        #     visibility=visibility,
+        # )
+        self._descriptors[key] = DependencyDescriptor(
             contract=contract,
             provider=provider,
+            namespace=namespace,
             visibility=visibility,
         )
 
-    def get(
-        self,
-        namespace: str,
-        contract: type[Any],
-    ) -> DependencyDescriptor:
+    # def get(
+    #     self,
+    #     namespace: str,
+    #     contract: type[Any],
+    # ) -> DependencyDescriptor:
+    #     """
+    #     Get dependency descriptor.
+    #
+    #     Returns:
+    #         DependencyDescriptor
+    #
+    #     Raises:
+    #         DependencyNotFoundError
+    #
+    #     """
+    #     try:
+    #         return self._namespaces[namespace][contract]
+    #
+    #     except KeyError as error:
+    #         msg = f"{contract.__name__} not found in namespace '{namespace}'"
+    #         raise DependencyNotFoundError(msg) from error
+
+    def find(self, contract: type[Any]) -> DependencyDescriptor:
         """
-        Get dependency descriptor.
+        Find descriptor by contract.
 
         Returns:
             DependencyDescriptor
@@ -101,16 +146,16 @@ class DependencyRegistry:
             DependencyNotFoundError
 
         """
-        try:
-            return self._namespaces[namespace][contract]
+        for descriptor in self._descriptors.values():
+            if descriptor.contract is contract:
+                return descriptor
 
-        except KeyError as error:
-            msg = f"{contract.__name__} not found in namespace '{namespace}'"
-            raise DependencyNotFoundError(msg) from error
+        msg = f"Dependency not registered: {contract.__name__}"
+        raise DependencyNotFoundError(msg)
 
     def contains(
         self,
-        namespace: str,
+        # namespace: str,
         contract: type[Any],
     ) -> bool:
         """
@@ -120,10 +165,16 @@ class DependencyRegistry:
             bool
 
         """
-        return (
-            namespace in self._namespaces
-            and contract in self._namespaces[namespace]
-        )
+        try:
+            self.find(contract)
+            return True
+        except DependencyNotFoundError:
+            return False
+
+        # return (
+        #     namespace in self._namespaces
+        #     and contract in self._namespaces[namespace]
+        # )
 
     @property
     def namespaces(self) -> tuple[str, ...]:
@@ -134,46 +185,47 @@ class DependencyRegistry:
             tuple[str, ...]
 
         """
-        return tuple(self._namespaces.keys())
-
-    def snapshot(self) -> DependencyGraph:
-        """
-        Create graph snapshot.
-
-        Returns:
-            DependencyGraph
-
-        """
-        nodes: list[DependencyNode] = []
-
-        for namespace, bucket in self._namespaces.items():
-            nodes.extend(
-                DependencyNode(
-                    namespace=namespace,
-                    contract=descriptor.contract.__name__,
-                    provider=type(
-                        descriptor.provider,
-                    ).__name__,
-                    scope=descriptor.provider.scope.value,
-                    visibility=descriptor.visibility,
-                )
-                for descriptor in bucket.values()
-            )
-
-        return DependencyGraph(nodes=tuple(nodes))
+        # return tuple(self._namespaces.keys())
+        return tuple(
+            sorted({
+                descriptor.namespace.name
+                for descriptor in self._descriptors.values()
+            })
+        )
 
     def snapshot(self) -> ContainerSnapshot:
+        """
+        Create diagnostics graph snapshot.
 
-        nodes: list[DependencyNode] = [
+        Returns:
+            ContainerSnapshot
+
+        """
+        # nodes: list[DependencyNode] = []
+        #
+        # for namespace, bucket in self._namespaces.items():
+        #     nodes.extend(
+        #         DependencyNode(
+        #             namespace=namespace,
+        #             contract=descriptor.contract.__name__,
+        #             provider=type(
+        #                 descriptor.provider,
+        #             ).__name__,
+        #             scope=descriptor.provider.scope.value,
+        #             visibility=descriptor.visibility,
+        #         )
+        #         for descriptor in bucket.values()
+        #     )
+        #
+        # return DependencyGraph(nodes=tuple(nodes))
+        nodes = tuple(
             DependencyNode(
+                namespace=descriptor.namespace.name,
                 contract=descriptor.contract.__name__,
-                namespace=descriptor.namespace.value,
+                provider=type(descriptor.provider.__name__),
                 scope=descriptor.provider.scope.value,
                 visibility=descriptor.visibility.value,
             )
-            for descriptor in self._registry.descriptors
-        ]
-
-        return ContainerSnapshot(
-            nodes=tuple(nodes),
+            for descriptor in self._descriptors.values()
         )
+        return ContainerSnapshot(nodes=nodes)

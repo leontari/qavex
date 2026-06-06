@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-from .exceptions import DependencyVisibilityError
-from .namespace import DependencyNamespace, Namespace
+from typing import TYPE_CHECKING
+
+from .exceptions import (
+    DependencyNamespaceError,
+    DependencyVisibilityError,
+)
 from .types import DependencyVisibility
+
+if TYPE_CHECKING:
+    from .namespace import Namespace
 
 
 def enforce_visibility(
@@ -11,20 +18,26 @@ def enforce_visibility(
     requester: Namespace,
     visibility: DependencyVisibility,
 ) -> None:
-
+    """Validate dependency access."""
     if visibility is DependencyVisibility.PUBLIC:
         return
 
     if visibility is DependencyVisibility.PRIVATE:
-        if owner == requester:
-            return
+        if owner != requester:
+            msg = (
+                f"Namespace '{requester}' "
+                f"cannot access private dependency "
+                f"from '{owner}'"
+            )
+            raise DependencyVisibilityError(msg)
 
-        msg = "Private dependency access denied"
-        raise DependencyVisibilityError(msg)
+        return
 
-    if visibility is DependencyVisibility.KERNEL:
-        if requester.name == DependencyNamespace.KERNEL:
-            return
+    if (
+        visibility is DependencyVisibility.KERNEL
+        and requester.name != "kernel"
+    ):
+        msg = f"Dependency from '{owner}' is available only for kernel"
+        raise DependencyNamespaceError(msg)
 
-        msg_0 = "Kernel dependency access denied"
-        raise DependencyVisibilityError(msg_0)
+    return

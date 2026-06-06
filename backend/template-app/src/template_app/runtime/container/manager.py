@@ -5,9 +5,22 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from .exceptions import DependencyVisibilityError
+from .contracts import DependencyProvider
+from .exceptions import (
+    AsyncDependencyError,
+    DependencyCycleError,
+    InvalidProviderError,
+    ScopeRequiredError,
+    DependencyVisibilityError,
+)
+from .namespace import Namespace
 from .registry import DependencyRegistry
-from .types import DependencyScope, DependencyVisibility
+from .scope import ScopeContext
+from .types import (
+    DependencyScope,
+    DependencyVisibility,
+)
+from .visibility import enforce_visibility
 
 if TYPE_CHECKING:
     from .graph import DependencyGraph
@@ -21,28 +34,37 @@ class DependencyManager:
     Runtime dependency manager.
 
     Responsibilities:
-        - registration
+        - dependency registration
         - singleton lifecycle
+        - scoped lifecycle
         - dependency resolution
+        - async dependency resolution
+        - visibility enforcement
+        - namespace enforcement
         - diagnostics
 
     Does not store dependencies directly.
+    Registry owns metadata.
+    Manager owns runtime lifecycle.
     """
 
-    registry: DependencyRegistry = field(
+    _registry: DependencyRegistry = field(
         default_factory=DependencyRegistry,
     )
 
     _singletons: dict[tuple[str, type[Any]], object] = field(
         default_factory=dict,
     )
+    _resolution_stack: list[type[Any]] = field(
+        default_factory=list,
+    )
 
     def register(
         self,
         contract: type[Any],
-        provider: Any,
+        provider: DependencyProvider,
         *,
-        namespace: str,
+        namespace: Namespace,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         overwrite: bool = False,
     ) -> None:
@@ -54,19 +76,23 @@ class DependencyManager:
                 Dependency contract.
 
             provider:
-                Provider.
+                Dependency provider.
 
             namespace:
-                Namespace.
+                Dependency namespace.
 
             visibility:
-                Visibility.
+                Dependency visibility.
 
             overwrite:
                 Allow to overwrite.
 
         """
-        self.registry.register(
+        if not isinstance(provider, DependencyProvider):
+            msg = f"{type(provider).__name__} is not a DependencyProvider"
+            raise InvalidProviderError(msg)
+
+        self._registry.register(
             namespace=namespace,
             contract=contract,
             provider=provider,
@@ -74,18 +100,11 @@ class DependencyManager:
             overwrite=overwrite,
         )
 
-    # def resolve(
-    #     self,
-    #     contract: type[T],
-    #     *,
-    #     namespace: str
-    # ) -> T:
     def resolve(
         self,
         contract: type[T],
         *,
-        owner: Namespace,
-        requester: Namespace,
+        requester: Namespace | None = None,
         scope: ScopeContext | None = None,
     ) -> T:
         """
@@ -95,55 +114,122 @@ class DependencyManager:
             contract:
                 Dependency contract.
 
-            namespace:
-                Namespace.
+            requester:
+                Namespace requesting dependency.
+
+            scope:
+                Optional scope context.
 
         Returns:
-            T
+            Resolved dependency.
 
         """
-        descriptor = self.registry.get(namespace, contract)
+        descriptor = self._registry.find(contract)
+        requester_ns = requester or Namespace("kernel")
 
-        if descriptor.visibility is DependencyVisibility.PRIVATE:
-            msg = f"{contract.__name__} is private"
-            raise DependencyVisibilityError(msg)
+        enforce_visibility(
+            owner=descriptor.namespace,
+            requester=requester_ns,
+            visibility=descriptor.visibility,
+        )
 
         provider = descriptor.provider
 
-        key = (namespace, contract)
+        if provider.scope is DependencyScope.ASYNC:
+            msg = f"{contract.__name__} must be resolved via resolve_async()"
+            raise AsyncDependencyError(msg)
 
-        if provider.scope is DependencyScope.SINGLETON:
-            if key not in self._singletons:
-                self._singletons[key] = provider.provide(self)
+        if contract in self._resolution_stack:
+            chain = " -> ".join(
+                item.__name__ for item in (*self._resolution_stack, contract)
+            )
+            raise DependencyCycleError(chain)
 
-            return cast("T", self._singletons[key])
+        self._resolution_stack.append(contract)
 
-        return cast("T", provider.provide(self))
+        # if descriptor.visibility is DependencyVisibility.PRIVATE:
+        #     msg = f"{contract.__name__} is private"
+        #     raise DependencyVisibilityError(msg)
+
+        try:
+            if provider.scope is DependencyScope.SCOPED:
+                if scope is None:
+                    msg = f"{contract.__name__} requires ScopeContext"
+                    raise ScopeRequiredError(msg)
+
+                if scope.contains(contract):
+                    return cast("T", scope.get(contract))
+
+                instance = provider.provide(self)
+                scope.set(contract, instance)
+
+                return cast("T", instance)
+
+            key = (descriptor.namespace.name, contract)
+
+            if provider.scope is DependencyScope.SINGLETON:
+                if key not in self._singletons:
+                    self._singletons[key] = provider.provide(self)
+
+                return cast("T", self._singletons[key])
+
+            return cast("T", provider.provide(self))
+
+        finally:
+            self._resolution_stack.pop()
 
     async def resolve_async(
         self,
         contract: type[T],
         *,
-        namespace: Namespace | None = None,
+        requester: Namespace | None = None,
         scope: ScopeContext | None = None,
     ) -> T:
         """
         Resolve async dependency.
 
+        Args:
+            contract:
+                Dependency contract.
+
+            requester:
+                Namespace requesting dependency.
+
+            scope:
+                Optional scope context.
+
         Returns:
-            T
+            Resolved dependency.
 
         """
-        descriptor = self.registry.get(namespace, contract)
+        descriptor = self._registry.find(contract)
+        requester_ns = requester or Namespace("kernel")
+
+        enforce_visibility(
+            owner=descriptor.namespace,
+            requester=requester_ns,
+            visibility=descriptor.visibility,
+        )
 
         provider = descriptor.provider
 
+        if provider.scope is DependencyScope.SCOPED:
+            if scope is None:
+                msg = f"{contract.__name__} requires ScopeContext."
+                raise ScopeRequiredError(msg)
+
+            if scope.contains(contract):
+                return cast("T", scope.get(contract))
+
+            instance = provider.provide(self)
+            scope.set(contract, instance)
+
+            return cast("T", instance)
+
         if provider.scope is not DependencyScope.ASYNC:
-            return self.resolve(contract, namespace=namespace)
+            return cast("T", await provider.provide(self))
 
-        result = await provider.provide(self)
-
-        return cast("T", result)
+        return self.resolve(contract, requester=requester, scope=scope)
 
     def contains(self, contract: type[Any], *, namespace: str) -> bool:
         """
@@ -153,17 +239,17 @@ class DependencyManager:
             bool
 
         """
-        return self.registry.contains(namespace, contract)
+        return self._registry.contains(namespace, contract)
 
     def snapshot(self) -> DependencyGraph:
         """
-        Dependency graph snapshot.
+        Create diagnostics snapshot.
 
         Returns:
             DependencyGraph
 
         """
-        return self.registry.snapshot()
+        return self._registry.snapshot()
 
     def dump(self) -> str:
         """
