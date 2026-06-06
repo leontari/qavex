@@ -21,10 +21,6 @@ class DependencyProvider(Protocol):
 
     scope: DependencyScope
 
-    @property
-    def scope(self) -> DependencyScope:
-        """Dependency scope."""
-
     def provide(self, manager: DependencyManager) -> Any:
         """
         Build dependency instance.
