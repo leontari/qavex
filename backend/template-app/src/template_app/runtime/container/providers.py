@@ -15,11 +15,11 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class SingletonProvider(Generic[T]):
     """Singleton provider."""
 
-    factory: Callable[[object], T]
+    factory: Callable[[DependencyManager], T]
 
     scope: DependencyScope = DependencyScope.SINGLETON
 
@@ -34,11 +34,11 @@ class SingletonProvider(Generic[T]):
         return self.factory(manager)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class FactoryProvider(Generic[T]):
     """Transient provider."""
 
-    factory: Callable[[object], T]
+    factory: Callable[[DependencyManager], T]
 
     scope: DependencyScope = DependencyScope.TRANSIENT
 
@@ -53,11 +53,11 @@ class FactoryProvider(Generic[T]):
         return self.factory(manager)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class ScopedProvider(Generic[T]):
     """Scoped provider."""
 
-    factory: Callable[[object], T]
+    factory: Callable[[DependencyManager], T]
 
     scope: DependencyScope = DependencyScope.SCOPED
 
@@ -72,11 +72,11 @@ class ScopedProvider(Generic[T]):
         return self.factory(manager)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class AsyncProvider(Generic[T]):
     """Async provider."""
 
-    factory: Callable[[object], Awaitable[T]]
+    factory: Callable[[DependencyManager], Awaitable[T]]
 
     scope: DependencyScope = DependencyScope.ASYNC
 
