@@ -9,13 +9,12 @@ from .contracts import DependencyProvider
 from .exceptions import (
     AsyncDependencyError,
     DependencyCycleError,
+    DependencyVisibilityError,
     InvalidProviderError,
     ScopeRequiredError,
-    DependencyVisibilityError,
 )
 from .namespace import Namespace
 from .registry import DependencyRegistry
-from .scope import ScopeContext
 from .types import (
     DependencyScope,
     DependencyVisibility,
@@ -24,6 +23,7 @@ from .visibility import enforce_visibility
 
 if TYPE_CHECKING:
     from .graph import DependencyGraph
+    from .scope import ScopeContext
 
 T = TypeVar("T")
 
@@ -124,20 +124,16 @@ class DependencyManager:
             Resolved dependency.
 
         """
-        descriptor = self._registry.find(contract)
-        requester_ns = requester or Namespace("kernel")
+        descriptor = self._registry.locate(contract)[1]
+        requester_namespace = requester or descriptor.namespace
 
         enforce_visibility(
             owner=descriptor.namespace,
-            requester=requester_ns,
+            requester=requester_namespace,
             visibility=descriptor.visibility,
         )
 
         provider = descriptor.provider
-
-        if provider.scope is DependencyScope.ASYNC:
-            msg = f"{contract.__name__} must be resolved via resolve_async()"
-            raise AsyncDependencyError(msg)
 
         if contract in self._resolution_stack:
             chain = " -> ".join(
@@ -147,12 +143,9 @@ class DependencyManager:
 
         self._resolution_stack.append(contract)
 
-        # if descriptor.visibility is DependencyVisibility.PRIVATE:
-        #     msg = f"{contract.__name__} is private"
-        #     raise DependencyVisibilityError(msg)
-
         try:
-            if provider.scope is DependencyScope.SCOPED:
+            # SCOPED
+            if provider.scope == DependencyScope.SCOPED:
                 if scope is None:
                     msg = f"{contract.__name__} requires ScopeContext"
                     raise ScopeRequiredError(msg)
@@ -162,18 +155,26 @@ class DependencyManager:
 
                 instance = provider.provide(self)
                 scope.set(contract, instance)
-
                 return cast("T", instance)
 
+            # SINGLETON
             key = (descriptor.namespace.name, contract)
 
-            if provider.scope is DependencyScope.SINGLETON:
+            if provider.scope == DependencyScope.SINGLETON:
                 if key not in self._singletons:
                     self._singletons[key] = provider.provide(self)
-
                 return cast("T", self._singletons[key])
 
-            return cast("T", provider.provide(self))
+            # TRANSIENT
+            if provider.scope == DependencyScope.TRANSIENT:
+                return cast("T", provider.provide(self))
+
+            # ASYNC blocked here
+            if provider.scope == DependencyScope.ASYNC:
+                raise AsyncDependencyError(contract.__name__)
+            # if provider.scope is DependencyScope.ASYNC:
+            #     msg = f"{contract.__name__} must be resolved via resolve_async()"
+            #     raise AsyncDependencyError(msg)
 
         finally:
             self._resolution_stack.pop()
@@ -202,12 +203,12 @@ class DependencyManager:
             Resolved dependency.
 
         """
-        descriptor = self._registry.find(contract)
-        requester_ns = requester or Namespace("kernel")
+        descriptor = self._registry.locate(contract)[1]
+        requester_namespace = requester or descriptor.namespace
 
         enforce_visibility(
             owner=descriptor.namespace,
-            requester=requester_ns,
+            requester=requester_namespace,
             visibility=descriptor.visibility,
         )
 
@@ -221,9 +222,8 @@ class DependencyManager:
             if scope.contains(contract):
                 return cast("T", scope.get(contract))
 
-            instance = provider.provide(self)
+            instance = await provider.provide(self)
             scope.set(contract, instance)
-
             return cast("T", instance)
 
         if provider.scope is not DependencyScope.ASYNC:
@@ -231,7 +231,7 @@ class DependencyManager:
 
         return self.resolve(contract, requester=requester, scope=scope)
 
-    def contains(self, contract: type[Any], *, namespace: str) -> bool:
+    def contains(self, namespace: Namespace, contract: type[Any]) -> bool:
         """
         Check dependency existence.
 
