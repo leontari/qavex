@@ -11,12 +11,16 @@ if TYPE_CHECKING:
 class ContainerSnapshot:
     """Immutable container snapshot."""
 
-    _graph: DependencyGraph
+    graph: DependencyGraph
 
     @property
     def total_dependencies(self) -> int:
-        return len(self._graph.nodes)
+        return len(self.graph.nodes)
+
+    @property
+    def total_edges(self) -> int:
+        return len(self.graph.edges)
 
     @property
     def namespaces(self) -> tuple[str, ...]:
-        return tuple(sorted({node.namespace for node in self._graph.nodes}))
+        return tuple(sorted({node.namespace for node in self.graph.nodes}))
