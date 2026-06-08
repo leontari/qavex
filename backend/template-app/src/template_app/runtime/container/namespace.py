@@ -8,7 +8,7 @@ from enum import StrEnum
 
 class DependencyNamespace(StrEnum):
     """
-    System-level pre-defined namespace categories.
+    Reserved root namespaces.
 
     These categories are top-level runtime boundaries used by Kernel
     for isolation, visibility and plugin separation.
@@ -16,7 +16,7 @@ class DependencyNamespace(StrEnum):
     """
 
     KERNEL = "kernel"
-    INFRASTRUCTURE = "infrastructure"
+    INFRA = "infra"
     TRANSPORT = "transport"
     MODULE = "module"
     PLUGIN = "plugin"
@@ -28,7 +28,7 @@ class DependencyNamespace(StrEnum):
 @dataclass(frozen=True, slots=True)
 class Namespace:
     """
-    Logical namespace instance.
+    Logical namespace.
 
     Used to define fine-grained separation inside system namespaces.
 
@@ -48,8 +48,19 @@ class Namespace:
             raise ValueError(msg)
 
         if ".." in self.name:
-            msg = "Invalid namespace format"
+            msg = f"Invalid namespace name format: {self.name}"
             raise ValueError(msg)
+
+    @property
+    def root(self) -> str:
+        """
+        Root segment of namespace.
+
+        Example:
+            "plugin.auth" -> "plugin"
+
+        """
+        return self.name.split(".")[0]
 
     @property
     def parts(self) -> tuple[str, ...]:
@@ -63,31 +74,27 @@ class Namespace:
         return tuple(self.name.split("."))
 
     @property
-    def root(self) -> str:
-        """
-        Root segment of namespace.
-
-        Example:
-            "plugin.auth" -> "plugin"
-
-        """
-        return self.parts[0]
-
-    @property
     def is_plugin(self) -> bool:
-        return self.root == "plugin"
-
-    @classmethod
-    def is_transport(self) -> bool:
-        return self.root == "transport"
-
-    @classmethod
-    def is_infrastructure(self) -> bool:
-        return self.root == "infra"
+        return self.root == DependencyNamespace.PLUGIN
 
     @property
     def is_kernel(self) -> bool:
-        return self.name == "kernel"
+        return self.name == DependencyNamespace.KERNEL
+
+    def belongs_to(self, parent: Namespace) -> bool:
+        """
+        Hierarchical ownership check.
+
+        plugin.auth.jwt
+        belongs_to(plugin.auth)
+
+        Returns:
+            bool
+
+        """
+        return self.name == parent.name or self.name.startswith(
+            f"{parent.name}"
+        )
 
     def __str__(self) -> str:
         return self.name

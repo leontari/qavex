@@ -12,38 +12,92 @@ def export_json(snapshot: ContainerSnapshot) -> str:
     payload = {
         "dependencies": [
             {
-                "contract": node.contract,
-                "namespace": node.namespace,
-                "scope": node.scope,
-                "visibility": node.visibility,
+                "contract": node.contract.__name__,
+                "namespace": node.namespace.name,
+                "scope": node.scope.value,
+                "visibility": node.visibility.value,
             }
-            for node in snapshot.graph.nodes
-        ]
+            for node in snapshot.graph.nodes.values()
+        ],
+        "edges": [
+            {
+                "source": edge.source.__name__,
+                "target": edge.target.__name__,
+                "scope": edge.scope_ide,
+            }
+            for edge in snapshot.graph.edges
+        ],
     }
-    return json.dumps(payload, indent=4, sort_keys=True)
+    return json.dumps(
+        payload,
+        indent=4,
+        sort_keys=True,
+    )
 
 
 def export_dump(
     snapshot: ContainerSnapshot,
 ) -> str:
-    """Human readable dump."""
+    """
+    Human-readable container dump.
+    """
+
     lines: list[str] = []
-    lines.extend(
-        (f"Dependencies: {snapshot.total_dependencies}", ""),
+
+    lines.append(
+        f"Dependencies: {snapshot.total_dependencies}",
     )
-    lines.extend(
-        f"[{node.namespace}] {node.contract} ({node.scope}, {node.visibility})"
-        for node in snapshot.graph.nodes
+    lines.append(
+        f"Edges: {snapshot.total_edges}",
     )
+    lines.append("")
+
+    grouped: dict[str, list[str]] = {}
+
+    for node in snapshot.graph.nodes.values():
+        grouped.setdefault(
+            node.namespace.name,
+            [],
+        ).append(
+            (f"{node.contract.__name__} [{node.scope.value}]"),
+        )
+
+    for namespace in sorted(grouped):
+        lines.append(namespace)
+
+        for dependency in sorted(grouped[namespace]):
+            lines.append(f"  └── {dependency}")
+
+        lines.append("")
+
     return "\n".join(lines)
 
 
-def export_graph(snapshot: ContainerSnapshot) -> str:
-    """GraphViz DOT export."""
-    lines = ["digraph Container {"]
-    lines.extend(
-        f'"{node.namespace}" -> "{node.contract}"'
-        for node in snapshot.graph.nodes
-    )
+def export_graphviz(
+    snapshot: ContainerSnapshot,
+) -> str:
+    """
+    Export graph as GraphViz DOT.
+    """
+
+    lines = [
+        "digraph DependencyGraph {",
+    ]
+
+    for node in snapshot.graph.nodes.values():
+        lines.append(
+            (
+                f'"{node.contract.__name__}" '
+                f'[label="{node.contract.__name__}\\n'
+                f'{node.namespace.name}"]'
+            ),
+        )
+
+    for edge in snapshot.graph.edges:
+        lines.append(
+            (f'"{edge.source.__name__}" -> "{edge.target.__name__}"'),
+        )
+
     lines.append("}")
+
     return "\n".join(lines)

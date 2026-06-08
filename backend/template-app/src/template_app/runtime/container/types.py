@@ -1,4 +1,4 @@
-"""Kernel di container types."""
+"""Container runtime types."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from enum import StrEnum
 class DependencyScope(StrEnum):
     """Dependency lifetime policy."""
 
-    SINGLETON = "singleton"
-    TRANSIENT = "transient"
-    SCOPED = "scoped"
+    SINGLETON = "singleton"  # single object for the whole app
+    TRANSIENT = "transient"  # new object every time when called
+    SCOPED = "scoped"  # single object for a pipeline, then destroy
 
 
 class DependencyVisibility(StrEnum):
@@ -18,4 +18,3 @@ class DependencyVisibility(StrEnum):
 
     PUBLIC = "public"  # available to all
     PRIVATE = "private"  # available only for namespace members
-    KERNEL = "kernel"

@@ -1,3 +1,5 @@
+"""Visibility rules."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -18,26 +20,25 @@ def enforce_visibility(
     requester: Namespace,
     visibility: DependencyVisibility,
 ) -> None:
-    """Validate dependency access."""
+    """
+    Validate runtime visibility.
+
+    Rules:
+        1. PUBLIC -> allowed everywhere
+        2. PRIVATE -> same namespace only
+        3. KERNEL -> only kernel OR kernel-scoped boundary access
+
+    """
+    # FAST PATH
     if visibility is DependencyVisibility.PUBLIC:
         return
 
+    # PRIVATE: strict namespace boundary
     if visibility is DependencyVisibility.PRIVATE:
         if owner != requester:
             msg = (
-                f"Namespace '{requester}' "
-                f"cannot access private dependency "
-                f"from '{owner}'"
+                f"PRIVATE violation: "
+                f"{requester.name} cannot access {owner.name}"
             )
             raise DependencyVisibilityError(msg)
-
         return
-
-    if (
-        visibility is DependencyVisibility.KERNEL
-        and requester.name != "kernel"
-    ):
-        msg = f"Dependency from '{owner}' is available only for kernel"
-        raise DependencyNamespaceError(msg)
-
-    return

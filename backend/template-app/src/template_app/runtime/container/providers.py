@@ -1,91 +1,38 @@
-"""DI container providers."""
+"""DI provider factory."""
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypeVar
-
-from .types import DependencyScope
+from typing import TYPE_CHECKING, Generic, TypeVar, runtime_checkable
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
     from .manager import DependencyManager
+    from .types import DependencyScope
 
 T = TypeVar("T")
 
-
-@dataclass(slots=True, frozen=True)
-class SingletonProvider(Generic[T]):
-    """Singleton provider."""
-
-    factory: Callable[[DependencyManager], T]
-
-    scope: DependencyScope = DependencyScope.SINGLETON
-
-    def provide(self, manager: DependencyManager) -> T:
-        """
-        Create instance.
-
-        Returns:
-            Singleton instance.
-
-        """
-        return self.factory(manager)
+Factory = Callable[["DependencyManager"], T | Awaitable[T]]
 
 
 @dataclass(slots=True, frozen=True)
-class FactoryProvider(Generic[T]):
-    """Transient provider."""
+class Provider(Generic[T]):
+    """Universal dependency provider factory."""
 
-    factory: Callable[[DependencyManager], T]
-
-    scope: DependencyScope = DependencyScope.TRANSIENT
-
-    def provide(self, manager: DependencyManager) -> T:
-        """
-        Create new instance.
-
-        Returns:
-            New dependency instance.
-
-        """
-        return self.factory(manager)
-
-
-@dataclass(slots=True, frozen=True)
-class ScopedProvider(Generic[T]):
-    """Scoped provider."""
-
-    factory: Callable[[DependencyManager], T]
-
-    scope: DependencyScope = DependencyScope.SCOPED
-
-    def provide(self, manager: DependencyManager) -> T:
-        """
-        Create scoped instance.
-
-        Returns:
-            Scoped instance.
-
-        """
-        return self.factory(manager)
-
-
-@dataclass(slots=True, frozen=True)
-class AsyncProvider(Generic[T]):
-    """Async provider."""
-
-    factory: Callable[[DependencyManager], Awaitable[T]]
-
-    scope: DependencyScope = DependencyScope.ASYNC
+    factory: Factory[T]
+    scope: DependencyScope
 
     async def provide(self, manager: DependencyManager) -> T:
         """
-        Create async instance.
+        Provide dependency object.
 
         Returns:
-            async instance.
+            Resolved dependency object
 
         """
-        return await self.factory(manager)
+        resolved = self.factory(manager)
+
+        if hasattr(resolved, "__await__"):
+            resolved = await resolved
+
+        return resolved

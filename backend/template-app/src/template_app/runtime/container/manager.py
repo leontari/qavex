@@ -3,27 +3,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from .contracts import DependencyProvider
+from .diagnostics import ContainerSnapshot
 from .exceptions import (
-    AsyncDependencyError,
     DependencyCycleError,
-    DependencyVisibilityError,
     InvalidProviderError,
     ScopeRequiredError,
 )
+from .graph import DependencyGraph
 from .namespace import Namespace
-from .registry import DependencyRegistry
+from .registry import DependencyDescriptor, DependencyRegistry
+from .scope import ScopeContext, ScopeID, ScopeManager
 from .types import (
     DependencyScope,
     DependencyVisibility,
 )
 from .visibility import enforce_visibility
-
-if TYPE_CHECKING:
-    from .graph import DependencyGraph
-    from .scope import ScopeContext
 
 T = TypeVar("T")
 
@@ -31,256 +28,209 @@ T = TypeVar("T")
 @dataclass(slots=True)
 class DependencyManager:
     """
-    Runtime dependency manager.
+    Runtime orchestration layer.
 
-    Responsibilities:
-        - dependency registration
+    Owns:
+
+        - registry
+        - graph
+        - scope lifecycle
         - singleton lifecycle
-        - scoped lifecycle
-        - dependency resolution
-        - async dependency resolution
-        - visibility enforcement
-        - namespace enforcement
-        - diagnostics
 
-    Does not store dependencies directly.
-    Registry owns metadata.
-    Manager owns runtime lifecycle.
+    Responsible for:
+
+        - dependency resolution
+        - visibility checks
+        - graph construction
+        - graph validation
     """
 
     _registry: DependencyRegistry = field(
         default_factory=DependencyRegistry,
     )
 
-    _singletons: dict[tuple[str, type[Any]], object] = field(
+    _graph: DependencyGraph = field(
+        default_factory=DependencyGraph,
+    )
+
+    _scopes: ScopeManager = field(
+        default_factory=ScopeManager,
+    )
+
+    _singletons: dict[
+        tuple[str, type[Any]],
+        object,
+    ] = field(
         default_factory=dict,
     )
-    _resolution_stack: list[type[Any]] = field(
+
+    _resolution_stack: list[tuple[str, type[Any]]] = field(
         default_factory=list,
     )
+
+    ##############
+    # Registration
+    ##############
 
     def register(
         self,
         contract: type[Any],
-        provider: DependencyProvider,
+        provider: DependencyProvider[Any],
         *,
         namespace: Namespace,
-        visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
+        visibility: DependencyVisibility = (DependencyVisibility.PUBLIC),
         overwrite: bool = False,
     ) -> None:
-        """
-        Register dependency.
-
-        Args:
-            contract:
-                Dependency contract.
-
-            provider:
-                Dependency provider.
-
-            namespace:
-                Dependency namespace.
-
-            visibility:
-                Dependency visibility.
-
-            overwrite:
-                Allow to overwrite.
-
-        """
+        """Register dependency."""
         if not isinstance(provider, DependencyProvider):
-            msg = f"{type(provider).__name__} is not a DependencyProvider"
+            msg = f"{type(provider).__name__} is not DependencyProvider"
             raise InvalidProviderError(msg)
 
-        self._registry.register(
-            namespace=namespace,
+        descriptor = DependencyDescriptor(
             contract=contract,
             provider=provider,
+            namespace=namespace,
             visibility=visibility,
+        )
+
+        self._registry.register(
+            descriptor=descriptor,
             overwrite=overwrite,
         )
 
-    def resolve(
+    #################
+    # Scope lifecycle
+    #################
+
+    def create_scope(self) -> ScopeContext:
+        """Create runtime scope."""
+        return self._scopes.create_scope()
+
+    def close_scope(self, scope_id: ScopeID) -> None:
+        """Destroy runtime scope."""
+        self._scopes.close_scope(scope_id)
+
+    ############
+    # Resolution
+    ############
+
+    async def resolve(
         self,
         contract: type[T],
         *,
         requester: Namespace | None = None,
-        scope: ScopeContext | None = None,
+        scope_id: ScopeID | None = None,
     ) -> T:
-        """
-        Resolve dependency.
+        """Resolve dependency."""
 
-        Args:
-            contract:
-                Dependency contract.
+        descriptor = self._registry.get(contract)
 
-            requester:
-                Namespace requesting dependency.
-
-            scope:
-                Optional scope context.
-
-        Returns:
-            Resolved dependency.
-
-        """
-        descriptor = self._registry.locate(contract)[1]
-        requester_namespace = requester or descriptor.namespace
+        owner_namespace = descriptor.namespace
+        requester_namespace = requester or Namespace("kernel")  # TODO: check
 
         enforce_visibility(
-            owner=descriptor.namespace,
+            owner=owner_namespace,
             requester=requester_namespace,
             visibility=descriptor.visibility,
         )
 
-        provider = descriptor.provider
+        self._register_graph_edge(contract)
 
+        try:
+            provider = descriptor.provider
+
+            if provider.scope is DependencyScope.SCOPED:
+                return await self._resolve_scoped(descriptor, scope_id)
+
+            if provider.scope is DependencyScope.SINGLETON:
+                return await self._resolve_singleton(descriptor)
+
+            if provider.scope is DependencyScope.TRANSIENT:
+                return await provider.provide(self)
+
+        finally:
+            self._resolution_stack.pop()  # TODO: check
+
+    ####################
+    # Internal lifecycle
+    ####################
+
+    async def _resolve_singleton(self, descriptor: DependencyDescriptor):
+
+        key = descriptor.namespace.name, descriptor.contract
+
+        if key not in self._singletons:
+            instance = await descriptor.provider.provide(self)
+
+            self._singletons[key] = instance
+
+        return self._singletons[key]
+
+    async def _resolve_scoped(
+        self,
+        descriptor: DependencyDescriptor,
+        scope_id: ScopeID | None,
+    ):
+
+        if scope_id is None:
+            msg = f"{descriptor.contract.__name__} requires scope"
+            raise ScopeRequiredError(msg)
+
+        if not self._scopes.exists(scope_id):
+            msg = "Scope is closed"
+            raise ScopeRequiredError(msg)
+
+        scope = self._scopes.get_scope(scope_id)
+
+        key = descriptor.namespace.name, descriptor.contract
+
+        if scope.contains(key):
+            return scope.get(key)
+
+        instance = await descriptor.provider.provide(self)
+
+        scope.set(key, instance)
+
+        return instance
+
+    def _register_graph_edge(self, contract: type[Any]) -> None:
+        """Build runtime dependency graph."""
         if contract in self._resolution_stack:
-            chain = " -> ".join(
+            msg = " -> ".join(
                 item.__name__ for item in (*self._resolution_stack, contract)
             )
-            raise DependencyCycleError(chain)
+            raise DependencyCycleError(msg)
+
+        if self._resolution_stack:
+            parent = self._resolution_stack[-1]
+            self._graph.add_edge(parent.__name__, contract.__name__)
+
+        else:
+            self._graph.add_node(contract.__name__)
 
         self._resolution_stack.append(contract)
 
-        try:
-            # SCOPED
-            if provider.scope == DependencyScope.SCOPED:
-                if scope is None:
-                    msg = f"{contract.__name__} requires ScopeContext"
-                    raise ScopeRequiredError(msg)
+    ############
+    # Validation
+    ############
 
-                if scope.contains(contract):
-                    return cast("T", scope.get(contract))
+    def validate(self) -> None:
+        """Validate runtime graph."""
+        self._graph.validate()
 
-                instance = provider.provide(self)
-                scope.set(contract, instance)
-                return cast("T", instance)
+    #############
+    # Diagnostics
+    #############
 
-            # SINGLETON
-            key = (descriptor.namespace.name, contract)
+    def snapshot(self):
+        return ContainerSnapshot(graph=self._graph)
 
-            if provider.scope == DependencyScope.SINGLETON:
-                if key not in self._singletons:
-                    self._singletons[key] = provider.provide(self)
-                return cast("T", self._singletons[key])
+    def graph(self) -> DependencyGraph:
+        return self._graph
 
-            # TRANSIENT
-            if provider.scope == DependencyScope.TRANSIENT:
-                return cast("T", provider.provide(self))
-
-            # ASYNC blocked here
-            if provider.scope == DependencyScope.ASYNC:
-                raise AsyncDependencyError(contract.__name__)
-            # if provider.scope is DependencyScope.ASYNC:
-            #     msg = f"{contract.__name__} must be resolved via resolve_async()"
-            #     raise AsyncDependencyError(msg)
-
-        finally:
-            self._resolution_stack.pop()
-
-    async def resolve_async(
-        self,
-        contract: type[T],
-        *,
-        requester: Namespace | None = None,
-        scope: ScopeContext | None = None,
-    ) -> T:
-        """
-        Resolve async dependency.
-
-        Args:
-            contract:
-                Dependency contract.
-
-            requester:
-                Namespace requesting dependency.
-
-            scope:
-                Optional scope context.
-
-        Returns:
-            Resolved dependency.
-
-        """
-        descriptor = self._registry.locate(contract)[1]
-        requester_namespace = requester or descriptor.namespace
-
-        enforce_visibility(
-            owner=descriptor.namespace,
-            requester=requester_namespace,
-            visibility=descriptor.visibility,
-        )
-
-        provider = descriptor.provider
-
-        if provider.scope is DependencyScope.SCOPED:
-            if scope is None:
-                msg = f"{contract.__name__} requires ScopeContext."
-                raise ScopeRequiredError(msg)
-
-            if scope.contains(contract):
-                return cast("T", scope.get(contract))
-
-            instance = await provider.provide(self)
-            scope.set(contract, instance)
-            return cast("T", instance)
-
-        if provider.scope is not DependencyScope.ASYNC:
-            return cast("T", await provider.provide(self))
-
-        return self.resolve(contract, requester=requester, scope=scope)
-
-    def contains(self, namespace: Namespace, contract: type[Any]) -> bool:
-        """
-        Check dependency existence.
-
-        Returns:
-            bool
-
-        """
-        return self._registry.contains(namespace, contract)
-
-    def snapshot(self) -> DependencyGraph:
-        """
-        Create diagnostics snapshot.
-
-        Returns:
-            DependencyGraph
-
-        """
-        return self._registry.snapshot()
-
-    def dump(self) -> str:
-        """
-        Return Human readable graph.
-
-        Returns:
-            str
-
-        """
-        graph = self.snapshot()
-
-        lines: list[str] = []
-
-        current_namespace = ""
-
-        for node in sorted(
-            graph.nodes,
-            key=lambda x: (x.namespace, x.contract),
-        ):
-            if node.namespace != current_namespace:
-                current_namespace = node.namespace
-                lines.append(current_namespace)
-
-            lines.append(f"  └── {node.contract} [{node.scope}]")
-
-        return "\n".join(lines)
+    #########
+    # Testing
+    #########
 
     def clear_singletons(self) -> None:
-        """
-        Clear singleton cache.
-
-        Useful in tests.
-        """
         self._singletons.clear()

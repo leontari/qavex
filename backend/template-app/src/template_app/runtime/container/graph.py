@@ -3,55 +3,90 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
-from itertools import starmap
+from enum import StrEnum
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.scope import ScopeID
+    from template_app.runtime.container.namespace import Namespace
 
 
 @dataclass(slots=True, frozen=True)
 class DependencyNode:
     """Dependency graph node."""
 
-    namespace: str
-    contract: str
-    provider: str
-    scope: str
-    visibility: str
-
-
-@dataclass(slots=True, frozen=True)
-class DependencyEdge:
-    """Runtime dependency relation."""
-
-    source: str
-    target: str
+    contract: type[Any]
+    namespace: Namespace
 
 
 @dataclass(slots=True)
 class DependencyGraph:
-    """Runtime dependency graph."""
+    """
+    Runtime dependency graph.
 
-    _nodes: dict[str, DependencyNode] = field(
-        default_factory=dict,
-    )
-    _edges: set[tuple[str, str]] = field(
-        default_factory=set,
-    )
+    Built dynamically during resolve().
 
-    # active_scopes: dict[ScopeID, str]
+    Stores:
+        contract -> dependencies
+
+    Used for:
+        - validation
+        - cycle detection
+        - diagnostics
+        - visualization
+    """
+
+    _nodes: dict[str, DependencyNode] = field(default_factory=dict)
+    _edges: dict[str, set[str]] = field(default_factory=dict)
 
     def add_node(self, node_id: str, node: DependencyNode) -> None:
+        """Register isolated node."""
         self._nodes[node_id] = node
 
     def add_edge(self, source: str, target: str) -> None:
-        self._edges.add((source, target))
+        """
+        Register dependency edge.
+
+        Source -> Target.
+
+        """
+        self._nodes.add(source)
+        self._nodes.add(target)
+
+        self._edges.setdefault(source, set()).add(target)
 
     @property
-    def nodes(self) -> tuple[DependencyNode, ...]:
-        return tuple(self._nodes.values())
+    def nodes(self) -> frozenset[str]:
+        return frozenset(self._nodes)
 
     @property
-    def edges(self) -> tuple[DependencyEdge, ...]:
-        return tuple(starmap(DependencyEdge, sorted(self._edges)))
+    def edges(self) -> dict[str, set[str]]:
+        return self._edges
+
+    def validate(self) -> None:
+        """
+        Validate graph.
+
+        Detect dependency cycles.
+
+        """
+        visited: set[str] = set()
+        stack: set[str] = set()
+
+        def dfs(node: str) -> None:
+            if node in stack:
+                msg = f"Dependency cycle detected at '{node}'"
+                raise RuntimeError(msg)
+
+            if node in visited:
+                return
+
+            stack.add(node)
+
+            for dependency in self._edges.get(node, ()):
+                dfs(dependency)
+
+            stack.remove(node)
+            visited.add(node)
+
+        for node in self._edges:
+            dfs(node)

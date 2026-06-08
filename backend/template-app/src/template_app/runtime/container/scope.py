@@ -1,4 +1,4 @@
-"""Runtime scope management."""
+"""Runtime scopes management."""
 
 from __future__ import annotations
 
@@ -11,72 +11,91 @@ from .exceptions import ScopeRequiredError
 
 @dataclass(frozen=True, slots=True)
 class ScopeID:
-    value: UUID
+    """Unique scope identifier."""
+
+    value: UUID  # TODO: check this
 
     @classmethod
     def new(cls) -> ScopeID:
         return cls(uuid4())
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 @dataclass(slots=True)
 class ScopeContext:
-    """Runtime scope state."""
+    """
+    Runtime dependency scope.
 
-    # _id: ScopeID = field(default_factory=ScopeID.new)
-
-    # _instances: dict[tuple[type[Any], ScopeID], object] = field(
-    #     default_factory=dict
-    # )
+    Stores scoped instances only.
+    """
 
     id: ScopeID
 
-    _instances: dict[type[Any], object] = field(
-        default_factory=dict,
-    )
+    _instances: dict[tuple[str, type[Any]]] = field(default_factory=dict)
 
-    # def contains(self, contract: type[Any]) -> bool:
-    #     return (contract, self._id) in self._instances
+    def contains(self, key: tuple[str, type[Any]]) -> bool:
+        return key in self._instances
 
-    def contains(self, contract: type[Any]) -> bool:
-        return contract in self._instances
+    def get(self, key: tuple[str, type[Any]]) -> object:
+        return self._instances[key]
 
-    # def get(self, contract: type[Any]) -> object:
-    #     return self._instances[contract, self._id]
-
-    def get(self, contract: type[Any]) -> object:
-        return self._instances[contract]
-
-    # def set(self, contract: type[Any], instance: object) -> None:
-    #     self._instances[contract, self._id] = instance
-
-    def set(self, contract: type[Any], instance: object) -> None:
-        self._instances[contract] = instance
+    def set(self, key: tuple[str, type[Any]], instance: object) -> None:
+        self._instances[key] = instance
 
     def clear(self) -> None:
-        self._instances.clear()  # TODO: check this
+        self._instances.clear()
+
+    @property
+    def instance_count(self) -> int:
+        return len(self._instances)
 
 
 @dataclass(slots=True)
 class ScopeManager:
-    """Owns all runtime scopes."""
+    """
+    Scope lifecycle manager.
 
-    _scopes: dict[UUID, ScopeContext] = field(
-        default_factory=dict,
-    )
+    Owns all active scopes.
+    Scope lifecycle is controlled only here.
+    ScopeContext must never be created directly.
+    """
 
-    def create_scope(self) -> ScopeID:
-        scope_id = ScopeID.new()
+    _scopes: dict[ScopeID, ScopeContext] = field(default_factory=dict)
 
-        self._scopes[scope_id.value] = ScopeContext(id=scope_id)
+    def create_scope(self) -> ScopeContext:
+        """Create runtime scope."""
+        scope = ScopeContext(id=ScopeID.new())
+        self._scopes[scope.id] = scope
 
-        return scope_id
+        return scope
+
+    def close_scope(self, scope_id: ScopeID) -> None:
+        """Destroy scope."""
+        scope = self._scopes.pop(scope_id, None)
+
+        if scope is not None:
+            scope.clear()
 
     def get_scope(self, scope_id: ScopeID) -> ScopeContext:
         try:
-            return self._scopes[scope_id.value]
+            return self._scopes[scope_id]
         except KeyError as error:
-            msg = f"Unknown scope: {scope_id.value}"
+            msg = f"Unknown scope: {scope_id}"
             raise ScopeRequiredError(msg) from error
 
-    def close_scope(self, scope_id: ScopeID) -> None:
-        self._scopes.pop(scope_id.value, None)
+    def exists(self, scope_id: ScopeID) -> bool:
+        """
+        Check whether scope exists.
+
+        Returns:
+            True if scope exists.
+
+        """
+        return scope_id in self._scopes
+
+    @property
+    def scopes_count(self) -> int:
+        """Count existing scopes."""
+        return len(self._scopes)
