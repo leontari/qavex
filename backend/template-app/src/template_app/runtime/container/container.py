@@ -1,9 +1,15 @@
+"""Public DI facade."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from template_app.runtime.container.models.dependency import DependencyID
+from template_app.runtime.container.runtime.manager import (
+    DependencyManager,
+    ScopeHandle,
+)
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
@@ -12,12 +18,6 @@ if TYPE_CHECKING:
     from template_app.runtime.container.models.visibility import (
         DependencyVisibility,
     )
-    from template_app.runtime.container.runtime.manager import (
-        DependencyManager,
-    )
-    from template_app.runtime.container.runtime.registry import (
-        DependencyRegistry,
-    )
     from template_app.runtime.container.runtime.scope_manager import (
         ScopeManager,
     )
@@ -25,18 +25,11 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Container:
-    """
-    Public DI facade.
+    """Public DI API."""
 
-    Coordinates registry,
-    dependency resolution and scopes.
-    """
-
-    registry: DependencyRegistry
-    manager: DependencyManager
-    scopes: ScopeManager
+    manager: DependencyManager = field(default_factory=DependencyManager)
 
     # delegate to Registry
     def register(
@@ -47,7 +40,8 @@ class Container:
         namespace: Namespace,
         visibility: DependencyVisibility,
     ) -> None:
-        self.registry.register(
+        """Register dependency in container."""
+        self.manager.register(
             contract=contract,
             provider=provider,
             namespace=namespace,
@@ -59,31 +53,42 @@ class Container:
         self,
         contract: type[T],
         *,
-        namespace: Namespace,
+        namespace: Namespace,  # TODO: requester namespace
         scope: ScopeID | None = None,
     ) -> T:
-        key = DependencyID(
+        """
+        Resolve registered dependency.
+
+        Returns:
+            resolved dependency
+
+        """
+        dependency_id = DependencyID(
             namespace=namespace,
             contract=contract,
         )
+
         return cast(
             "T",
             await self.manager.resolve(
-                key=key,
-                scope=scope,
+                dependency_id=dependency_id,
+                scope_id=scope,
             ),
         )
 
     # for ScopeManager existing separately
     def create_scope(self) -> ScopeID:
-        return self.scopes.create_scope()
+        return self.manager.create_scope()
 
     # for ScopeManager existing separately
     async def close_scope(
         self,
         scope: ScopeID,
     ) -> None:
-        await self.scopes.close_scope(scope)
+        await self.manager.close_scope(scope)
+
+    def scopes(self) -> ScopeHandle:
+        return self.manager.scopes()
 
 
 # # Very useful to make

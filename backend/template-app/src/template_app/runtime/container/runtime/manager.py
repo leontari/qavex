@@ -13,7 +13,10 @@ from template_app.runtime.container.exceptions import (
 )
 from template_app.runtime.container.graph.diagnostics import ContainerSnapshot
 from template_app.runtime.container.graph.graph import DependencyGraph
-from template_app.runtime.container.models.dependency import DependencyID
+from template_app.runtime.container.models.dependency import (
+    DependencyDescriptor,
+    DependencyID,
+)
 from template_app.runtime.container.models.namespace import Namespace
 from template_app.runtime.container.models.scope import (
     DependencyScope,
@@ -23,12 +26,25 @@ from template_app.runtime.container.models.scope import (
 from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
-from template_app.runtime.container.runtime.registry import (
-    DependencyDescriptor,
-    DependencyRegistry,
-)
+from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import ScopeManager
 from template_app.runtime.container.visibility import enforce_visibility
+
+
+class ScopeHandle:
+    def __init__(self, manager: ScopeManager) -> None:
+        self._manager = manager
+        self._scope_id: ScopeID | None = None
+
+    async def __aenter__(self) -> ScopeID:
+        self._scope_id = self._manager.create_scope()
+        return self._scope_id
+
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+        assert self._scope_id is not None
+
+        await self._manager.close_scope(self._scope_id)
+
 
 T = TypeVar("T")
 
@@ -86,7 +102,13 @@ class DependencyManager:
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         overwrite: bool = False,
     ) -> None:
-        """Register dependency."""
+        """
+        Register dependency.
+
+        Public api.
+
+        Delegates registration to registry.
+        """
         if not isinstance(provider, DependencyProvider):
             msg = f"{type(provider).__name__} is not DependencyProvider"
             raise InvalidProviderError(msg)
@@ -115,10 +137,30 @@ class DependencyManager:
         """Destroy runtime scope."""
         self._scopes.close_scope(scope_id)
 
+    def scopes(self):
+        return ScopeHandle(self._scopes)
+
     ############
     # Resolution
     ############
     async def resolve(
+        self,
+        dependency_id: DependencyID,
+        scope_id: ScopeID | None,
+    ) -> T:
+
+        scope = self._scopes.get_scope(scope_id)
+
+        if scope.contains(dependency_id):
+            return scope.get(dependency_id)
+
+        instance = await self._create_instance(...)
+
+        scope.set(dependency_id, instance)
+
+        return instance
+
+    async def resolve_(
         self,
         contract: type[T],
         *,
