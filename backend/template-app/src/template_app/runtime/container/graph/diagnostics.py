@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .graph import DependencyGraph
+    from template_app.runtime.container.graph.graph import DependencyGraph
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,3 +44,6 @@ class ContainerSnapshot:
                 },
             ),
         )
+
+
+class GraphSnapshot: ...

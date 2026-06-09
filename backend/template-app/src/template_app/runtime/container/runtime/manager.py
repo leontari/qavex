@@ -5,23 +5,30 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from .contracts import DependencyProvider
-from .diagnostics import ContainerSnapshot
-from .exceptions import (
+from template_app.runtime.container.contracts import DependencyProvider
+from template_app.runtime.container.exceptions import (
     DependencyCycleError,
     InvalidProviderError,
     ScopeRequiredError,
 )
-from .graph import DependencyGraph
-from template_app.runtime.container.keys import DependencyKey
-from template_app.runtime.container.namespace import Namespace
-from .registry import DependencyDescriptor, DependencyRegistry
-from .scope import ScopeContext, ScopeID, ScopeManager
-from .types import (
+from template_app.runtime.container.graph.diagnostics import ContainerSnapshot
+from template_app.runtime.container.graph.graph import DependencyGraph
+from template_app.runtime.container.models.dependency import DependencyID
+from template_app.runtime.container.models.namespace import Namespace
+from template_app.runtime.container.models.scope import (
     DependencyScope,
+    ScopeContext,
+    ScopeID,
+)
+from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
-from .visibility import enforce_visibility
+from template_app.runtime.container.runtime.registry import (
+    DependencyDescriptor,
+    DependencyRegistry,
+)
+from template_app.runtime.container.runtime.scope_manager import ScopeManager
+from template_app.runtime.container.visibility import enforce_visibility
 
 T = TypeVar("T")
 
@@ -58,11 +65,11 @@ class DependencyManager:
         default_factory=ScopeManager,
     )
 
-    _singletons: dict[DependencyKey:object] = field(
+    _singletons: dict[DependencyID:object] = field(
         default_factory=dict,
     )
 
-    _resolution_stack: list[DependencyKey] = field(
+    _resolution_stack: list[DependencyID] = field(
         default_factory=list,
     )
 
@@ -111,7 +118,6 @@ class DependencyManager:
     ############
     # Resolution
     ############
-
     async def resolve(
         self,
         contract: type[T],
@@ -232,3 +238,84 @@ class DependencyManager:
 
     def clear_singletons(self) -> None:
         self._singletons.clear()
+
+
+# @dataclass(slots=True)
+# class DependencyManager:
+#     """
+#     Runtime dependency resolver.
+#
+#     Responsible for dependency construction,
+#     lifecycle handling and dependency graph traversal.
+#
+#     Does not expose public container API.
+#     """
+#
+#     registry: Registry
+#     scopes: ScopeManager
+#
+#     # single main operation. That is all.
+#     async def resolve(
+#         self,
+#         key: DependencyId,
+#         scope: ScopeID | None = None,
+#     ) -> object: ...
+#         # get registration
+#         descriptor = registry.get(key)
+#
+#         # verify lifetime
+#         # SINGLETON
+#         # SCOPED
+#         # TRANSIENT
+#
+#         # search in cache
+#         # Singleton:
+#         singleton_cache.get(key)
+#         # Scoped:
+#         # scope.get(key)
+#
+#         # create instance
+#         instance = await provider.create(...)
+#
+#         # save in cache
+#         signleton_cache[key] = instance
+#         # or
+#         scope[key] = instance
+#
+#         # return result
+#         return instance
+#
+#
+#     ###############
+#     # INNER METHODS
+#     ###############
+#         async def _resolve_singleton(self): ...
+#         async def _resolve_scoped(self): ...
+#         async def _resolve_transient(self): ...
+#         async def _create_instance(self): ...
+#
+#     ######
+#     # we have dependency graph, so manager should construct ResolutionContext
+#     ######
+#         # example:
+# async def _create_instance(...):
+#     ResolutionContext(stack=[])
+#     # and then watches for cycles like
+#     UserService -> UserRepository -> Database
+#
+#
+# #########################
+# # what should not be here
+# #########################
+# # registration like
+# manager.register(...) -> it is Registry responsibility
+#
+# # scope management like
+# manager.create_scope()
+# manager.close_scope() -> it is ScopeManager responsibility
+#
+# # graph export like
+# manager.export_mermaid() -> it is Graph responsibility
+#
+# # diagnostics like
+# manager.snapshot() -> it is Diagnostics responsibility

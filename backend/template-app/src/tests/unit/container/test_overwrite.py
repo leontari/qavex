@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.container.manager import (
+from template_app.runtime.container.runtime.manager import (
     DependencyManager,
 )
 from template_app.runtime.container.providers import (

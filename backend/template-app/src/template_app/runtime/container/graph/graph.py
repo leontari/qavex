@@ -3,19 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.keys import DependencyKey
-    from template_app.runtime.container.namespace import Namespace
-
-
-@dataclass(slots=True, frozen=True)
-class DependencyNode:
-    """Dependency graph node."""
-
-    contract: type[Any]
-    namespace: Namespace
+    from template_app.runtime.container.models.dependency import DependencyID
 
 
 @dataclass(slots=True)
@@ -35,18 +26,18 @@ class DependencyGraph:
         - visualization
     """
 
-    _nodes: set[DependencyKey] = field(
+    _nodes: set[DependencyID] = field(
         default_factory=dict,
     )
-    _edges: dict[DependencyKey : set[DependencyKey]] = field(
+    _edges: dict[DependencyID : set[DependencyID]] = field(
         default_factory=dict,
     )
 
-    def add_node(self, key: DependencyKey) -> None:
+    def add_node(self, key: DependencyID) -> None:
         """Register isolated node."""
         self._nodes.add(key)
 
-    def add_edge(self, source: DependencyKey, target: DependencyKey) -> None:
+    def add_edge(self, source: DependencyID, target: DependencyID) -> None:
         """
         Register dependency edge.
 
@@ -59,7 +50,7 @@ class DependencyGraph:
         self._edges.setdefault(source, set()).add(target)
 
     @property
-    def nodes(self) -> frozenset[DependencyKey]:
+    def nodes(self) -> frozenset[DependencyID]:
         return frozenset(self._nodes)
 
     @property

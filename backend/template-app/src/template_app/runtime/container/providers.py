@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
-    from .manager import DependencyManager
-    from .types import DependencyScope
+    from template_app.runtime.container.models.scope import DependencyScope
+    from template_app.runtime.container.runtime.manager import (
+        DependencyManager,
+    )
 
 T = TypeVar("T")
 

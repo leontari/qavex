@@ -1,5 +1,5 @@
-from template_app.runtime.container.keys import DependencyKey
-from template_app.runtime.container.namespace import Namespace
+from template_app.runtime.container.models.keys import DependencyKey
+from template_app.runtime.container.models.namespace import Namespace
 
 
 class Dummy:

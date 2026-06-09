@@ -5,7 +5,7 @@ import pytest
 from template_app.runtime.container.exceptions import (
     DependencyNotFoundError,
 )
-from template_app.runtime.container.manager import (
+from template_app.runtime.container.runtime.manager import (
     DependencyManager,
 )
 from template_app.runtime.container.providers import (

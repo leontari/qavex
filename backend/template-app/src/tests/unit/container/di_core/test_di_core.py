@@ -1,7 +1,7 @@
 import pytest
 
-from template_app.runtime.container.manager import DependencyManager
-from template_app.runtime.container.namespace import Namespace
+from template_app.runtime.container.runtime.manager import DependencyManager
+from template_app.runtime.container.models.namespace import Namespace
 from template_app.runtime.container.providers import Provider
 from template_app.runtime.container.types import DependencyScope
 

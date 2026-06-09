@@ -4,7 +4,9 @@ import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .diagnostics import ContainerSnapshot
+    from template_app.runtime.container.graph.diagnostics import (
+        ContainerSnapshot,
+    )
 
 
 def export_json(snapshot: ContainerSnapshot) -> str:

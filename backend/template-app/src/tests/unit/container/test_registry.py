@@ -5,7 +5,7 @@ import pytest
 from template_app.runtime.container.exceptions import (
     DependencyAlreadyRegisteredError,
 )
-from template_app.runtime.container.registry import (
+from template_app.runtime.container.runtime.registry import (
     DependencyRegistry,
 )
 from template_app.runtime.container.types import (

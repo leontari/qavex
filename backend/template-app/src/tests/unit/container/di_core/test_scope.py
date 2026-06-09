@@ -1,4 +1,4 @@
-from template_app.runtime.container.scope import ScopeContext, ScopeID
+from template_app.runtime.container.runtime.scope import ScopeContext, ScopeID
 
 class Dummy:
     pass

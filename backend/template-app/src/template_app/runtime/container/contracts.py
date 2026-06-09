@@ -10,8 +10,10 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from .manager import DependencyManager
-    from .types import DependencyScope
+    from template_app.runtime.container.models.scope import DependencyScope
+    from template_app.runtime.container.runtime.manager import (
+        DependencyManager,
+    )
 
 T = TypeVar("T")
 
