@@ -13,7 +13,8 @@ from .exceptions import (
     ScopeRequiredError,
 )
 from .graph import DependencyGraph
-from .namespace import Namespace
+from template_app.runtime.container.keys import DependencyKey
+from template_app.runtime.container.namespace import Namespace
 from .registry import DependencyDescriptor, DependencyRegistry
 from .scope import ScopeContext, ScopeID, ScopeManager
 from .types import (
@@ -57,14 +58,11 @@ class DependencyManager:
         default_factory=ScopeManager,
     )
 
-    _singletons: dict[
-        tuple[str, type[Any]],
-        object,
-    ] = field(
+    _singletons: dict[DependencyKey:object] = field(
         default_factory=dict,
     )
 
-    _resolution_stack: list[tuple[str, type[Any]]] = field(
+    _resolution_stack: list[DependencyKey] = field(
         default_factory=list,
     )
 
@@ -78,7 +76,7 @@ class DependencyManager:
         provider: DependencyProvider[Any],
         *,
         namespace: Namespace,
-        visibility: DependencyVisibility = (DependencyVisibility.PUBLIC),
+        visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         overwrite: bool = False,
     ) -> None:
         """Register dependency."""

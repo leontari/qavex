@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from template_app.runtime.container.keys import DependencyKey
     from template_app.runtime.container.namespace import Namespace
 
 
@@ -35,14 +35,18 @@ class DependencyGraph:
         - visualization
     """
 
-    _nodes: dict[str, DependencyNode] = field(default_factory=dict)
-    _edges: dict[str, set[str]] = field(default_factory=dict)
+    _nodes: set[DependencyKey] = field(
+        default_factory=dict,
+    )
+    _edges: dict[DependencyKey : set[DependencyKey]] = field(
+        default_factory=dict,
+    )
 
-    def add_node(self, node_id: str, node: DependencyNode) -> None:
+    def add_node(self, key: DependencyKey) -> None:
         """Register isolated node."""
-        self._nodes[node_id] = node
+        self._nodes.add(key)
 
-    def add_edge(self, source: str, target: str) -> None:
+    def add_edge(self, source: DependencyKey, target: DependencyKey) -> None:
         """
         Register dependency edge.
 
@@ -55,7 +59,7 @@ class DependencyGraph:
         self._edges.setdefault(source, set()).add(target)
 
     @property
-    def nodes(self) -> frozenset[str]:
+    def nodes(self) -> frozenset[DependencyKey]:
         return frozenset(self._nodes)
 
     @property

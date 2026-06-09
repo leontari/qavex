@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .namespace import Namespace
+    from template_app.runtime.container.namespace import Namespace
 
 
 @dataclass(frozen=True, slots=True)

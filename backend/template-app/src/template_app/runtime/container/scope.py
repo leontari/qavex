@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from .exceptions import ScopeRequiredError
+
+if TYPE_CHECKING:
+    from template_app.runtime.container.keys import DependencyKey
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,15 +36,15 @@ class ScopeContext:
 
     id: ScopeID
 
-    _instances: dict[tuple[str, type[Any]]] = field(default_factory=dict)
+    _instances: dict[DependencyKey:object] = field(default_factory=dict)
 
-    def contains(self, key: tuple[str, type[Any]]) -> bool:
+    def contains(self, key: DependencyKey) -> bool:
         return key in self._instances
 
-    def get(self, key: tuple[str, type[Any]]) -> object:
+    def get(self, key: DependencyKey) -> object:
         return self._instances[key]
 
-    def set(self, key: tuple[str, type[Any]], instance: object) -> None:
+    def set(self, key: DependencyKey, instance: object) -> None:
         self._instances[key] = instance
 
     def clear(self) -> None:
@@ -62,7 +65,7 @@ class ScopeManager:
     ScopeContext must never be created directly.
     """
 
-    _scopes: dict[ScopeID, ScopeContext] = field(default_factory=dict)
+    _scopes: dict[ScopeID:ScopeContext] = field(default_factory=dict)
 
     def create_scope(self) -> ScopeContext:
         """Create runtime scope."""
@@ -73,7 +76,7 @@ class ScopeManager:
 
     def close_scope(self, scope_id: ScopeID) -> None:
         """Destroy scope."""
-        scope = self._scopes.pop(scope_id, None)
+        scope = self._scopes.pop(scope_id)
 
         if scope is not None:
             scope.clear()

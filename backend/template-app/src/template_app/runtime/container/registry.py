@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from .exceptions import (
@@ -11,20 +12,142 @@ from .exceptions import (
 )
 
 if TYPE_CHECKING:
+    from template_app.runtime.container.keys import DependencyKey
+    from template_app.runtime.container.namespace import Namespace
+
     from .contracts import DependencyProvider
-    from .keys import DependencyKey
-    from .namespace import Namespace
     from .types import DependencyVisibility
+
+
+class DependencyNamespace(StrEnum):
+    """
+    Reserved root namespaces.
+
+    These categories are top-level runtime boundaries used
+    for isolation, visibility and plugin separation.
+
+    """
+
+    KERNEL = "kernel"
+    INFRA = "infra"
+    TRANSPORT = "transport"
+    MODULE = "module"
+    PLUGIN = "plugin"
+    GUI = "gui"
+    TESTING = "testing"
+    INTERNAL = "internal"
+
+
+@dataclass(frozen=True, slots=True)
+class Namespace:
+    """
+    Logical namespace.
+
+    Used to define fine-grained separation inside system namespaces.
+
+    Examples:
+        Namespace("plugin.auth")
+        Namespace("transport.grpc")
+        Namespace("infra.redis")
+
+    """
+
+    name: str
+
+    def __post_init__(self) -> None:
+        """Validate namespace format."""
+        if not self.name or not self.name.strip():
+            msg = "Namespace name cannot be empty"
+            raise ValueError(msg)
+
+        if ".." in self.name:
+            msg = f"Invalid namespace name format: {self.name}"
+            raise ValueError(msg)
+
+    @property
+    def root(self) -> str:
+        """
+        Root segment of namespace.
+
+        Example:
+            "plugin.auth" -> "plugin"
+
+        """
+        return self.name.split(".")[0]
+
+    @property
+    def parts(self) -> tuple[str, ...]:
+        """
+        Split namespace into hierarchical segments.
+
+        Example:
+            "plugin.auth.jwt" -> ("plugin", "auth", "jwt")
+
+        """
+        return tuple(self.name.split("."))
+
+    @property
+    def is_plugin(self) -> bool:
+        return self.root == DependencyNamespace.PLUGIN
+
+    @property
+    def is_kernel(self) -> bool:
+        return self.name == DependencyNamespace.KERNEL
+
+    def belongs_to(self, parent: Namespace) -> bool:
+        """
+        Hierarchical ownership check.
+
+        plugin.auth.jwt
+        belongs_to(plugin.auth)
+
+        Returns:
+            bool
+
+        """
+        return self.name == parent.name or self.name.startswith(
+            f"{parent.name}"
+        )
+
+    def __str__(self) -> str:
+        return self.name
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyKey:
+    """
+    Unique dependency identifier.
+
+    Identifies a dependency inside container runtime.
+    """
+
+    namespace: Namespace
+    contract: type[Any]
+
+    @property
+    def node_id(self) -> str:
+        """
+        Stable graph identifier.
+
+        Example:
+            plugin.auth:app.services.UserService
+
+        """
+        return (
+            f"{self.namespace.name}:"
+            f"{self.contract.__module__}."
+            f"{self.contract.__qualname__}"
+        )
+
+    def __str__(self) -> str:
+        return self.node_id
 
 
 @dataclass(slots=True, frozen=True)
 class DependencyDescriptor:
     """Immutable dependency metadata."""
 
-    contract: type[Any]
     provider: DependencyProvider[Any]
-
-    namespace: Namespace
     visibility: DependencyVisibility
 
 
@@ -42,7 +165,7 @@ class DependencyRegistry:
     Registry stores metadata only.
     """
 
-    _descriptors: dict[DependencyKey, DependencyDescriptor] = field(
+    _descriptors: dict[DependencyKey:DependencyDescriptor] = field(
         default_factory=dict,
     )
 
