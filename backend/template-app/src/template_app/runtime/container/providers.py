@@ -7,14 +7,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
+    from template_app.runtime.container.container import Container
     from template_app.runtime.container.models.scope import DependencyScope
-    from template_app.runtime.container.runtime.manager import (
-        DependencyManager,
-    )
 
 T = TypeVar("T")
 
-Factory = Callable[["DependencyManager"], T | Awaitable[T]]
+Factory = Callable[["Container"], T | Awaitable[T]]
 
 
 @dataclass(slots=True, frozen=True)
@@ -24,7 +22,7 @@ class Provider(Generic[T]):
     factory: Factory[T]
     scope: DependencyScope
 
-    async def provide(self, manager: DependencyManager) -> T:
+    async def provide(self, container: Container) -> T:
         """
         Provide dependency object.
 
@@ -32,7 +30,7 @@ class Provider(Generic[T]):
             Resolved dependency object
 
         """
-        resolved = self.factory(manager)
+        resolved = self.factory(container)
 
         if hasattr(resolved, "__await__"):
             resolved = await resolved
