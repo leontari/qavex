@@ -2,13 +2,31 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from template_app.runtime.container.models.dependency import DependencyID
+
 
 class DependencyError(RuntimeError):
     """Base dependency injection exception."""
 
 
 class DependencyNotFoundError(DependencyError):
-    """Dependency is not registered."""
+    """
+    Raised when a dependency is not registered.
+
+    Attributes:
+        dependency_id:
+            Identifier of the missing dependency.
+
+    """
+
+    dependency_id: DependencyID
+
+    def __init__(self, dependency_id: DependencyID) -> None:  # noqa: D107
+        self.dependency_id = dependency_id
+        super().__init__(f"Dependency '{dependency_id}' is not registered.")
 
 
 class DependencyAlreadyRegisteredError(DependencyError):

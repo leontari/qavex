@@ -21,6 +21,20 @@ class DependencyID:
     namespace: Namespace
     contract: type[Any]
 
+    def __str__(self) -> str:
+        """
+        Return a diagnostic message.
+
+        Returns:
+            a human-readable string representation of the DependencyID object
+
+        """
+        return (
+            f"{self.namespace.name}:"
+            f"{self.contract.__module__}."
+            f"{self.contract.__qualname__}"
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class DependencyDescriptor:
