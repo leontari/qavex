@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from template_app.runtime.container.contracts import DependencyProvider
 from template_app.runtime.container.exceptions import (
     DependencyCycleError,
-    InvalidProviderError,
     ScopeRequiredError,
 )
 from template_app.runtime.container.graph.diagnostics import ContainerSnapshot
@@ -20,15 +18,17 @@ from template_app.runtime.container.models.dependency import (
 from template_app.runtime.container.models.namespace import Namespace
 from template_app.runtime.container.models.scope import (
     DependencyScope,
-    ScopeContext,
     ScopeID,
-)
-from template_app.runtime.container.models.visibility import (
-    DependencyVisibility,
 )
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import ScopeManager
 from template_app.runtime.container.visibility import enforce_visibility
+
+if TYPE_CHECKING:
+    from template_app.runtime.container.contracts import DependencyProvider
+    from template_app.runtime.container.models.visibility import (
+        DependencyVisibility,
+    )
 
 
 class ScopeHandle:
@@ -36,14 +36,14 @@ class ScopeHandle:
         self._manager = manager
         self._scope_id: ScopeID | None = None
 
-    async def __aenter__(self) -> ScopeID:
+    def __aenter__(self) -> ScopeID:
         self._scope_id = self._manager.create_scope()
         return self._scope_id
 
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    def __aexit__(self, exc_type, exc, tb) -> None:
         assert self._scope_id is not None
 
-        await self._manager.close_scope(self._scope_id)
+        self._manager.close_scope(self._scope_id)
 
 
 T = TypeVar("T")
@@ -97,39 +97,34 @@ class DependencyManager:
         self,
         contract: type[Any],
         provider: DependencyProvider[Any],
-        *,
         namespace: Namespace,
-        visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
-        overwrite: bool = False,
+        visibility: DependencyVisibility,
+        scope: DependencyScope,
+        overwrite: type[bool],
     ) -> None:
-        """
-        Register dependency.
-
-        Public api.
-
-        Delegates registration to registry.
-        """
-        if not isinstance(provider, DependencyProvider):
-            msg = f"{type(provider).__name__} is not DependencyProvider"
-            raise InvalidProviderError(msg)
+        """Register dependency metadata."""
+        dependency_id = DependencyID(
+            namespace=namespace,
+            contract=contract,
+        )
 
         descriptor = DependencyDescriptor(
-            contract=contract,
+            ident=dependency_id,
             provider=provider,
-            namespace=namespace,
             visibility=visibility,
+            scope=scope,
         )
 
-        self._registry.register(
-            descriptor=descriptor,
-            overwrite=overwrite,
-        )
+        if overwrite:
+            self._registry.replace(descriptor=descriptor)
+        else:
+            self._registry.add(descriptor=descriptor)
 
     #################
     # Scope lifecycle
     #################
 
-    def create_scope(self) -> ScopeContext:
+    def create_scope(self) -> ScopeID:
         """Create runtime scope."""
         return self._scopes.create_scope()
 
@@ -137,7 +132,7 @@ class DependencyManager:
         """Destroy runtime scope."""
         self._scopes.close_scope(scope_id)
 
-    def scopes(self):
+    def scopes(self) -> ScopeHandle:
         return ScopeHandle(self._scopes)
 
     ############
@@ -146,33 +141,17 @@ class DependencyManager:
     async def resolve(
         self,
         dependency_id: DependencyID,
-        scope_id: ScopeID | None,
-    ) -> T:
-
-        scope = self._scopes.get_scope(scope_id)
-
-        if scope.contains(dependency_id):
-            return scope.get(dependency_id)
-
-        instance = await self._create_instance(...)
-
-        scope.set(dependency_id, instance)
-
-        return instance
-
-    async def resolve_(
-        self,
-        contract: type[T],
         *,
-        requester: Namespace | None = None,
+        requester_ns: Namespace | None = None,
         scope_id: ScopeID | None = None,
     ) -> T:
         """Resolve dependency."""
 
-        descriptor = self._registry.get(contract)
-
-        owner_namespace = descriptor.namespace
-        requester_namespace = requester or Namespace("kernel")  # TODO: check
+        descriptor = self._registry.get(dependency_id)
+        owner_namespace = descriptor.ident.namespace
+        requester_namespace = requester_ns or Namespace(
+            "kernel"
+        )  # TODO: check
 
         enforce_visibility(
             owner=owner_namespace,
@@ -180,19 +159,34 @@ class DependencyManager:
             visibility=descriptor.visibility,
         )
 
-        self._register_graph_edge(contract)
+        self._register_graph_edge(dependency_id)
 
         try:
-            provider = descriptor.provider
+            scope = self._scopes.get_scope(scope_id)
 
-            if provider.scope is DependencyScope.SCOPED:
-                return await self._resolve_scoped(descriptor, scope_id)
+            if scope.contains(dependency_id):
+                return scope.get(dependency_id)
 
-            if provider.scope is DependencyScope.SINGLETON:
-                return await self._resolve_singleton(descriptor)
+            match descriptor.scope:
+                case DependencyScope.SINGLETON:
+                    return await self._resolve_singleton(
+                        dependency_id,
+                        descriptor,
+                    )
+                case DependencyScope.SCOPED:
+                    return await self._resolve_scoped(
+                        dependency_id,
+                        descriptor,
+                        scope_id,
+                    )
+                case DependencyScope.TRANSIENT:
+                    return await self._resolve_transient(
+                        descriptor,
+                    )
 
-            if provider.scope is DependencyScope.TRANSIENT:
-                return await provider.provide(self)
+            instance = await self._create_instance(...)
+            scope.set(dependency_id, instance)
+            return instance
 
         finally:
             self._resolution_stack.pop()  # TODO: check
@@ -201,25 +195,28 @@ class DependencyManager:
     # Internal lifecycle
     ####################
 
-    async def _resolve_singleton(self, descriptor: DependencyDescriptor):
+    async def _resolve_singleton(
+        self,
+        dependency_id: DependencyID,
+        descriptor: DependencyDescriptor,
+    ):
 
-        key = descriptor.namespace.name, descriptor.contract
-
-        if key not in self._singletons:
+        if dependency_id not in self._singletons:
             instance = await descriptor.provider.provide(self)
 
-            self._singletons[key] = instance
+            self._singletons[dependency_id] = instance
 
-        return self._singletons[key]
+        return self._singletons[dependency_id]
 
     async def _resolve_scoped(
         self,
+        dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
         scope_id: ScopeID | None,
     ):
 
         if scope_id is None:
-            msg = f"{descriptor.contract.__name__} requires scope"
+            msg = f"{dependency_id.contract.__name__} requires scope"
             raise ScopeRequiredError(msg)
 
         if not self._scopes.exists(scope_id):
@@ -228,19 +225,29 @@ class DependencyManager:
 
         scope = self._scopes.get_scope(scope_id)
 
-        key = descriptor.namespace.name, descriptor.contract
-
-        if scope.contains(key):
-            return scope.get(key)
+        if scope.contains(dependency_id):
+            return scope.get(dependency_id)
 
         instance = await descriptor.provider.provide(self)
 
-        scope.set(key, instance)
+        scope.set(dependency_id, instance)
 
         return instance
 
-    def _register_graph_edge(self, contract: type[Any]) -> None:
+    async def _resolve_transient(self, descriptor: DependencyDescriptor):
+        return await descriptor.provider.provide(self)
+
+    async def _create_instance(
+        self,
+        descriptor: DependencyDescriptor,
+        scope_id: ScopeID | None,
+    ):
+        return await descriptor.provider.provide(self)
+
+    def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Build runtime dependency graph."""
+        contract = dependency_id.contract
+
         if contract in self._resolution_stack:
             msg = " -> ".join(
                 item.__name__ for item in (*self._resolution_stack, contract)
@@ -249,12 +256,12 @@ class DependencyManager:
 
         if self._resolution_stack:
             parent = self._resolution_stack[-1]
-            self._graph.add_edge(parent.__name__, contract.__name__)
+            self._graph.add_edge(parent.__name__, dependency_id)
 
         else:
-            self._graph.add_node(contract.__name__)
+            self._graph.add_node(dependency_id)
 
-        self._resolution_stack.append(contract)
+        self._resolution_stack.append(dependency_id)
 
     ############
     # Validation
@@ -280,84 +287,3 @@ class DependencyManager:
 
     def clear_singletons(self) -> None:
         self._singletons.clear()
-
-
-# @dataclass(slots=True)
-# class DependencyManager:
-#     """
-#     Runtime dependency resolver.
-#
-#     Responsible for dependency construction,
-#     lifecycle handling and dependency graph traversal.
-#
-#     Does not expose public container API.
-#     """
-#
-#     registry: Registry
-#     scopes: ScopeManager
-#
-#     # single main operation. That is all.
-#     async def resolve(
-#         self,
-#         key: DependencyId,
-#         scope: ScopeID | None = None,
-#     ) -> object: ...
-#         # get registration
-#         descriptor = registry.get(key)
-#
-#         # verify lifetime
-#         # SINGLETON
-#         # SCOPED
-#         # TRANSIENT
-#
-#         # search in cache
-#         # Singleton:
-#         singleton_cache.get(key)
-#         # Scoped:
-#         # scope.get(key)
-#
-#         # create instance
-#         instance = await provider.create(...)
-#
-#         # save in cache
-#         signleton_cache[key] = instance
-#         # or
-#         scope[key] = instance
-#
-#         # return result
-#         return instance
-#
-#
-#     ###############
-#     # INNER METHODS
-#     ###############
-#         async def _resolve_singleton(self): ...
-#         async def _resolve_scoped(self): ...
-#         async def _resolve_transient(self): ...
-#         async def _create_instance(self): ...
-#
-#     ######
-#     # we have dependency graph, so manager should construct ResolutionContext
-#     ######
-#         # example:
-# async def _create_instance(...):
-#     ResolutionContext(stack=[])
-#     # and then watches for cycles like
-#     UserService -> UserRepository -> Database
-#
-#
-# #########################
-# # what should not be here
-# #########################
-# # registration like
-# manager.register(...) -> it is Registry responsibility
-#
-# # scope management like
-# manager.create_scope()
-# manager.close_scope() -> it is ScopeManager responsibility
-#
-# # graph export like
-# manager.export_mermaid() -> it is Graph responsibility
-#
-# # diagnostics like
-# manager.snapshot() -> it is Diagnostics responsibility

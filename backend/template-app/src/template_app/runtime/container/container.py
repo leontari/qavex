@@ -5,7 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from template_app.runtime.container.models.dependency import DependencyID
+from template_app.runtime.container.models.dependency import (
+    DependencyID,
+)
+from template_app.runtime.container.models.visibility import (
+    DependencyVisibility,
+)
 from template_app.runtime.container.runtime.manager import (
     DependencyManager,
     ScopeHandle,
@@ -14,18 +19,15 @@ from template_app.runtime.container.runtime.manager import (
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.scope import ScopeID
-    from template_app.runtime.container.models.visibility import (
-        DependencyVisibility,
-    )
-    from template_app.runtime.container.runtime.scope_manager import (
-        ScopeManager,
+    from template_app.runtime.container.models.scope import (
+        DependencyScope,
+        ScopeID,
     )
 
 T = TypeVar("T")
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class Container:
     """Public DI API."""
 
@@ -34,11 +36,13 @@ class Container:
     # delegate to Registry
     def register(
         self,
-        *,
         contract: type[Any],
         provider: DependencyProvider[Any],
+        *,
         namespace: Namespace,
-        visibility: DependencyVisibility,
+        visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
+        scope: DependencyScope,
+        overwrite: bool = False,
     ) -> None:
         """Register dependency in container."""
         self.manager.register(
@@ -46,6 +50,8 @@ class Container:
             provider=provider,
             namespace=namespace,
             visibility=visibility,
+            scope=scope,
+            overwrite=overwrite,
         )
 
     # delegate to manager
@@ -81,65 +87,8 @@ class Container:
         return self.manager.create_scope()
 
     # for ScopeManager existing separately
-    async def close_scope(
-        self,
-        scope: ScopeID,
-    ) -> None:
-        await self.manager.close_scope(scope)
+    def close_scope(self, scope: ScopeID) -> None:
+        self.manager.close_scope(scope)
 
     def scopes(self) -> ScopeHandle:
         return self.manager.scopes()
-
-
-# # Very useful to make
-# # async with container.scope() as scope:
-# #     service = await container.resolve(
-# #         UserService,
-# #         scope=scope,
-# #     )
-# # and then
-# # class Container:
-# #     def scope(self) -> ScopeHandle:
-# #         return ScopeHandle(self.scopes)
-#
-#
-# container = Container()
-# # do not mix diagnostics with main API
-# # it's better
-# container.diagnostics.snapshot()
-# or
-# container.graph.export_mermaid()
-# #
-#
-# #############
-# # basic usage
-# #############
-# container.register(...)
-#
-# scope = container.create_scope()
-#
-# service = await container.resolve(
-#     UserService,
-#     scope=scope,
-# )
-#
-#
-# ############
-# # target API
-# ############
-# container = Container()
-#
-# container.register(...)
-#
-# async with container.scope() as scope:
-#     service = await container.resolve(
-#         UserService,
-#         scope=scope,
-#     )
-#
-# # This should be considered as implementation and should not be touched directly
-# #
-# # Registry
-# # DependencyManager
-# # ScopeManager
-# # DependencyGraph
