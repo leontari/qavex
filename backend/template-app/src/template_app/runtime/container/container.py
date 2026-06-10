@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 from template_app.runtime.container.models.dependency import (
     DependencyID,
 )
+from template_app.runtime.container.models.scope import (
+    DependencyScope,
+)
 from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
@@ -20,7 +23,6 @@ if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.scope import (
-        DependencyScope,
         ScopeID,
     )
 
@@ -39,9 +41,9 @@ class Container:
         contract: type[Any],
         provider: DependencyProvider[Any],
         *,
-        namespace: Namespace,
+        namespace: Namespace | None = None,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
-        scope: DependencyScope,
+        scope: DependencyScope = DependencyScope.TRANSIENT,
         overwrite: bool = False,
     ) -> None:
         """Register dependency in container."""
