@@ -27,7 +27,7 @@ class DependencyRegistry:
 
     """
 
-    _descriptors: dict[DependencyID:DependencyDescriptor] = field(
+    _descriptors: dict[DependencyID, DependencyDescriptor] = field(
         default_factory=dict,
     )
 
@@ -140,13 +140,16 @@ class DependencyRegistry:
             for descriptor in self._descriptors.values()
         )
 
-    @property
     def items(self) -> tuple[tuple[DependencyID, DependencyDescriptor], ...]:
         """
         Return immutable snapshot of registered dependencies.
 
         Helper for:
             - GraphBuilder.
+
+        Returns:
+            immutable snapshot of stored dependencies.
+
         """
         return tuple(self._descriptors.items())
 
