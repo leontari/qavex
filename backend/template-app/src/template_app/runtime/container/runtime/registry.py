@@ -36,29 +36,32 @@ class DependencyRegistry:
         Store dependency metadata.
 
         Raises:
-            DependencyAlreadyRegisteredError
+            DependencyAlreadyRegisteredError:
+                If dependency has already been registered.
 
         """
-        if self._descriptors[descriptor.ident] in self._descriptors:
-            raise DependencyAlreadyRegisteredError(descriptor)
+        if descriptor.ident in self._descriptors:
+            raise DependencyAlreadyRegisteredError(descriptor.ident)
 
         self._descriptors[descriptor.ident] = descriptor
 
     def replace(self, descriptor: DependencyDescriptor) -> None:
         """Replace stored dependency metadata."""
+        if descriptor.ident not in self._descriptors:
+            raise DependencyNotFoundError(descriptor.ident)
+
         self._descriptors[descriptor.ident] = descriptor
 
     def get(self, dependency_id: DependencyID) -> DependencyDescriptor:
         """
         Get stored descriptor metadata by ID.
 
-        To be use in runtime container.
-
         Returns:
-            DependencyDescriptor
+            DependencyDescriptor.
 
         Raises:
-            DependencyNotFoundError
+            DependencyNotFoundError:
+                If dependency is not registered.
 
         """
         try:
@@ -72,10 +75,18 @@ class DependencyRegistry:
         Remove stored dependency metadata by ID.
 
         Returns:
-            removed DependencyDescriptor
+            removed DependencyDescriptor.
+
+        Raises:
+            DependencyNotFoundError:
+                If dependency is not registered.
 
         """
-        return self._descriptors.pop(dependency_id)
+        try:
+            return self._descriptors.pop(dependency_id)
+
+        except KeyError as error:
+            raise DependencyNotFoundError(dependency_id) from error
 
     def contains(self, dependency_id: DependencyID) -> bool:
         """
@@ -90,13 +101,13 @@ class DependencyRegistry:
     @property
     def descriptors(self) -> tuple[DependencyDescriptor, ...]:
         """
-        Return immutable metadata view.
+        Return immutable view of registered descriptors.
 
         Helper for:
-            - GraphBuilder
-            - Diagnostics
-            - Exporters
-            - PluginLoader
+            - GraphBuilder;
+            - Diagnostics;
+            - Exporters;
+            - PluginLoader.
         """
         return tuple(self._descriptors.values())
 
@@ -106,9 +117,9 @@ class DependencyRegistry:
         Return immutable list of registered keys.
 
         Helper for:
-            - Diagnostics
-            - Graph
-            - Validation
+            - Diagnostics;
+            - Graph;
+            - Validation.
 
         """
         return tuple(self._descriptors.keys())
@@ -119,9 +130,9 @@ class DependencyRegistry:
         Return unique namespace models stored in registry.
 
         Helper for:
-            - PluginDiagnostics
-            - VisibilityChecks
-            - GraphExport
+            - PluginDiagnostics;
+            - VisibilityChecks;
+            - GraphExport.
 
         """
         return frozenset(
@@ -129,11 +140,45 @@ class DependencyRegistry:
             for descriptor in self._descriptors.values()
         )
 
+    @property
+    def items(self) -> tuple[tuple[DependencyID, DependencyDescriptor], ...]:
+        """
+        Return immutable snapshot of registered dependencies.
+
+        Helper for:
+            - GraphBuilder.
+        """
+        return tuple(self._descriptors.items())
+
+    @property
+    def size(self) -> int:
+        """
+        Return number of registered dependencies.
+
+        Helper for:
+            - testing.
+        """
+        return len(self._descriptors)
+
+    @property
+    def is_empty(self) -> bool:
+        """
+        Whether dependency storage is empty.
+
+        Helper for:
+            - testing.
+
+        Returns:
+            True if storage is empty.
+
+        """
+        return len(self._descriptors) == 0
+
     def clear(self) -> None:
         """
         Clear storage.
 
         Helper for:
-            - testing
+            - testing.
         """
         self._descriptors.clear()
