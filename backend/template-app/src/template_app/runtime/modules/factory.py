@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container import (
+from template_app.runtime.container.container import (
     Container,
 )
 from template_app.runtime.infrastructure.factories import (

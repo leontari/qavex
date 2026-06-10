@@ -35,7 +35,7 @@ class DependencyAlreadyRegisteredError(DependencyError):
 
     Attributes:
         dependency_id:
-            Identifier of the missing dependency.
+            Identifier of the registered dependency.
 
     """
 

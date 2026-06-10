@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_app.runtime.container.types import DependencyScope
+from template_app.runtime.container.models.scope import DependencyScope
 from template_app.runtime.infrastructure.infra import CacheProvider
 
 
