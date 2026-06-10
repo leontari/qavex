@@ -100,7 +100,8 @@ class DependencyManager:
         namespace: Namespace,
         visibility: DependencyVisibility,
         scope: DependencyScope,
-        overwrite: type[bool],
+        *,
+        overwrite: bool,
     ) -> None:
         """Register dependency metadata."""
         dependency_id = DependencyID(
