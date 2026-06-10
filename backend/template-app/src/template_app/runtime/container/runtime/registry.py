@@ -37,7 +37,7 @@ class DependencyRegistry:
 
         Raises:
             DependencyAlreadyRegisteredError:
-                If dependency has already been registered.
+                if dependency is registered.
 
         """
         if descriptor.ident in self._descriptors:

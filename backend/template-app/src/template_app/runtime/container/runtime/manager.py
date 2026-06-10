@@ -95,12 +95,12 @@ class DependencyManager:
 
     def register(
         self,
+        *,
         contract: type[Any],
         provider: DependencyProvider[Any],
         namespace: Namespace,
         visibility: DependencyVisibility,
         scope: DependencyScope,
-        *,
         overwrite: bool,
     ) -> None:
         """Register dependency metadata."""

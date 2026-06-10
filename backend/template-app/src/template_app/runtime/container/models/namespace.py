@@ -32,10 +32,10 @@ class Namespace:
 
     Used to define fine-grained separation inside system namespaces.
 
-    Examples:
-        Namespace("plugin.auth")
-        Namespace("transport.grpc")
-        Namespace("infra.redis")
+    Example:
+        - Namespace("plugin.auth")
+        - Namespace("transport.grpc")
+        - Namespace("infra.redis")
 
     """
 

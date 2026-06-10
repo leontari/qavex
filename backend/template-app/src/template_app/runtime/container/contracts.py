@@ -10,10 +10,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.scope import DependencyScope
-    from template_app.runtime.container.runtime.manager import (
-        DependencyManager,
-    )
+    from template_app.runtime.container.container import Container
 
 T = TypeVar("T")
 
@@ -22,11 +19,9 @@ T = TypeVar("T")
 class DependencyProvider(Protocol[T]):
     """Dependency provider contract."""
 
-    scope: DependencyScope
-
-    async def provide(self, manager: DependencyManager) -> T:
+    async def provide(self, resolver: Container) -> T:
         """
-        Create dependency instance.
+        Provide dependency instance.
 
         Returns:
             Dependency instance.
