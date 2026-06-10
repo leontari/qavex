@@ -30,7 +30,22 @@ class DependencyNotFoundError(DependencyError):
 
 
 class DependencyAlreadyRegisteredError(DependencyError):
-    """Dependency already exists."""
+    """
+    Raised when a dependency has already been registered.
+
+    Attributes:
+        dependency_id:
+            Identifier of the missing dependency.
+
+    """
+
+    dependency_id: DependencyID
+
+    def __init__(self, dependency_id: DependencyID) -> None:  # noqa: D107
+        self.dependency_id = dependency_id
+        super().__init__(
+            f"Dependency '{dependency_id}' has already been registered."
+        )
 
 
 class DependencyNamespaceError(DependencyError):
