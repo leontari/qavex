@@ -13,7 +13,9 @@ from template_app.runtime.container.models.dependency import (
     DependencyID,
 )
 from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.providers import Provider
+from template_app.runtime.container.models.scope import DependencyScope
+from template_app.runtime.container.models.visibility import DependencyVisibility
+from template_app.runtime.container.providers import FactoryProvider
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 
 
@@ -47,7 +49,9 @@ def descriptor(
 ) -> DependencyDescriptor:
     return DependencyDescriptor(
         ident=dependency_id,
-        provider=Provider(ServiceA),
+        provider=FactoryProvider(ServiceA),
+        scope=DependencyScope.TRANSIENT,
+        visibility=DependencyVisibility.PUBLIC,
     )
 
 
@@ -79,11 +83,15 @@ def test_replace_descriptor(
     descriptor_a = DependencyDescriptor(
         ident=dependency_id,
         provider=FactoryProvider(ServiceA),
+        scope=DependencyScope.TRANSIENT,
+        visibility=DependencyVisibility.PUBLIC,
     )
 
     descriptor_b = DependencyDescriptor(
         ident=dependency_id,
         provider=FactoryProvider(ServiceB),
+        scope=DependencyScope.TRANSIENT,
+        visibility=DependencyVisibility.PUBLIC,
     )
 
     registry.add(descriptor_a)
@@ -101,6 +109,8 @@ def test_replace_missing_raises(
     descriptor = DependencyDescriptor(
         ident=dependency_id,
         provider=FactoryProvider(ServiceA),
+        scope=DependencyScope.TRANSIENT,
+        visibility=DependencyVisibility.PUBLIC,
     )
 
     with pytest.raises(
@@ -203,6 +213,8 @@ def test_namespaces(
         DependencyDescriptor(
             ident=dependency_a,
             provider=FactoryProvider(ServiceA),
+            scope=DependencyScope.TRANSIENT,
+            visibility=DependencyVisibility.PUBLIC,
         ),
     )
 
@@ -210,6 +222,8 @@ def test_namespaces(
         DependencyDescriptor(
             ident=dependency_b,
             provider=FactoryProvider(ServiceB),
+            scope=DependencyScope.TRANSIENT,
+            visibility=DependencyVisibility.PUBLIC,
         ),
     )
 
