@@ -14,22 +14,20 @@ class DependencyGraph:
     """
     Runtime dependency graph.
 
-    Built dynamically during resolve().
-
-    Stores:
-        contract -> dependencies
+    Built dynamically during DependencyManager.resolve().
 
     Used for:
-        - validation
-        - cycle detection
         - diagnostics
+        - runtime dependency tracing
+        - graph export
         - visualization
+
     """
 
     _nodes: set[DependencyID] = field(
-        default_factory=dict,
+        default_factory=set,
     )
-    _edges: dict[DependencyID : set[DependencyID]] = field(
+    _edges: dict[DependencyID, set[DependencyID]] = field(
         default_factory=dict,
     )
 
@@ -49,39 +47,30 @@ class DependencyGraph:
 
         self._edges.setdefault(source, set()).add(target)
 
+    def contains(self, dependency_id: DependencyID) -> bool:
+        return dependency_id in self._nodes
+
+    def successors(
+        self, dependency_id: DependencyID
+    ) -> frozenset[DependencyID]:
+        return frozenset(self._edges.get(dependency_id, ()))
+
+    def clear(self) -> None:
+        self._nodes.clear()
+        self._edges.clear()
+
+    @property
+    def node_count(self) -> int:
+        return len(self._nodes)
+
+    @property
+    def edge_cont(self) -> int:
+        return sum(len(edges) for edges in self._edges.values())
+
     @property
     def nodes(self) -> frozenset[DependencyID]:
         return frozenset(self._nodes)
 
     @property
-    def edges(self) -> dict[str, set[str]]:
-        return self._edges
-
-    def validate(self) -> None:
-        """
-        Validate graph.
-
-        Detect dependency cycles.
-
-        """
-        visited: set[str] = set()
-        stack: set[str] = set()
-
-        def dfs(node: str) -> None:
-            if node in stack:
-                msg = f"Dependency cycle detected at '{node}'"
-                raise RuntimeError(msg)
-
-            if node in visited:
-                return
-
-            stack.add(node)
-
-            for dependency in self._edges.get(node, ()):
-                dfs(dependency)
-
-            stack.remove(node)
-            visited.add(node)
-
-        for node in self._edges:
-            dfs(node)
+    def edges(self) -> dict[DependencyID, frozenset[DependencyID]]:
+        return {node: frozenset(edges) for node, edges in self._edges.items()}
