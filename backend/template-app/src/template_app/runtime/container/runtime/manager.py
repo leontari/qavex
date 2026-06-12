@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from template_app.runtime.container.exceptions import (
     DependencyCycleError,
+    InvalidProviderError,
     ScopeRequiredError,
 )
 from template_app.runtime.container.graph.diagnostics import ContainerSnapshot
@@ -20,6 +21,7 @@ from template_app.runtime.container.models.scope import (
     DependencyScope,
     ScopeID,
 )
+from template_app.runtime.container.providers import FactoryProvider
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import ScopeManager
 from template_app.runtime.container.visibility import enforce_visibility
@@ -96,14 +98,20 @@ class DependencyManager:
     def register(
         self,
         *,
-        contract: type[Any],
-        provider: DependencyProvider[Any],
+        contract: type[T],
+        provider: FactoryProvider,
         namespace: Namespace,
         visibility: DependencyVisibility,
         scope: DependencyScope,
         overwrite: bool,
     ) -> None:
         """Register dependency metadata."""
+        # if not isinstance(contract, type):
+        #     raise InvalidContractError(contract)
+        #
+        # if not isinstance(provider, DependencyProvider):
+        #     raise InvalidProviderError(provider)
+
         dependency_id = DependencyID(
             namespace=namespace,
             contract=contract,
@@ -146,28 +154,24 @@ class DependencyManager:
         requester_ns: Namespace | None = None,
         scope_id: ScopeID | None = None,
     ) -> T:
-        """Resolve dependency."""
+        """
+        Resolve dependency.
 
+        Returns:
+            Resolved dependency instance.
+
+        """
         descriptor = self._registry.get(dependency_id)
-        owner_namespace = descriptor.ident.namespace
-        requester_namespace = requester_ns or Namespace(
-            "kernel"
-        )  # TODO: check
 
         enforce_visibility(
-            owner=owner_namespace,
-            requester=requester_namespace,
+            owner=descriptor.ident.namespace,
+            requester=requester_ns or descriptor.ident.namespace,
             visibility=descriptor.visibility,
         )
 
         self._register_graph_edge(dependency_id)
 
         try:
-            scope = self._scopes.get_scope(scope_id)
-
-            if scope.contains(dependency_id):
-                return scope.get(dependency_id)
-
             match descriptor.scope:
                 case DependencyScope.SINGLETON:
                     return await self._resolve_singleton(
@@ -184,10 +188,6 @@ class DependencyManager:
                     return await self._resolve_transient(
                         descriptor,
                     )
-
-            instance = await self._create_instance(...)
-            scope.set(dependency_id, instance)
-            return instance
 
         finally:
             self._resolution_stack.pop()  # TODO: check
@@ -238,12 +238,12 @@ class DependencyManager:
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         return await descriptor.provider.provide(self)
 
-    async def _create_instance(
-        self,
-        descriptor: DependencyDescriptor,
-        scope_id: ScopeID | None,
-    ):
-        return await descriptor.provider.provide(self)
+    # async def _create_instance(
+    #     self,
+    #     descriptor: DependencyDescriptor,
+    #     scope_id: ScopeID | None,
+    # ):
+    #     return await descriptor.provider.provide(self)
 
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Build runtime dependency graph."""
