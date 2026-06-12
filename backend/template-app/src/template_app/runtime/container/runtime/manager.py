@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING
 
 from template_app.runtime.container.exceptions import (
     DependencyCycleError,
+    InvalidContractError,
     InvalidProviderError,
     ScopeRequiredError,
 )
@@ -16,21 +17,21 @@ from template_app.runtime.container.models.dependency import (
     DependencyDescriptor,
     DependencyID,
 )
-from template_app.runtime.container.models.namespace import Namespace
 from template_app.runtime.container.models.scope import (
     DependencyScope,
     ScopeID,
 )
-from template_app.runtime.container.providers import FactoryProvider
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import ScopeManager
 from template_app.runtime.container.visibility import enforce_visibility
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
+    from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.visibility import (
         DependencyVisibility,
     )
+    from template_app.runtime.container.types import T
 
 
 class ScopeHandle:
@@ -46,9 +47,6 @@ class ScopeHandle:
         assert self._scope_id is not None
 
         self._manager.close_scope(self._scope_id)
-
-
-T = TypeVar("T")
 
 
 @dataclass(slots=True)
@@ -83,7 +81,7 @@ class DependencyManager:
         default_factory=ScopeManager,
     )
 
-    _singletons: dict[DependencyID:object] = field(
+    _singletons: dict[DependencyID, object] = field(
         default_factory=dict,
     )
 
@@ -99,18 +97,18 @@ class DependencyManager:
         self,
         *,
         contract: type[T],
-        provider: FactoryProvider,
+        provider: DependencyProvider[T],
         namespace: Namespace,
         visibility: DependencyVisibility,
         scope: DependencyScope,
         overwrite: bool,
     ) -> None:
         """Register dependency metadata."""
-        # if not isinstance(contract, type):
-        #     raise InvalidContractError(contract)
-        #
-        # if not isinstance(provider, DependencyProvider):
-        #     raise InvalidProviderError(provider)
+        if not isinstance(contract, type):
+            raise InvalidContractError(contract)
+
+        if not hasattr(provider, "provide"):
+            raise InvalidProviderError(provider)
 
         dependency_id = DependencyID(
             namespace=namespace,
@@ -141,7 +139,7 @@ class DependencyManager:
         """Destroy runtime scope."""
         self._scopes.close_scope(scope_id)
 
-    def scopes(self) -> ScopeHandle:
+    def scope(self) -> ScopeHandle:
         return ScopeHandle(self._scopes)
 
     ############
@@ -169,9 +167,12 @@ class DependencyManager:
             visibility=descriptor.visibility,
         )
 
-        self._register_graph_edge(dependency_id)
+        added_to_stack = False
 
         try:
+            self._register_graph_edge(dependency_id)
+            added_to_stack = True
+
             match descriptor.scope:
                 case DependencyScope.SINGLETON:
                     return await self._resolve_singleton(
@@ -190,18 +191,21 @@ class DependencyManager:
                     )
 
         finally:
-            self._resolution_stack.pop()  # TODO: check
+            if added_to_stack:
+                self._resolution_stack.pop()  # TODO: check
 
     ####################
     # Internal lifecycle
     ####################
 
+    # TODO: needs _singleton_locks: dict[DependencyID, asyncio.Lock]
+    # as it is possible to make to instances with:
+    # await asyncio.gather(resolve(Service), resolve(Service))
     async def _resolve_singleton(
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
     ):
-
         if dependency_id not in self._singletons:
             instance = await descriptor.provider.provide(self)
 
@@ -209,13 +213,13 @@ class DependencyManager:
 
         return self._singletons[dependency_id]
 
+    # TODO: Also needs lock as _resolve_siglenton
     async def _resolve_scoped(
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
         scope_id: ScopeID | None,
     ):
-
         if scope_id is None:
             msg = f"{dependency_id.contract.__name__} requires scope"
             raise ScopeRequiredError(msg)
@@ -238,26 +242,17 @@ class DependencyManager:
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         return await descriptor.provider.provide(self)
 
-    # async def _create_instance(
-    #     self,
-    #     descriptor: DependencyDescriptor,
-    #     scope_id: ScopeID | None,
-    # ):
-    #     return await descriptor.provider.provide(self)
-
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Build runtime dependency graph."""
-        contract = dependency_id.contract
-
-        if contract in self._resolution_stack:
-            msg = " -> ".join(
-                item.__name__ for item in (*self._resolution_stack, contract)
+        if dependency_id in self._resolution_stack:
+            chain = " -> ".join(
+                str(item) for item in (*self._resolution_stack, dependency_id)
             )
-            raise DependencyCycleError(msg)
+            raise DependencyCycleError(chain)
 
         if self._resolution_stack:
             parent = self._resolution_stack[-1]
-            self._graph.add_edge(parent.__name__, dependency_id)
+            self._graph.add_edge(parent, dependency_id)
 
         else:
             self._graph.add_node(dependency_id)
@@ -269,16 +264,21 @@ class DependencyManager:
     ############
 
     def validate(self) -> None:
-        """Validate runtime graph."""
+        """
+        Validate runtime dependency graph.
+
+        Graph is built lazily during dependency resolution.
+        """
         self._graph.validate()
 
     #############
     # Diagnostics
     #############
 
-    def snapshot(self):
+    def snapshot(self) -> ContainerSnapshot:
         return ContainerSnapshot(graph=self._graph)
 
+    @property
     def graph(self) -> DependencyGraph:
         return self._graph
 

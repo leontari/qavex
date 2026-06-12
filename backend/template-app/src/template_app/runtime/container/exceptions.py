@@ -52,6 +52,10 @@ class DependencyNamespaceError(DependencyError):
     """Namespace violation error."""
 
 
+class InvalidContractError(DependencyError):
+    """Provider contract error."""
+
+
 class DependencyVisibilityError(DependencyError):
     """Visibility violation error."""
 

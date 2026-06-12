@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypeVar
+from inspect import isawaitable
+from typing import TYPE_CHECKING, Generic
+
+from template_app.runtime.container.types import Factory, T
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.container import Container
-
-T = TypeVar("T")
-
-Factory = Callable[["Container"], T | Awaitable[T]]
+    from template_app.runtime.container.contracts import DependencyResolver
 
 
 @dataclass(slots=True, frozen=True)
@@ -20,7 +18,7 @@ class FactoryProvider(Generic[T]):
 
     factory: Factory[T]
 
-    async def provide(self, resolver: Container) -> T:
+    async def provide(self, resolver: DependencyResolver) -> T:
         """
         Provide dependency object.
 
@@ -28,9 +26,9 @@ class FactoryProvider(Generic[T]):
             Resolved dependency object
 
         """
-        resolved = self.factory(resolver)
+        result = self.factory(resolver)
 
-        if hasattr(resolved, "__await__"):
-            resolved = await resolved
+        if isawaitable(result):
+            result = await result
 
-        return resolved
+        return result

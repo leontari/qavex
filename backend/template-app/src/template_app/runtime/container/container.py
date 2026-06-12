@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 from template_app.runtime.container.models.dependency import (
     DependencyID,
@@ -25,8 +25,7 @@ if TYPE_CHECKING:
     from template_app.runtime.container.models.scope import (
         ScopeID,
     )
-
-T = TypeVar("T")
+    from template_app.runtime.container.types import T
 
 
 @dataclass(slots=True)
@@ -38,8 +37,8 @@ class Container:
     # delegate to Registry
     def register(
         self,
-        contract: type[Any],
-        provider: DependencyProvider[Any],
+        contract: type[T],
+        provider: DependencyProvider[T],
         *,
         namespace: Namespace | None = None,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
