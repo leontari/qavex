@@ -41,16 +41,13 @@ class Container:
     _manager: DependencyManager = field(
         default_factory=DependencyManager,
     )
-    _diagnostics: ContainerDiagnostics = field(
-        default_factory=ContainerDiagnostics,
-    )
 
     # delegate to Registry
     def register(
         self,
+        *,
         contract: type[T],
         provider: DependencyProvider[T],
-        *,
         namespace: Namespace | None = None,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         scope: DependencyScope = DependencyScope.TRANSIENT,
@@ -71,8 +68,8 @@ class Container:
         self,
         contract: type[T],
         *,
-        namespace: Namespace,  # TODO: requester namespace
-        scope: ScopeID | None = None,
+        namespace: Namespace | None = None,  # TODO: requester ns default
+        scope_id: ScopeID | None = None,
     ) -> T:
         """
         Resolve registered dependency.
@@ -82,16 +79,14 @@ class Container:
 
         """
         dependency_id = DependencyID(
-            namespace=namespace,
             contract=contract,
+            namespace=namespace,
         )
 
-        return cast(
-            "T",
-            await self._manager.resolve(
-                dependency_id=dependency_id,
-                scope_id=scope,
-            ),
+        return await self._manager.resolve(
+            dependency_id=dependency_id,
+            requester_ns=namespace,
+            scope_id=scope_id,
         )
 
     # for ScopeManager existing separately
@@ -107,6 +102,6 @@ class Container:
 
     # for diagnostics
     @property
-    def diagnostics(self) -> ContainerSnapshot:
-        """Read-only diagnostics API."""
-        return self._diagnostics.snapshot
+    def diagnostics(self) -> ContainerDiagnostics:
+        """Diagnostics API."""
+        return ContainerDiagnostics(self._manager)

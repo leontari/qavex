@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Protocol
 
 from template_app.runtime.container.exceptions import (
     DependencyCycleError,
     InvalidContractError,
     InvalidProviderError,
+    ScopeNotFoundError,
     ScopeRequiredError,
 )
 from template_app.runtime.container.models.dependency import (
@@ -25,6 +28,7 @@ from template_app.runtime.container.runtime.scope_manager import (
     ScopeHandle,
     ScopeManager,
 )
+from template_app.runtime.container.types import T
 from template_app.runtime.container.visibility_enforcer import (
     enforce_visibility,
 )
@@ -32,12 +36,14 @@ from template_app.runtime.container.visibility_enforcer import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from template_app.runtime.container.contracts import DependencyProvider
+    from template_app.runtime.container.contracts import (
+        DependencyProvider,
+        DependencyResolver,
+    )
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.visibility import (
         DependencyVisibility,
     )
-    from template_app.runtime.container.types import T
 
 
 @dataclass(slots=True)
@@ -64,7 +70,7 @@ class DependencyManager:
     Registry: Source of truth for registration.
     ScopeManager: Source of truth for scoped instances.
     SingletonCache: Source of truth for singleton instances.
-    RuntimeGraph: Source of truth for dependency resolution history.
+    RuntimeGraph: Source of truth for observed dependency relations.
 
     """
 
@@ -84,8 +90,9 @@ class DependencyManager:
         default_factory=dict,
     )
 
-    _resolution_stack: list[DependencyID] = field(
-        default_factory=list,
+    _resolution_stack: ContextVar[tuple[DependencyID, ...]] = ContextVar(
+        "dependency_resolution_stack",
+        default=(),
     )
 
     ##############
@@ -103,10 +110,11 @@ class DependencyManager:
         overwrite: bool,
     ) -> None:
         """Register dependency metadata."""
-        if not isinstance(contract, type):
+        if not isinstance(contract, type):  # TODO: check
             raise InvalidContractError(contract)
 
-        if not hasattr(provider, "provide"):
+        provide = getattr(provider, "provide", None)
+        if not callable(provide):
             raise InvalidProviderError(provider)
 
         dependency_id = DependencyID(
@@ -131,11 +139,29 @@ class DependencyManager:
     #################
 
     def create_scope(self) -> ScopeID:
-        """Create runtime scope."""
+        """
+        Create runtime scope.
+
+        Low-level scpe API.
+
+        Prefer using:
+            async with container.scope()
+
+        Returns:
+            ScopeID
+
+        """
         return self._scopes.create_scope()
 
     def close_scope(self, scope_id: ScopeID) -> None:
-        """Destroy runtime scope."""
+        """
+        Destroy runtime scope.
+
+        Low-level scpe API.
+
+        Prefer using:
+            async with container.scope()
+        """
         self._scopes.close_scope(scope_id)
 
     def scope(self) -> ScopeHandle:
@@ -148,8 +174,8 @@ class DependencyManager:
         self,
         dependency_id: DependencyID,
         *,
-        requester_ns: Namespace | None = None,
-        scope_id: ScopeID | None = None,
+        requester_ns: Namespace | None,  # TODO: delete defaults
+        scope_id: ScopeID | None,
     ) -> T:
         """
         Resolve dependency.
@@ -166,11 +192,9 @@ class DependencyManager:
             visibility=descriptor.visibility,
         )
 
-        added_to_stack = False
-
         try:
             self._register_graph_edge(dependency_id)
-            added_to_stack = True
+            token = self._enter_resolution(dependency_id)
 
             match descriptor.scope:
                 case DependencyScope.SINGLETON:
@@ -189,9 +213,11 @@ class DependencyManager:
                         descriptor,
                     )
 
+            msg = f"Unsupported dependency scope: {descriptor.scope}"
+            raise RuntimeError(msg)
+
         finally:
-            if added_to_stack:
-                self._resolution_stack.pop()  # TODO: check
+            self._leave_resolution(token)
 
     ####################
     # Internal lifecycle
@@ -224,8 +250,8 @@ class DependencyManager:
             raise ScopeRequiredError(msg)
 
         if not self._scopes.exists(scope_id):
-            msg = "Scope is closed"
-            raise ScopeRequiredError(msg)
+            msg = f"Scope {scope_id} not found for {dependency_id}."
+            raise ScopeNotFoundError(msg)
 
         scope = self._scopes.get_scope(scope_id)
 
@@ -241,22 +267,36 @@ class DependencyManager:
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         return await descriptor.provider.provide(self)
 
-    def _register_graph_edge(self, dependency_id: DependencyID) -> None:
-        """Build runtime dependency graph."""
-        if dependency_id in self._resolution_stack:
-            chain = " -> ".join(
-                str(item) for item in (*self._resolution_stack, dependency_id)
-            )
+    def _enter_resolution(
+        self,
+        dependency_id: DependencyID,
+    ) -> Token[tuple[DependencyID, ...]]:
+        stack = self._resolution_stack.get()
+
+        if dependency_id in stack:
+            chain = " -> ".join(str(item) for item in (*stack, dependency_id))
             raise DependencyCycleError(chain)
 
-        if self._resolution_stack:
-            parent = self._resolution_stack[-1]
+        return self._resolution_stack.set(
+            (*stack, dependency_id),
+        )
+
+    def _leave_resolution(
+        self,
+        token: Token[tuple[DependencyID, ...]],
+    ) -> None:
+        self._resolution_stack.reset(token)
+
+    def _register_graph_edge(self, dependency_id: DependencyID) -> None:
+        """Build runtime dependency graph."""
+        stack = self._resolution_stack.get()
+
+        if stack:
+            parent = stack[-1]
             self._graph.add_edge(parent, dependency_id)
 
         else:
             self._graph.add_node(dependency_id)
-
-        self._resolution_stack.append(dependency_id)
 
     ############
     # Validation
@@ -264,9 +304,12 @@ class DependencyManager:
 
     def validate(self) -> None:
         """
-        Validate runtime dependency graph.
+        Validate currently observed runtime graph.
 
         Graph is built lazily during dependency resolution.
+
+        Only dependencies that have been resolved at least once
+        are present in the graph.
         """
         self._graph.validate()
 
@@ -288,7 +331,7 @@ class DependencyManager:
 
     @property
     def singletons(self) -> Mapping[DependencyID, object]:
-        return self._singletons
+        return MappingProxyType(self._singletons)
 
     #########
     # Testing

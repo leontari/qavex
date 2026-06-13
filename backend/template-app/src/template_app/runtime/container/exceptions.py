@@ -48,6 +48,10 @@ class DependencyAlreadyRegisteredError(DependencyError):
         )
 
 
+class ScopeNotFoundError(DependencyError):
+    """Scope not found error."""
+
+
 class DependencyNamespaceError(DependencyError):
     """Namespace violation error."""
 

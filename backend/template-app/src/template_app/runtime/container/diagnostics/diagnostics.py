@@ -79,13 +79,11 @@ class ContainerDiagnostics:
     @property
     def snapshot(self) -> ContainerSnapshot:
         return ContainerSnapshot(
-            registered_dependencies=len(
-                self._manager._registry.dependency_ids
-            ),
-            active_scopes=self._manager._scopes.scopes_count,
+            registered_dependencies=len(self._manager.registry.dependency_ids),
+            active_scopes=self._manager.scopes.scopes_count,
             scoped_instances=len(self._manager.singletons),
             resolved_edges=len(self._manager.graph.nodes),
-            namespaces=self._manager._registry.namespaces,
+            namespaces=self._manager.registry.namespaces,
         )
 
     def registrations(self) -> RegistrationSnapshot: ...
@@ -97,3 +95,11 @@ class ContainerDiagnostics:
     def namespace(self, namespace: Namespace) -> NamespaceSnapshot: ...
 
     def validate(self): ...
+
+    def export_text(self): ...
+
+    def export_markdown(self): ...
+
+    def export_mermaid(self): ...
+
+    def export_json(self): ...
