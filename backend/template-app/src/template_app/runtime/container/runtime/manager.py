@@ -40,7 +40,6 @@ if TYPE_CHECKING:
 
     from template_app.runtime.container.contracts import (
         DependencyProvider,
-        DependencyResolver,
     )
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.visibility import (
@@ -88,15 +87,16 @@ class DependencyManager:
         default_factory=ScopeManager,
     )
 
+    _scopes_futures: dict[tuple[ScopeID, DependencyID], Future] = field(
+        default_factory=dict,
+    )
+
     _singletons: dict[DependencyID, object] = field(
         default_factory=dict,
     )
-    _singleton_locks: dict[DependencyID, asyncio.Lock] = field(
-        default_factory=dict
-    )
     # in-flight initialization tracker
     _singleton_futures: dict[DependencyID, Future] = field(
-        default_factory=dict
+        default_factory=dict,
     )
 
     _resolution_stack: ContextVar[tuple[DependencyID, ...]] = ContextVar(
@@ -173,6 +173,11 @@ class DependencyManager:
         """
         self._scopes.close_scope(scope_id)
 
+        # cleanup futures
+        self._scopes_futures = {
+            k: v for k, v in self._scopes_futures.items() if k[0] != scope_id
+        }
+
     def scope(self) -> ScopeHandle:
         return ScopeHandle(self._scopes)
 
@@ -238,6 +243,7 @@ class DependencyManager:
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
     ):
+        """Global future memoization."""
         # 1. fast path (already initialized)
         instance = self._singletons.get(dependency_id)
         if instance is not None:
@@ -270,13 +276,13 @@ class DependencyManager:
         # 3. someone else is initializing -> wait for result
         return await future
 
-    # TODO: Also needs lock as _resolve_siglenton
     async def _resolve_scoped(
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
         scope_id: ScopeID | None,
     ):
+        """Per-scope future memoization."""
         if scope_id is None:
             msg = f"{dependency_id.contract.__name__} requires scope"
             raise ScopeRequiredError(msg)
@@ -287,14 +293,36 @@ class DependencyManager:
 
         scope = self._scopes.get_scope(scope_id)
 
+        # fast path
         if scope.contains(dependency_id):
             return scope.get(dependency_id)
 
-        instance = await descriptor.provider.provide(self)
-        scope.set(dependency_id, instance)
-        return instance
+        key = (scope_id, dependency_id)
+
+        future = self._scopes_futures.get(key)
+        if future is None:
+            loop = asyncio.get_running_loop()
+            future = loop.create_future()
+            self._scopes_futures[key] = future
+
+            try:
+                instance = await descriptor.provider.provide(self)
+
+                scope.set(dependency_id, instance)
+                future.set_result(instance)
+                return instance
+
+            except Exception as e:
+                future.set_exception(e)
+                raise
+
+            finally:
+                await self._scopes_futures.pop(key, None)
+
+        return await future
 
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
+        """Call dependency provider directly."""
         return await descriptor.provider.provide(self)
 
     ####################################
@@ -373,7 +401,5 @@ class DependencyManager:
     #########
     # Testing
     #########
-
     def clear_singletons(self) -> None:
         self._singletons.clear()
-        self._singleton_locks.clear()
