@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+from asyncio import Future, get_running_loop
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from types import MappingProxyType
@@ -89,6 +91,13 @@ class DependencyManager:
     _singletons: dict[DependencyID, object] = field(
         default_factory=dict,
     )
+    _singleton_locks: dict[DependencyID, asyncio.Lock] = field(
+        default_factory=dict
+    )
+    # in-flight initialization tracker
+    _singleton_futures: dict[DependencyID, Future] = field(
+        default_factory=dict
+    )
 
     _resolution_stack: ContextVar[tuple[DependencyID, ...]] = ContextVar(
         "dependency_resolution_stack",
@@ -174,8 +183,8 @@ class DependencyManager:
         self,
         dependency_id: DependencyID,
         *,
-        requester_ns: Namespace | None,  # TODO: delete defaults
-        scope_id: ScopeID | None,
+        requester_ns: Namespace,
+        scope_id: ScopeID,
     ) -> T:
         """
         Resolve dependency.
@@ -192,9 +201,10 @@ class DependencyManager:
             visibility=descriptor.visibility,
         )
 
+        token = self._enter_resolution(dependency_id)
+
         try:
             self._register_graph_edge(dependency_id)
-            token = self._enter_resolution(dependency_id)
 
             match descriptor.scope:
                 case DependencyScope.SINGLETON:
@@ -223,20 +233,42 @@ class DependencyManager:
     # Internal lifecycle
     ####################
 
-    # TODO: needs _singleton_locks: dict[DependencyID, asyncio.Lock]
-    # as it is possible to make to instances with:
-    # await asyncio.gather(resolve(Service), resolve(Service))
     async def _resolve_singleton(
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
     ):
-        if dependency_id not in self._singletons:
-            instance = await descriptor.provider.provide(self)
+        # 1. fast path (already initialized)
+        instance = self._singletons.get(dependency_id)
+        if instance is not None:
+            return instance
 
-            self._singletons[dependency_id] = instance
+        # 2. check if initialization already in progress
+        future = self._singleton_futures.get(dependency_id)
+        if future is None:
+            loop = get_running_loop()
+            future = loop.create_future()
+            self._singleton_futures[dependency_id] = future
 
-        return self._singletons[dependency_id]
+            # we are the "initializer"
+            try:
+                instance = await descriptor.provider.provide(self)
+
+                self._singletons[dependency_id] = instance
+
+                future.set_result(instance)
+                return instance
+
+            except Exception as e:
+                future.set_exception(e)
+                raise
+
+            finally:
+                # cleanup in-flight marker
+                await self._singleton_futures.pop(dependency_id, None)
+
+        # 3. someone else is initializing -> wait for result
+        return await future
 
     # TODO: Also needs lock as _resolve_siglenton
     async def _resolve_scoped(
@@ -259,13 +291,15 @@ class DependencyManager:
             return scope.get(dependency_id)
 
         instance = await descriptor.provider.provide(self)
-
         scope.set(dependency_id, instance)
-
         return instance
 
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         return await descriptor.provider.provide(self)
+
+    ####################################
+    # Resolution stack (cycle detection)
+    ####################################
 
     def _enter_resolution(
         self,
@@ -287,6 +321,10 @@ class DependencyManager:
     ) -> None:
         self._resolution_stack.reset(token)
 
+    ################
+    # Graph tracking
+    ################
+
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Build runtime dependency graph."""
         stack = self._resolution_stack.get()
@@ -294,7 +332,6 @@ class DependencyManager:
         if stack:
             parent = stack[-1]
             self._graph.add_edge(parent, dependency_id)
-
         else:
             self._graph.add_node(dependency_id)
 
@@ -339,3 +376,4 @@ class DependencyManager:
 
     def clear_singletons(self) -> None:
         self._singletons.clear()
+        self._singleton_locks.clear()
