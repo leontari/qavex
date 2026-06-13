@@ -8,6 +8,21 @@ from template_app.runtime.container.exceptions import ScopeRequiredError
 from template_app.runtime.container.models.scope import ScopeContext, ScopeID
 
 
+class ScopeHandle:
+    def __init__(self, manager: ScopeManager) -> None:
+        self._manager = manager
+        self._scope_id: ScopeID | None = None
+
+    def __aenter__(self) -> ScopeID:
+        self._scope_id = self._manager.create_scope()
+        return self._scope_id
+
+    def __aexit__(self, exc_type, exc, tb) -> None:
+        assert self._scope_id is not None
+
+        self._manager.close_scope(self._scope_id)
+
+
 @dataclass(slots=True)
 class ScopeManager:
     """

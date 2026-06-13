@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
+from template_app.runtime.container.diagnostics.diagnostics import (
+    ContainerDiagnostics,
+)
 from template_app.runtime.container.models.dependency import (
     DependencyID,
 )
@@ -21,6 +24,9 @@ from template_app.runtime.container.runtime.manager import (
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
+    from template_app.runtime.container.diagnostics.snapshot import (
+        ContainerSnapshot,
+    )
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.scope import (
         ScopeID,
@@ -32,7 +38,12 @@ if TYPE_CHECKING:
 class Container:
     """Public DI API."""
 
-    manager: DependencyManager = field(default_factory=DependencyManager)
+    _manager: DependencyManager = field(
+        default_factory=DependencyManager,
+    )
+    _diagnostics: ContainerDiagnostics = field(
+        default_factory=ContainerDiagnostics,
+    )
 
     # delegate to Registry
     def register(
@@ -46,7 +57,7 @@ class Container:
         overwrite: bool = False,
     ) -> None:
         """Register dependency in container."""
-        self.manager.register(
+        self._manager.register(
             contract=contract,
             provider=provider,
             namespace=namespace,
@@ -77,7 +88,7 @@ class Container:
 
         return cast(
             "T",
-            await self.manager.resolve(
+            await self._manager.resolve(
                 dependency_id=dependency_id,
                 scope_id=scope,
             ),
@@ -85,11 +96,17 @@ class Container:
 
     # for ScopeManager existing separately
     def create_scope(self) -> ScopeID:
-        return self.manager.create_scope()
+        return self._manager.create_scope()
 
     # for ScopeManager existing separately
     def close_scope(self, scope: ScopeID) -> None:
-        self.manager.close_scope(scope)
+        self._manager.close_scope(scope)
 
     def scopes(self) -> ScopeHandle:
-        return self.manager.scopes()
+        return self._manager.scope()
+
+    # for diagnostics
+    @property
+    def diagnostics(self) -> ContainerSnapshot:
+        """Read-only diagnostics API."""
+        return self._diagnostics.snapshot

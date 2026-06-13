@@ -1,12 +1,12 @@
-from template_app.runtime.container.graph.exporters import (
+from template_app.runtime.container.diagnostics.exporters import (
     export_json,
 )
 
-from template_app.runtime.container.graph.exporters import (
+from template_app.runtime.container.diagnostics.exporters import (
     export_dump,
 )
 
-from template_app.runtime.container.graph.exporters import (
+from template_app.runtime.container.diagnostics.exporters import (
     export_graph,
 )
 

@@ -16,6 +16,9 @@ class DependencyGraph:
 
     Built dynamically during DependencyManager.resolve().
 
+    RuntimeGraph stores resolution history.
+    RuntimeGraph is not a source of truth for current dependency state.
+
     Used for:
         - diagnostics
         - runtime dependency tracing

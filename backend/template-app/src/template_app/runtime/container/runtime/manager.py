@@ -11,8 +11,6 @@ from template_app.runtime.container.exceptions import (
     InvalidProviderError,
     ScopeRequiredError,
 )
-from template_app.runtime.container.graph.diagnostics import ContainerSnapshot
-from template_app.runtime.container.graph.graph import DependencyGraph
 from template_app.runtime.container.models.dependency import (
     DependencyDescriptor,
     DependencyID,
@@ -21,32 +19,25 @@ from template_app.runtime.container.models.scope import (
     DependencyScope,
     ScopeID,
 )
+from template_app.runtime.container.runtime.graph import DependencyGraph
 from template_app.runtime.container.runtime.registry import DependencyRegistry
-from template_app.runtime.container.runtime.scope_manager import ScopeManager
-from template_app.runtime.container.visibility import enforce_visibility
+from template_app.runtime.container.runtime.scope_manager import (
+    ScopeHandle,
+    ScopeManager,
+)
+from template_app.runtime.container.visibility_enforcer import (
+    enforce_visibility,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.visibility import (
         DependencyVisibility,
     )
     from template_app.runtime.container.types import T
-
-
-class ScopeHandle:
-    def __init__(self, manager: ScopeManager) -> None:
-        self._manager = manager
-        self._scope_id: ScopeID | None = None
-
-    def __aenter__(self) -> ScopeID:
-        self._scope_id = self._manager.create_scope()
-        return self._scope_id
-
-    def __aexit__(self, exc_type, exc, tb) -> None:
-        assert self._scope_id is not None
-
-        self._manager.close_scope(self._scope_id)
 
 
 @dataclass(slots=True)
@@ -62,11 +53,19 @@ class DependencyManager:
         - singleton lifecycle
 
     Responsible for:
-
         - dependency resolution
         - visibility checks
         - graph construction
         - graph validation
+
+    DependencyManager: responsible for DI system work
+    ContainerDiagnostics: responsible for DI system inspecting
+
+    Registry: Source of truth for registration.
+    ScopeManager: Source of truth for scoped instances.
+    SingletonCache: Source of truth for singleton instances.
+    RuntimeGraph: Source of truth for dependency resolution history.
+
     """
 
     _registry: DependencyRegistry = field(
@@ -275,12 +274,21 @@ class DependencyManager:
     # Diagnostics
     #############
 
-    def snapshot(self) -> ContainerSnapshot:
-        return ContainerSnapshot(graph=self._graph)
+    @property
+    def registry(self) -> DependencyRegistry:
+        return self._registry
 
     @property
     def graph(self) -> DependencyGraph:
         return self._graph
+
+    @property
+    def scopes(self) -> ScopeManager:
+        return self._scopes
+
+    @property
+    def singletons(self) -> Mapping[DependencyID, object]:
+        return self._singletons
 
     #########
     # Testing
