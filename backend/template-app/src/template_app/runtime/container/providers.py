@@ -6,10 +6,11 @@ from dataclasses import dataclass
 from inspect import isawaitable
 from typing import TYPE_CHECKING, Generic
 
-from template_app.runtime.container.types import Factory, T
+from template_app.runtime.container.type_vars import T
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyResolver
+    from template_app.runtime.container.type_aliases import Factory
 
 
 @dataclass(slots=True, frozen=True)

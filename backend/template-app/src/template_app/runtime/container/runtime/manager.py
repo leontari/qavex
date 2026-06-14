@@ -7,7 +7,7 @@ from asyncio import Future, get_running_loop
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from template_app.runtime.container.exceptions import (
     DependencyCycleError,
@@ -30,7 +30,7 @@ from template_app.runtime.container.runtime.scope_manager import (
     ScopeHandle,
     ScopeManager,
 )
-from template_app.runtime.container.types import T
+from template_app.runtime.container.type_vars import T
 from template_app.runtime.container.visibility_enforcer import (
     enforce_visibility,
 )

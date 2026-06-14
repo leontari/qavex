@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from template_app.runtime.container.diagnostics.diagnostics import (
     ContainerDiagnostics,
@@ -24,14 +24,11 @@ from template_app.runtime.container.runtime.manager import (
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
-    from template_app.runtime.container.diagnostics.snapshot import (
-        ContainerSnapshot,
-    )
     from template_app.runtime.container.models.namespace import Namespace
     from template_app.runtime.container.models.scope import (
         ScopeID,
     )
-    from template_app.runtime.container.types import T
+    from template_app.runtime.container.type_vars import T
 
 
 @dataclass(slots=True)
@@ -68,7 +65,7 @@ class Container:
         self,
         contract: type[T],
         *,
-        namespace: Namespace | None = None,  # TODO: requester ns default
+        namespace: Namespace | None = None,
         scope_id: ScopeID | None = None,
     ) -> T:
         """

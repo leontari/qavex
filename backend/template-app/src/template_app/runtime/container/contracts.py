@@ -8,7 +8,7 @@ from typing import (
     runtime_checkable,
 )
 
-from .types import T
+from template_app.runtime.container.type_vars import T
 
 if TYPE_CHECKING:
     from template_app.runtime.container.models.namespace import Namespace
