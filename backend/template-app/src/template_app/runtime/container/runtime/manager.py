@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import asyncio
 from asyncio import Future, get_running_loop
-from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from template_app.runtime.container.exceptions import (
-    DependencyCycleError,
     InvalidContractError,
     InvalidProviderError,
     ScopeNotFoundError,
@@ -25,9 +23,12 @@ from template_app.runtime.container.models.scope import (
     ScopeID,
 )
 from template_app.runtime.container.runtime.graph import DependencyGraph
+from template_app.runtime.container.runtime.helpers.resolution import (
+    ResolutionContextManager,
+)
+from template_app.runtime.container.runtime.helpers.scope import ScopeHandle
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import (
-    ScopeHandle,
     ScopeManager,
 )
 from template_app.runtime.container.type_vars import T
@@ -95,13 +96,12 @@ class DependencyManager:
         default_factory=dict,
     )
     # in-flight initialization tracker
-    _singleton_futures: dict[DependencyID, Future] = field(
+    _singleton_futures: dict[DependencyID, Future[object]] = field(
         default_factory=dict,
     )
 
-    _resolution_stack: ContextVar[tuple[DependencyID, ...]] = ContextVar(
-        "dependency_resolution_stack",
-        default=(),
+    _context: ResolutionContextManager = field(
+        default_factory=ResolutionContextManager,
     )
 
     ##############
@@ -174,12 +174,25 @@ class DependencyManager:
         self._scopes.close_scope(scope_id)
 
         # cleanup futures
-        self._scopes_futures = {
-            k: v for k, v in self._scopes_futures.items() if k[0] != scope_id
-        }
+        to_remove = [k for k in self._scopes_futures if k[0] == scope_id]
+        for k in to_remove:
+            future = self._scopes_futures.pop(k)
+            if not future.done():
+                future.cancel()
 
     def scope(self) -> ScopeHandle:
-        return ScopeHandle(self._scopes)
+        """
+        Create async scope context manager.
+
+        Examples:
+            async with container.scope() as scope_id:
+                ...
+
+        Returns:
+            async scope context manager
+
+        """
+        return ScopeHandle(scopes=self._scopes, context=self._context)
 
     ############
     # Resolution
@@ -205,10 +218,8 @@ class DependencyManager:
             Resolved dependency instance.
 
         """
-        dependency_id = DependencyID(
-            contract=contract,
-            namespace=namespace,
-        )
+        dependency_id = DependencyID(contract=contract, namespace=namespace)
+        scope_id = scope_id or self._context.current.scope_id
 
         return await self._resolve_dependency(
             dependency_id=dependency_id,
@@ -238,7 +249,7 @@ class DependencyManager:
             visibility=descriptor.visibility,
         )
 
-        token = self._enter_resolution(dependency_id)
+        token = self._context.enter_resolution(dependency_id)
 
         try:
             self._register_graph_edge(dependency_id)
@@ -264,7 +275,7 @@ class DependencyManager:
             raise RuntimeError(msg)
 
         finally:
-            self._leave_resolution(token)
+            self._context.leave_resolution(token)
 
     ####################
     # Internal lifecycle
@@ -303,7 +314,7 @@ class DependencyManager:
 
             finally:
                 # cleanup in-flight marker
-                await self._singleton_futures.pop(dependency_id, None)
+                self._singleton_futures.pop(dependency_id, None)
 
         # 3. someone else is initializing -> wait for result
         return await future
@@ -349,7 +360,7 @@ class DependencyManager:
                 raise
 
             finally:
-                await self._scopes_futures.pop(key, None)
+                self._scopes_futures.pop(key, None)
 
         return await future
 
@@ -357,39 +368,15 @@ class DependencyManager:
         """Call dependency provider directly."""
         return await descriptor.provider.provide(self)
 
-    ####################################
-    # Resolution stack (cycle detection)
-    ####################################
-
-    def _enter_resolution(
-        self,
-        dependency_id: DependencyID,
-    ) -> Token[tuple[DependencyID, ...]]:
-        stack = self._resolution_stack.get()
-
-        if dependency_id in stack:
-            chain = " -> ".join(str(item) for item in (*stack, dependency_id))
-            raise DependencyCycleError(chain)
-
-        return self._resolution_stack.set(
-            (*stack, dependency_id),
-        )
-
-    def _leave_resolution(
-        self,
-        token: Token[tuple[DependencyID, ...]],
-    ) -> None:
-        self._resolution_stack.reset(token)
-
     ################
     # Graph tracking
     ################
 
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Build runtime dependency graph."""
-        stack = self._resolution_stack.get()
+        stack = self._context.current.stack
 
-        if stack:
+        if len(stack) >= 2:
             parent = stack[-1]
             self._graph.add_edge(parent, dependency_id)
         else:
@@ -399,6 +386,7 @@ class DependencyManager:
     # Validation
     ############
 
+    # TODO: check whether it's necessary
     def validate(self) -> None:
         """
         Validate currently observed runtime graph.
@@ -429,6 +417,11 @@ class DependencyManager:
     @property
     def singletons(self) -> Mapping[DependencyID, object]:
         return MappingProxyType(self._singletons)
+
+    @property
+    def context(self) -> ResolutionContextManager:
+        """Runtime resolution context manager."""
+        return self._context
 
     #########
     # Testing
