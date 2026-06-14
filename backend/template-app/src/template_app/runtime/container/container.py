@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING
 from template_app.runtime.container.diagnostics.diagnostics import (
     ContainerDiagnostics,
 )
-from template_app.runtime.container.models.dependency import (
-    DependencyID,
-)
 from template_app.runtime.container.models.scope import (
     DependencyScope,
 )
@@ -38,6 +35,10 @@ class Container:
     _manager: DependencyManager = field(
         default_factory=DependencyManager,
     )
+    _diagnostics: ContainerDiagnostics = field(init=False)
+
+    def __post_init__(self) -> None:
+        self._diagnostics = ContainerDiagnostics(self._manager)
 
     # delegate to Registry
     def register(
@@ -45,7 +46,7 @@ class Container:
         *,
         contract: type[T],
         provider: DependencyProvider[T],
-        namespace: Namespace | None = None,
+        namespace: Namespace,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         scope: DependencyScope = DependencyScope.TRANSIENT,
         overwrite: bool = False,
@@ -65,7 +66,7 @@ class Container:
         self,
         contract: type[T],
         *,
-        namespace: Namespace | None = None,
+        namespace: Namespace,
         scope_id: ScopeID | None = None,
     ) -> T:
         """
@@ -75,14 +76,9 @@ class Container:
             resolved dependency
 
         """
-        dependency_id = DependencyID(
+        return await self._manager.resolve(
             contract=contract,
             namespace=namespace,
-        )
-
-        return await self._manager.resolve(
-            dependency_id=dependency_id,
-            requester_ns=namespace,
             scope_id=scope_id,
         )
 
@@ -94,11 +90,11 @@ class Container:
     def close_scope(self, scope: ScopeID) -> None:
         self._manager.close_scope(scope)
 
-    def scopes(self) -> ScopeHandle:
+    def scope(self) -> ScopeHandle:
         return self._manager.scope()
 
     # for diagnostics
     @property
     def diagnostics(self) -> ContainerDiagnostics:
         """Diagnostics API."""
-        return ContainerDiagnostics(self._manager)
+        return self._diagnostics

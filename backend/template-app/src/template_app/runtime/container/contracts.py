@@ -30,7 +30,7 @@ class DependencyResolver(Protocol):
         self,
         contract: type[T],
         *,
-        namespace: Namespace | None = None,
+        namespace: Namespace,
         scope_id: ScopeID | None = None,
     ) -> T:
         """

@@ -127,8 +127,8 @@ class DependencyManager:
             raise InvalidProviderError(provider)
 
         dependency_id = DependencyID(
-            namespace=namespace,
             contract=contract,
+            namespace=namespace,
         )
 
         descriptor = DependencyDescriptor(
@@ -186,11 +186,43 @@ class DependencyManager:
     ############
     async def resolve(
         self,
+        contract: type[T],
+        *,
+        namespace: Namespace,
+        scope_id: ScopeID | None = None,
+    ) -> T:
+        """
+        Resolve dependency instance.
+
+        Implements DependencyResolver.
+
+        Args:
+            contract:
+            namespace:
+            scope_id:
+
+        Returns:
+            Resolved dependency instance.
+
+        """
+        dependency_id = DependencyID(
+            contract=contract,
+            namespace=namespace,
+        )
+
+        return await self._resolve_dependency(
+            dependency_id=dependency_id,
+            requester_ns=namespace,
+            scope_id=scope_id,
+        )
+
+    async def _resolve_dependency(
+        self,
         dependency_id: DependencyID,
         *,
         requester_ns: Namespace,
         scope_id: ScopeID,
-    ) -> T:
+    ) -> object:
         """
         Resolve dependency.
 
