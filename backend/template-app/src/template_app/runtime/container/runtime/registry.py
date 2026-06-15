@@ -23,6 +23,8 @@ class DependencyRegistry:
     """
     Metadata storage.
 
+    Source of truth for metadata
+
     Registry stores dependency metadata only.
 
     """

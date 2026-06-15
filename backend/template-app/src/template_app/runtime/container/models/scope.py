@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 if TYPE_CHECKING:
+    from asyncio import Future
+
     from template_app.runtime.container.models.dependency import DependencyID
 
 
@@ -36,26 +38,36 @@ class DependencyScope(StrEnum):
 @dataclass(slots=True)
 class ScopeContext:
     """
-    Runtime dependency scope.
+    Active dependency scope.
 
     Stores scoped instances only.
     """
 
     id: ScopeID
 
-    _instances: dict[DependencyID:object] = field(default_factory=dict)
+    _instances: dict[DependencyID, object] = field(
+        default_factory=dict,
+    )
 
-    def contains(self, key: DependencyID) -> bool:
-        return key in self._instances
+    # _futures: dict[tuple[ScopeID, DependencyID], Future] = field(
+    #     default_factory=dict,
+    # )
+    _futures: dict[DependencyID, Future[object]] = field(
+        default_factory=dict,
+    )
 
-    def get(self, key: DependencyID) -> object:
-        return self._instances[key]
+    def contains(self, dependency_id: DependencyID) -> bool:
+        return dependency_id in self._instances
 
-    def set(self, key: DependencyID, instance: object) -> None:
-        self._instances[key] = instance
+    def get(self, dependency_id: DependencyID) -> object:
+        return self._instances[dependency_id]
+
+    def set(self, dependency_id: DependencyID, instance: object) -> None:
+        self._instances[dependency_id] = instance
 
     def clear(self) -> None:
         self._instances.clear()
+        self._futures.clear()
 
     @property
     def instance_count(self) -> int:

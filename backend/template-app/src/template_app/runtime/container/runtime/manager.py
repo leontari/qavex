@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from asyncio import Future, get_running_loop
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING
@@ -31,6 +30,9 @@ from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import (
     ScopeManager,
 )
+from template_app.runtime.container.runtime.singleton_cache import (
+    SingletonCache,
+)
 from template_app.runtime.container.type_vars import T
 from template_app.runtime.container.visibility_enforcer import (
     enforce_visibility,
@@ -53,8 +55,9 @@ class DependencyManager:
     """
     Runtime orchestration layer.
 
-    Owns:
+    Orchestrator only
 
+    Owns:
         - registry
         - graph
         - scope lifecycle
@@ -66,13 +69,18 @@ class DependencyManager:
         - graph construction
         - graph validation
 
-    DependencyManager: responsible for DI system work
-    ContainerDiagnostics: responsible for DI system inspecting
-
-    Registry: Source of truth for registration.
-    ScopeManager: Source of truth for scoped instances.
-    SingletonCache: Source of truth for singleton instances.
-    RuntimeGraph: Source of truth for observed dependency relations.
+    Registry:
+        Source of truth for metadata registration.
+    ScopeManager:
+        Source of truth for scoped instances.
+    SingletonCache:
+        Source of truth for singleton instances.
+    ResolutionContextManager:
+        Source of truth for runtime context.
+    RuntimeGraph:
+        Source of truth for observed dependency relations.
+    DependencyManager:
+        Orchestrator only.
 
     """
 
@@ -84,25 +92,15 @@ class DependencyManager:
         default_factory=DependencyGraph,
     )
 
+    _context: ResolutionContextManager = field(
+        default_factory=ResolutionContextManager,
+    )
+
     _scopes: ScopeManager = field(
         default_factory=ScopeManager,
     )
 
-    _scopes_futures: dict[tuple[ScopeID, DependencyID], Future] = field(
-        default_factory=dict,
-    )
-
-    _singletons: dict[DependencyID, object] = field(
-        default_factory=dict,
-    )
-    # in-flight initialization tracker
-    _singleton_futures: dict[DependencyID, Future[object]] = field(
-        default_factory=dict,
-    )
-
-    _context: ResolutionContextManager = field(
-        default_factory=ResolutionContextManager,
-    )
+    _singletons: SingletonCache = field(default_factory=SingletonCache)
 
     ##############
     # Registration
@@ -199,10 +197,10 @@ class DependencyManager:
     ############
     async def resolve(
         self,
-        contract: type[T],
         *,
+        contract: type[T],
         namespace: Namespace,
-        scope_id: ScopeID | None = None,
+        scope_id: ScopeID,
     ) -> T:
         """
         Resolve dependency instance.
@@ -229,8 +227,8 @@ class DependencyManager:
 
     async def _resolve_dependency(
         self,
-        dependency_id: DependencyID,
         *,
+        dependency_id: DependencyID,
         requester_ns: Namespace,
         scope_id: ScopeID,
     ) -> object:
@@ -288,81 +286,78 @@ class DependencyManager:
     ):
         """Global future memoization."""
         # 1. fast path (already initialized)
-        instance = self._singletons.get(dependency_id)
-        if instance is not None:
-            return instance
+        if self._singletons.contains(dependency_id):
+            return self._singletons.get(dependency_id)
 
         # 2. check if initialization already in progress
-        future = self._singleton_futures.get(dependency_id)
-        if future is None:
-            loop = get_running_loop()
-            future = loop.create_future()
-            self._singleton_futures[dependency_id] = future
+        future = self._singletons.get_future(dependency_id)
 
-            # we are the "initializer"
-            try:
-                instance = await descriptor.provider.provide(self)
+        if future is not None:
+            return await future
 
-                self._singletons[dependency_id] = instance
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        self._singletons.set_future(dependency_id, future)
 
-                future.set_result(instance)
-                return instance
+        # we are the "initializer"
+        try:
+            instance = await descriptor.provider.provide(self)
 
-            except Exception as e:
-                future.set_exception(e)
-                raise
+            self._singletons.set(dependency_id, instance)
 
-            finally:
-                # cleanup in-flight marker
-                self._singleton_futures.pop(dependency_id, None)
+            future.set_result(instance)
+            return instance
 
-        # 3. someone else is initializing -> wait for result
-        return await future
+        except Exception as error:
+            future.set_exception(error)
+            raise
+
+        finally:
+            # cleanup in-flight marker
+            self._singletons.remove_future(dependency_id)
 
     async def _resolve_scoped(
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
-        scope_id: ScopeID | None,
+        scope_id: ScopeID,
     ):
         """Per-scope future memoization."""
         if scope_id is None:
             msg = f"{dependency_id.contract.__name__} requires scope"
             raise ScopeRequiredError(msg)
 
+        # TODO: check logic
         if not self._scopes.exists(scope_id):
             msg = f"Scope {scope_id} not found for {dependency_id}."
             raise ScopeNotFoundError(msg)
 
-        scope = self._scopes.get_scope(scope_id)
+        if self._scopes.contains(scope_id, dependency_id):
+            return self._scopes.get(scope_id, dependency_id)
 
-        # fast path
-        if scope.contains(dependency_id):
-            return scope.get(dependency_id)
+        future = self._scopes.get_future(scope_id, dependency_id)
 
-        key = (scope_id, dependency_id)
+        if future is not None:
+            return await future
 
-        future = self._scopes_futures.get(key)
-        if future is None:
-            loop = asyncio.get_running_loop()
-            future = loop.create_future()
-            self._scopes_futures[key] = future
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        self._scopes.set_future(scope_id, dependency_id, future)
 
-            try:
-                instance = await descriptor.provider.provide(self)
+        try:
+            instance = await descriptor.provider.provide(self)
 
-                scope.set(dependency_id, instance)
-                future.set_result(instance)
-                return instance
+            self._scopes.set(scope_id, dependency_id, instance)
+            future.set_result(instance)
 
-            except Exception as e:
-                future.set_exception(e)
-                raise
+            return instance
 
-            finally:
-                self._scopes_futures.pop(key, None)
+        except Exception as error:
+            future.set_exception(error)
+            raise
 
-        return await future
+        finally:
+            self._scopes.remove_future(scope_id, dependency_id)
 
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         """Call dependency provider directly."""

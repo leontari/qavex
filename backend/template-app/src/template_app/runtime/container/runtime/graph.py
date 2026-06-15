@@ -14,6 +14,8 @@ class DependencyGraph:
     """
     Runtime dependency graph.
 
+    Source of truth for observed dependencies
+
     Built dynamically during DependencyManager.resolve().
 
     RuntimeGraph stores resolution history.

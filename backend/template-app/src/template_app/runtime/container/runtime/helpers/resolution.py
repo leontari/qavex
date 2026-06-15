@@ -21,6 +21,8 @@ class ResolutionContextManager:
     """
     Async-safe local runtime context manager.
 
+    Source of truth for runtime context
+
     Used for:
         - cycle detection
         - parent dependency tracking

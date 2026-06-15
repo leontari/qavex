@@ -30,7 +30,15 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class Container:
-    """Public DI API."""
+    """
+    Public DI API.
+
+    DependencyManager:
+        responsible for DI system work.
+    ContainerDiagnostics:
+        responsible for DI system inspecting.
+
+    """
 
     _manager: DependencyManager = field(
         default_factory=DependencyManager,
@@ -64,8 +72,8 @@ class Container:
     # delegate to manager
     async def resolve(
         self,
-        contract: type[T],
         *,
+        contract: type[T],
         namespace: Namespace,
         scope_id: ScopeID | None = None,
     ) -> T:
