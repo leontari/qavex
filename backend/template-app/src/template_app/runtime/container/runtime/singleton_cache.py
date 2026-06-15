@@ -16,9 +16,20 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class SingletonCache:
     """
-    Singleton instances storage.
+    Singleton instance cache.
 
     Source of truth for singleton instances.
+
+    Stores:
+        - initialized singleton instances
+        - singleton creation futures
+
+    Notes:
+        Synchronization and race-condition prevention are
+        handled by DependencyManager.
+
+        SingletonCache is a storage component only.
+
     """
 
     _instances: dict[DependencyID, object] = field(
@@ -30,26 +41,81 @@ class SingletonCache:
     )
 
     def contains(self, dependency_id: DependencyID) -> bool:
+        """
+        Whether singleton instance exists.
+
+        Returns:
+            True if singleton instance is cached.
+
+        """
         return dependency_id in self._instances
 
+    def contains_future(self, dependency_id: DependencyID) -> bool:
+        """
+        Whether initialization future exists.
+
+        Returns:
+            True if initialization future is registered.
+
+        """
+        return dependency_id in self._futures
+
     def get(self, dependency_id: DependencyID) -> object:
+        """
+        Get singleton instance.
+
+        Returns:
+            Cached singleton instance.
+
+        Raises: KeyError If instance is not cached.
+
+        """
         return self._instances[dependency_id]
 
-    def set(self, dependency_id: DependencyID, instance: object) -> None:
-        self._instances[dependency_id] = instance
-
     def get_future(self, dependency_id: DependencyID) -> Future[object] | None:
+        """
+        Get initialization future.
+
+        Returns:
+            Registered initialization future or None
+
+        """
         return self._futures.get(dependency_id)
+
+    def set(self, dependency_id: DependencyID, instance: object) -> None:
+        """Store singleton instance."""
+        self._instances[dependency_id] = instance
 
     def set_future(
         self, dependency_id: DependencyID, future: Future[object]
     ) -> None:
+        """Store initialization future."""
         self._futures[dependency_id] = future
 
+    def remove(self, dependency_id: DependencyID) -> None:
+        """
+        Remove singleton instance.
+
+        Missing instances are ignored.
+        """
+        self._instances.pop(dependency_id, None)
+
     def remove_future(self, dependency_id: DependencyID) -> None:
+        """
+        Remove initialization future.
+
+        Missing futures are ignored.
+        """
         self._futures.pop(dependency_id, None)
 
     def clear(self) -> None:
+        """
+        Remove all cached state.
+
+        Clears:
+            - singleton instances
+            - initialization futures
+        """
         self._instances.clear()
         self._futures.clear()
 
@@ -59,8 +125,33 @@ class SingletonCache:
 
     @property
     def instances(self) -> Mapping[DependencyID, object]:
+        """
+        Immutable singleton instances view.
+
+        Returns:
+            Read-only mapping of cached singleton instances.
+
+        """
         return MappingProxyType(self._instances)
 
     @property
     def count(self) -> int:
+        """
+        Cached singleton instances count.
+
+        Returns:
+            Number of cached singleton instances.
+
+        """
         return len(self._instances)
+
+    @property
+    def future_count(self) -> int:
+        """
+        Active initialization future count.
+
+        Returns:
+            Number of registered initialization futures.
+
+        """
+        return len(self._futures)
