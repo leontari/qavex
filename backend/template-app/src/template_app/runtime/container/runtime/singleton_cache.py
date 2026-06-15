@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from asyncio import Future
+    from collections.abc import Mapping
 
     from template_app.runtime.container.models.dependency import DependencyID
 
@@ -50,3 +52,15 @@ class SingletonCache:
     def clear(self) -> None:
         self._instances.clear()
         self._futures.clear()
+
+    #############
+    # Diagnostics
+    #############
+
+    @property
+    def instances(self) -> Mapping[DependencyID, object]:
+        return MappingProxyType(self._instances)
+
+    @property
+    def count(self) -> int:
+        return len(self._instances)

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from template_app.runtime.container.exceptions import (
@@ -25,7 +24,6 @@ from template_app.runtime.container.runtime.graph import DependencyGraph
 from template_app.runtime.container.runtime.helpers.resolution import (
     ResolutionContextManager,
 )
-from template_app.runtime.container.runtime.helpers.scope import ScopeHandle
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import (
     ScopeManager,
@@ -39,8 +37,6 @@ from template_app.runtime.container.visibility_enforcer import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from template_app.runtime.container.contracts import (
         DependencyProvider,
     )
@@ -140,57 +136,6 @@ class DependencyManager:
             self._registry.replace(descriptor=descriptor)
         else:
             self._registry.add(descriptor=descriptor)
-
-    #################
-    # Scope lifecycle
-    #################
-
-    def create_scope(self) -> ScopeID:
-        """
-        Create runtime scope.
-
-        Low-level scpe API.
-
-        Prefer using:
-            async with container.scope()
-
-        Returns:
-            ScopeID
-
-        """
-        return self._scopes.create_scope()
-
-    def close_scope(self, scope_id: ScopeID) -> None:
-        """
-        Destroy runtime scope.
-
-        Low-level scpe API.
-
-        Prefer using:
-            async with container.scope()
-        """
-        self._scopes.close_scope(scope_id)
-
-        # cleanup futures
-        to_remove = [k for k in self._scopes_futures if k[0] == scope_id]
-        for k in to_remove:
-            future = self._scopes_futures.pop(k)
-            if not future.done():
-                future.cancel()
-
-    def scope(self) -> ScopeHandle:
-        """
-        Create async scope context manager.
-
-        Examples:
-            async with container.scope() as scope_id:
-                ...
-
-        Returns:
-            async scope context manager
-
-        """
-        return ScopeHandle(scopes=self._scopes, context=self._context)
 
     ############
     # Resolution
@@ -399,19 +344,23 @@ class DependencyManager:
 
     @property
     def registry(self) -> DependencyRegistry:
+        """Dependency metadata storage."""
         return self._registry
 
     @property
     def graph(self) -> DependencyGraph:
+        """Dependency resolution history."""
         return self._graph
 
     @property
     def scopes(self) -> ScopeManager:
+        """Scopes lifecycle service."""
         return self._scopes
 
     @property
-    def singletons(self) -> Mapping[DependencyID, object]:
-        return MappingProxyType(self._singletons)
+    def singletons(self) -> SingletonCache:
+        """Singleton cache runtime service."""
+        return self._singletons
 
     @property
     def context(self) -> ResolutionContextManager:

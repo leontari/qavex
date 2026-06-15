@@ -51,6 +51,13 @@ class ScopeManager:
         if scope is not None:
             scope.clear()
 
+        # cleanup futures
+        to_remove = [k for k in self._scopes_futures if k[0] == scope_id]
+        for k in to_remove:
+            future = self._scopes_futures.pop(k)
+            if not future.done():
+                future.cancel()
+
     def get_scope(self, scope_id: ScopeID) -> ScopeContext:
         """
         Get scope by ID.

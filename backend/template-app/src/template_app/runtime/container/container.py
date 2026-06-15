@@ -8,23 +8,17 @@ from typing import TYPE_CHECKING
 from template_app.runtime.container.diagnostics.diagnostics import (
     ContainerDiagnostics,
 )
-from template_app.runtime.container.models.scope import (
-    DependencyScope,
-)
+from template_app.runtime.container.models.scope import DependencyScope
 from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
-from template_app.runtime.container.runtime.manager import (
-    DependencyManager,
-    ScopeHandle,
-)
+from template_app.runtime.container.runtime.helpers.scope import ScopeHandle
+from template_app.runtime.container.runtime.manager import DependencyManager
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.scope import (
-        ScopeID,
-    )
+    from template_app.runtime.container.models.scope import ScopeID
     from template_app.runtime.container.type_vars import T
 
 
@@ -91,15 +85,22 @@ class Container:
         )
 
     # for ScopeManager existing separately
-    def create_scope(self) -> ScopeID:
-        return self._manager.create_scope()
-
-    # for ScopeManager existing separately
-    def close_scope(self, scope: ScopeID) -> None:
-        self._manager.close_scope(scope)
-
     def scope(self) -> ScopeHandle:
-        return self._manager.scope()
+        """
+        Create async scope context manager.
+
+        Examples:
+            async with container.scope() as scope_id:
+                ...
+
+        Returns:
+            async scope context manager
+
+        """
+        return ScopeHandle(
+            scopes=self._manager.scopes,
+            context=self._manager.context,
+        )
 
     # for diagnostics
     @property
