@@ -18,7 +18,6 @@ from template_app.runtime.container.runtime.manager import DependencyManager
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.scope import ScopeID
     from template_app.runtime.container.type_vars import T
 
 
@@ -28,7 +27,7 @@ class Container:
     Public DI API.
 
     DependencyManager:
-        responsible for DI system work.
+        responsible for DI system work, DI orchestrator
     ContainerDiagnostics:
         responsible for DI system inspecting.
 
@@ -66,10 +65,9 @@ class Container:
     # delegate to manager
     async def resolve(
         self,
-        *,
         contract: type[T],
+        *,
         namespace: Namespace,
-        scope_id: ScopeID | None = None,
     ) -> T:
         """
         Resolve registered dependency.
@@ -81,7 +79,6 @@ class Container:
         return await self._manager.resolve(
             contract=contract,
             namespace=namespace,
-            scope_id=scope_id,
         )
 
     # for ScopeManager existing separately
@@ -90,8 +87,8 @@ class Container:
         Create async scope context manager.
 
         Examples:
-            async with container.scope() as scope_id:
-                ...
+            async with container.scope():
+                logger = await container.resolve(Logger)
 
         Returns:
             async scope context manager

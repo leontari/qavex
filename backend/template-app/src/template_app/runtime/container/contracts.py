@@ -22,8 +22,8 @@ class DependencyResolver(Protocol):
 
     Minimal runtime interface exposed to dependency providers.
 
-    Providers should depend on this contract instead of a concrete
-    Container or DependencyManager implementation.
+    Providers should depend only on this contract
+    and must not depend on Container or DependencyManager.
     """
 
     async def resolve(
@@ -31,16 +31,11 @@ class DependencyResolver(Protocol):
         contract: type[T],
         *,
         namespace: Namespace,
-        scope_id: ScopeID | None = None,
     ) -> T:
         """
         Resolve dependency instance.
 
         Args:
-            scope_id:
-                Active scope identifier.
-                When provided, nested dependency resolutions should
-                occur within the same scope.
             contract:
                 Dependency contract to resolve.
             namespace:

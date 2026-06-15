@@ -52,9 +52,9 @@ class ScopeManager:
             scope.clear()
 
         # cleanup futures
-        to_remove = [k for k in self._scopes_futures if k[0] == scope_id]
+        to_remove = [k for k in self._scopes._futures if k[0] == scope_id]
         for k in to_remove:
-            future = self._scopes_futures.pop(k)
+            future = self._scopes._futures.pop(k)
             if not future.done():
                 future.cancel()
 
@@ -146,7 +146,7 @@ class ScopeManager:
 
         scope = self.get_scope(scope_id)
 
-        scope.futures.pop(
+        scope._futures.pop(
             dependency_id,
             None,
         )

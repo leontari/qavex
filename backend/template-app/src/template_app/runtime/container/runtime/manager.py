@@ -18,7 +18,6 @@ from template_app.runtime.container.models.dependency import (
 )
 from template_app.runtime.container.models.scope import (
     DependencyScope,
-    ScopeID,
 )
 from template_app.runtime.container.runtime.graph import DependencyGraph
 from template_app.runtime.container.runtime.helpers.resolution import (
@@ -49,9 +48,7 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class DependencyManager:
     """
-    Runtime orchestration layer.
-
-    Orchestrator only
+    DI orchestrator.
 
     Owns:
         - registry
@@ -145,7 +142,6 @@ class DependencyManager:
         *,
         contract: type[T],
         namespace: Namespace,
-        scope_id: ScopeID,
     ) -> T:
         """
         Resolve dependency instance.
@@ -155,19 +151,16 @@ class DependencyManager:
         Args:
             contract:
             namespace:
-            scope_id:
 
         Returns:
             Resolved dependency instance.
 
         """
         dependency_id = DependencyID(contract=contract, namespace=namespace)
-        scope_id = scope_id or self._context.current.scope_id
 
         return await self._resolve_dependency(
             dependency_id=dependency_id,
             requester_ns=namespace,
-            scope_id=scope_id,
         )
 
     async def _resolve_dependency(
@@ -175,7 +168,6 @@ class DependencyManager:
         *,
         dependency_id: DependencyID,
         requester_ns: Namespace,
-        scope_id: ScopeID,
     ) -> object:
         """
         Resolve dependency.
@@ -207,7 +199,6 @@ class DependencyManager:
                     return await self._resolve_scoped(
                         dependency_id,
                         descriptor,
-                        scope_id,
                     )
                 case DependencyScope.TRANSIENT:
                     return await self._resolve_transient(
@@ -265,9 +256,10 @@ class DependencyManager:
         self,
         dependency_id: DependencyID,
         descriptor: DependencyDescriptor,
-        scope_id: ScopeID,
     ):
         """Per-scope future memoization."""
+        scope_id = self._context.current.scope_id
+
         if scope_id is None:
             msg = f"{dependency_id.contract.__name__} requires scope"
             raise ScopeRequiredError(msg)
@@ -367,8 +359,8 @@ class DependencyManager:
         """Runtime resolution context manager."""
         return self._context
 
-    #########
-    # Testing
-    #########
+    #############
+    # For testing
+    #############
     def clear_singletons(self) -> None:
         self._singletons.clear()
