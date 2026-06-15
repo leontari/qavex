@@ -314,22 +314,6 @@ class DependencyManager:
         else:
             self._graph.add_node(dependency_id)
 
-    ############
-    # Validation
-    ############
-
-    # TODO: check whether it's necessary
-    def validate(self) -> None:
-        """
-        Validate currently observed runtime graph.
-
-        Graph is built lazily during dependency resolution.
-
-        Only dependencies that have been resolved at least once
-        are present in the graph.
-        """
-        self._graph.validate()
-
     #############
     # Diagnostics
     #############
@@ -362,5 +346,6 @@ class DependencyManager:
     #############
     # For testing
     #############
+
     def clear_singletons(self) -> None:
         self._singletons.clear()
