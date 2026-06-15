@@ -20,6 +20,9 @@ class DependencyGraph:
 
     RuntimeGraph stores resolution history.
     RuntimeGraph is not a source of truth for current dependency state.
+    Graph is built lazily during dependency resolution.
+    Only dependencies that have been resolved at least once
+    are present in the graph.
 
     Used for:
         - diagnostics

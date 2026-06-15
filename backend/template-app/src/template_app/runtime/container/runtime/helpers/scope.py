@@ -19,13 +19,13 @@ if TYPE_CHECKING:
 
 class ScopeHandle:
     """
-    Async scope context manager.
+    Async public scope context manager.
 
     Creates and destroys runtime scope automatically.
 
     Examples:
-        async with container.scope() as scope_id:
-            ...
+        async with container.scope():
+            logger = await container.resolve(Logger)
 
     """
 

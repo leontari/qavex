@@ -16,13 +16,13 @@ if TYPE_CHECKING:
 class ResolutionContext:
     """Current runtime resolution context."""
 
-    scope_id: ScopeID | None = None
+    scope_id: ScopeID | None = None  # lifetime boundary
 
-    plugin_id: str | None = None
+    plugin_id: str | None = None  # runtime owner
 
-    actor_id: str | None = None
+    actor_id: str | None = None  # execution unit
 
-    request_id: str | None = None
+    request_id: str | None = None  # tracing / diagnostics
 
     stack: tuple[DependencyID, ...] = field(
         default_factory=tuple,
