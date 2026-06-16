@@ -7,4 +7,5 @@ pytest_plugins = [
     "tests.plugins.messaging",
     "tests.plugins.modules",
     "tests.plugins.transports",
+    "tests.plugins.container",
 ]

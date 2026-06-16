@@ -12,11 +12,7 @@ from template_app.runtime.container.runtime.graph import (
 
 
 class ServiceA: ...
-
-
 class ServiceB: ...
-
-
 class ServiceC: ...
 
 
@@ -32,9 +28,7 @@ def make_dependency(
 
 def test_add_node() -> None:
     graph = DependencyGraph()
-
     dependency = make_dependency(ServiceA)
-
     graph.add_node(dependency)
 
     assert graph.has_node(dependency)
@@ -44,7 +38,6 @@ def test_add_node() -> None:
 
 def test_add_edge_registers_nodes() -> None:
     graph = DependencyGraph()
-
     source = make_dependency(ServiceA)
     target = make_dependency(ServiceB)
 
@@ -106,7 +99,6 @@ def test_predecessors_returns_direct_dependents() -> None:
 
 def test_predecessors_returns_empty_set_for_unknown_node() -> None:
     graph = DependencyGraph()
-
     dependency = make_dependency(ServiceA)
 
     assert graph.predecessors(dependency) == frozenset()
@@ -114,7 +106,6 @@ def test_predecessors_returns_empty_set_for_unknown_node() -> None:
 
 def test_contains_returns_false_for_unknown_node() -> None:
     graph = DependencyGraph()
-
     dependency = make_dependency(ServiceA)
 
     assert not graph.has_node(dependency)
@@ -138,9 +129,7 @@ def test_clear_removes_all_nodes_and_edges() -> None:
 
 def test_nodes_returns_immutable_view() -> None:
     graph = DependencyGraph()
-
     dependency = make_dependency(ServiceA)
-
     graph.add_node(dependency)
 
     nodes = graph.nodes

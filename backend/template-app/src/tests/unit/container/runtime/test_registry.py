@@ -20,45 +20,14 @@ from template_app.runtime.container.runtime.registry import DependencyRegistry
 
 
 class ServiceA: ...
-
-
 class ServiceB: ...
-
-
-@pytest.fixture
-def registry() -> DependencyRegistry:
-    return DependencyRegistry()
-
-
-@pytest.fixture
-def namespace() -> Namespace:
-    return Namespace(name="test")
-
-
-@pytest.fixture
-def dependency_id(namespace: Namespace) -> DependencyID:
-    return DependencyID(
-        namespace=namespace,
-        contract=ServiceA,
-    )
-
-
-@pytest.fixture
-def descriptor(
-    dependency_id: DependencyID,
-) -> DependencyDescriptor:
-    return DependencyDescriptor(
-        ident=dependency_id,
-        provider=FactoryProvider(ServiceA),
-        scope=DependencyScope.TRANSIENT,
-        visibility=DependencyVisibility.PUBLIC,
-    )
 
 
 def test_add_descriptor(
     registry: DependencyRegistry,
     descriptor: DependencyDescriptor,
 ) -> None:
+
     registry.add(descriptor)
 
     assert registry.contains(descriptor.ident)
@@ -68,6 +37,7 @@ def test_add_duplicate_raises(
     registry: DependencyRegistry,
     descriptor: DependencyDescriptor,
 ) -> None:
+
     registry.add(descriptor)
 
     with pytest.raises(
@@ -80,6 +50,7 @@ def test_replace_descriptor(
     registry: DependencyRegistry,
     dependency_id: DependencyID,
 ) -> None:
+
     descriptor_a = DependencyDescriptor(
         ident=dependency_id,
         provider=FactoryProvider(ServiceA),
@@ -97,9 +68,7 @@ def test_replace_descriptor(
     registry.add(descriptor_a)
     registry.replace(descriptor_b)
 
-    assert registry.get(
-        dependency_id,
-    ) is descriptor_b
+    assert registry.get(dependency_id) is descriptor_b
 
 
 def test_replace_missing_raises(
@@ -147,24 +116,17 @@ def test_remove_descriptor(
     descriptor: DependencyDescriptor,
 ) -> None:
     registry.add(descriptor)
-
-    removed = registry.remove(
-        descriptor.ident,
-    )
+    removed = registry.remove(descriptor.ident)
 
     assert removed is descriptor
-    assert not registry.contains(
-        descriptor.ident,
-    )
+    assert not registry.contains(descriptor.ident)
 
 
 def test_remove_missing_raises(
     registry: DependencyRegistry,
     dependency_id: DependencyID,
 ) -> None:
-    with pytest.raises(
-        DependencyNotFoundError,
-    ):
+    with pytest.raises(DependencyNotFoundError):
         registry.remove(dependency_id)
 
 
@@ -172,15 +134,11 @@ def test_contains(
     registry: DependencyRegistry,
     descriptor: DependencyDescriptor,
 ) -> None:
-    assert not registry.contains(
-        descriptor.ident,
-    )
+    assert not registry.contains(descriptor.ident)
 
     registry.add(descriptor)
 
-    assert registry.contains(
-        descriptor.ident,
-    )
+    assert registry.contains(descriptor.ident)
 
 
 def test_clear(
@@ -188,7 +146,6 @@ def test_clear(
     descriptor: DependencyDescriptor,
 ) -> None:
     registry.add(descriptor)
-
     registry.clear()
 
     assert registry.size == 0
@@ -227,9 +184,7 @@ def test_namespaces(
         ),
     )
 
-    assert registry.namespaces == frozenset(
-        {namespace},
-    )
+    assert registry.namespaces == frozenset({namespace})
 
 
 def test_descriptors_snapshot_is_immutable(
@@ -237,9 +192,7 @@ def test_descriptors_snapshot_is_immutable(
     descriptor: DependencyDescriptor,
 ) -> None:
     registry.add(descriptor)
-
     snapshot = registry.descriptors
-
     registry.clear()
 
     assert len(snapshot) == 1
@@ -251,9 +204,7 @@ def test_dependency_ids_snapshot_is_immutable(
     descriptor: DependencyDescriptor,
 ) -> None:
     registry.add(descriptor)
-
     snapshot = registry.dependency_ids
-
     registry.clear()
 
     assert len(snapshot) == 1
@@ -265,7 +216,6 @@ def test_items(
     descriptor: DependencyDescriptor,
 ) -> None:
     registry.add(descriptor)
-
     items = registry.items()
 
     assert len(items) == 1

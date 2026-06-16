@@ -27,7 +27,6 @@ def make_dependency(contract: type) -> DependencyID:
 
 def test_contains_returns_false_for_unknown_dependency() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
 
     assert not cache.contains(dependency)
@@ -35,11 +34,8 @@ def test_contains_returns_false_for_unknown_dependency() -> None:
 
 def test_set_and_get_instance() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
-
     instance = object()
-
     cache.set(dependency, instance)
 
     assert cache.contains(dependency)
@@ -48,11 +44,8 @@ def test_set_and_get_instance() -> None:
 
 def test_remove_instance() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
-
     cache.set(dependency, object())
-
     cache.remove(dependency)
 
     assert not cache.contains(dependency)
@@ -60,9 +53,7 @@ def test_remove_instance() -> None:
 
 def test_remove_unknown_instance_is_safe() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
-
     cache.remove(dependency)
 
     assert cache.count == 0
@@ -70,7 +61,6 @@ def test_remove_unknown_instance_is_safe() -> None:
 
 def test_get_unknown_instance_raises_key_error() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
 
     try:
@@ -92,9 +82,7 @@ def test_count() -> None:
 
 def test_set_and_get_future() -> None:
     cache = SingletonCache()
-
     dependency = make_dependency(ServiceA)
-
     future = asyncio.Future()
 
     cache.set_future(dependency, future)
