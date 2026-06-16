@@ -88,10 +88,9 @@ class ScopeManager:
         try:
             return self._scopes[scope_id]
         except KeyError as error:
-            msg = f"Unknown scope: {scope_id}"
-            raise ScopeNotFoundError(msg) from error
+            raise ScopeNotFoundError(scope_id) from error
 
-    def close_owner_scope(
+    def close_owner_scopes(
         self,
         owner_id: str,
     ) -> None:

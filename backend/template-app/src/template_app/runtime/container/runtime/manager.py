@@ -262,18 +262,11 @@ class DependencyManager:
         scope_id = self._context.current.scope_id
 
         if scope_id is None:
-            msg = f"{dependency_id.contract.__name__} requires scope"
-            raise ScopeRequiredError(msg)
-
-        # TODO: check logic
-        if not self._scopes.exists(scope_id):
-            msg = f"Scope {scope_id} not found for {dependency_id}."
-            raise ScopeNotFoundError(msg)
+            raise ScopeRequiredError(dependency_id)
 
         scope = self._scopes.get_scope(scope_id)
 
         if scope.state is not ScopeState.ACTIVE:
-            msg = f"Scope '{scope_id}' is not active ({scope.state.name})"
             raise ScopeClosedError(scope_id)
 
         if scope.contains(dependency_id):
