@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from asyncio import Future
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
 
     from template_app.runtime.container.models.dependency import DependencyID
 
@@ -108,6 +108,26 @@ class SingletonCache:
         """
         self._futures.pop(dependency_id, None)
 
+    def iter_instances(self) -> Iterator[tuple[DependencyID, object]]:
+        """
+        Iterate over cached singleton instances.
+
+        Returns:
+            Iterator over cached instances.
+
+        """
+        return iter(self._instances.items())
+
+    def iter_futures(self) -> Iterator[Future[object]]:
+        """
+        Iterate over registered initialization futures.
+
+        Returns:
+            Iterator over active initialization futures.
+
+        """
+        return iter(self._futures.values())
+
     def clear(self) -> None:
         """
         Remove all cached state.
@@ -133,6 +153,17 @@ class SingletonCache:
 
         """
         return MappingProxyType(self._instances)
+
+    @property
+    def futures(self) -> MappingProxyType[DependencyID, Future[object]]:
+        """
+        Read-only initialization futures view.
+
+        Returns:
+            Immutable snapshot of initialization futures.
+
+        """
+        return MappingProxyType(self._futures)
 
     @property
     def count(self) -> int:

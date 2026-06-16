@@ -278,12 +278,13 @@ class DependencyManager:
 
         loop = asyncio.get_running_loop()
         future = loop.create_future()
-        self._scopes.get_scope(scope_id).set_future(dependency_id, future)
+        scope = self._scopes.get_scope(scope_id)
+        scope.set_future(dependency_id, future)
 
         try:
             instance = await descriptor.provider.provide(self)
 
-            self._scopes.get_scope(scope_id).set(dependency_id, instance)
+            scope.set(dependency_id, instance)
             future.set_result(instance)
 
             return instance
@@ -293,7 +294,7 @@ class DependencyManager:
             raise
 
         finally:
-            self._scopes.get_scope(scope_id).remove_future(dependency_id)
+            scope.remove_future(dependency_id)
 
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         """Call dependency provider directly."""
@@ -341,10 +342,3 @@ class DependencyManager:
     def context(self) -> ResolutionContextManager:
         """Runtime resolution context manager."""
         return self._context
-
-    #############
-    # For testing
-    #############
-    # TODO: check necessity
-    def clear_singletons(self) -> None:
-        self._singletons.clear()

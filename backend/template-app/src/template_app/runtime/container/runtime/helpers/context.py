@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from asyncio import Future
+    from collections.abc import Iterator
 
     from template_app.runtime.container.models.dependency import DependencyID
     from template_app.runtime.container.models.scope import ScopeID
@@ -101,6 +102,26 @@ class ScopeContext:
         """Remove initialization future."""
         self._futures.pop(dependency_id, None)
 
+    def iter_instances(self) -> Iterator[tuple[DependencyID, object]]:
+        """
+        Iterate over registered scoped instances.
+
+        Returns:
+            Iterator over cached instances.
+
+        """
+        return iter(self._instances.items())
+
+    def iter_futures(self) -> Iterator[Future[object]]:
+        """
+        Iterate over registered initialization futures.
+
+        Returns:
+            Iterator over active initialization futures.
+
+        """
+        return iter(self._futures.values())
+
     def clear(self) -> None:
         """
         Remove all scope state.
@@ -129,15 +150,23 @@ class ScopeContext:
         return MappingProxyType(self._instances)
 
     @property
-    def futures(self) -> MappingProxyType[DependencyID, object]: ...
+    def futures(self) -> MappingProxyType[DependencyID, Future[object]]:
+        """
+        Read-only initialization futures view.
+
+        Returns:
+            Immutable snapshot of initialization futures.
+
+        """
+        return MappingProxyType(self._futures)
 
     @property
     def count(self) -> int:
         """
-        Cached scoped instances count.
+        Registered scoped instances count.
 
         Returns:
-            Number of cached scoped instances.
+            Number of registered scoped instances.
 
         """
         return len(self._instances)

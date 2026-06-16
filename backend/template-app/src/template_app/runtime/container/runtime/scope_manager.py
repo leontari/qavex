@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from template_app.runtime.container.exceptions import (
     ScopeNotFoundError,
@@ -47,7 +48,7 @@ class ScopeManager:
         """
         scope = self._scopes.pop(scope_id)
 
-        for future in scope._futures.values():
+        for future in scope.iter_futures():
             if not future.done():
                 future.cancel()
 
@@ -58,7 +59,7 @@ class ScopeManager:
         Get scope by ID.
 
         Returns:
-            requested scope by ID
+            requested scope
 
         Raises:
             ScopeNotFoundError: if scope_id is not found
@@ -96,4 +97,24 @@ class ScopeManager:
 
     @property
     def active_scopes(self) -> frozenset[ScopeID]:
+        """
+        Active scope identifiers.
+
+        Returns:
+            Immutable collection of active scope IDs.
+
+        """
         return frozenset(self._scopes)
+
+    @property
+    def scope_contexts(self) -> MappingProxyType[ScopeID, ScopeContext]:
+        """
+        Active scope contexts.
+
+        Intended for diagnostics only.
+
+        Returns:
+            Read-only mapping of active scopes.
+
+        """
+        return MappingProxyType(self._scopes)
