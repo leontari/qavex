@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum, StrEnum, auto
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -31,3 +31,9 @@ class ScopeID:
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+class ScopeState(Enum):
+    ACTIVE = auto()
+    CLOSING = auto()
+    CLOSED = auto()

@@ -8,7 +8,7 @@ from types import MappingProxyType
 from template_app.runtime.container.exceptions import (
     ScopeNotFoundError,
 )
-from template_app.runtime.container.models.scope import ScopeID
+from template_app.runtime.container.models.scope import ScopeID, ScopeState
 from template_app.runtime.container.runtime.helpers.context import ScopeContext
 
 
@@ -46,13 +46,18 @@ class ScopeManager:
 
         Cancels all pending initialization futures.
         """
-        scope = self._scopes.pop(scope_id)
+        scope = self.get_scope(scope_id)
+
+        scope.state = ScopeState.CLOSING
 
         for future in scope.iter_futures():
             if not future.done():
                 future.cancel()
 
         scope.clear()
+
+        scope.state = ScopeState.CLOSED
+        self._scopes.pop(scope_id)
 
     def get_scope(self, scope_id: ScopeID) -> ScopeContext:
         """

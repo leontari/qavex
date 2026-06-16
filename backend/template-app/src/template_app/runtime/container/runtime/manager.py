@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from template_app.runtime.container.exceptions import (
     InvalidContractError,
     InvalidProviderError,
+    ScopeClosedError,
     ScopeNotFoundError,
     ScopeRequiredError,
 )
@@ -18,6 +19,7 @@ from template_app.runtime.container.models.dependency import (
 )
 from template_app.runtime.container.models.scope import (
     DependencyScope,
+    ScopeState,
 )
 from template_app.runtime.container.runtime.graph import DependencyGraph
 from template_app.runtime.container.runtime.helpers.context_manager import (
@@ -268,17 +270,21 @@ class DependencyManager:
             msg = f"Scope {scope_id} not found for {dependency_id}."
             raise ScopeNotFoundError(msg)
 
-        if self._scopes.get_scope(scope_id).contains(dependency_id):
-            return self._scopes.get_scope(scope_id).get(dependency_id)
+        scope = self._scopes.get_scope(scope_id)
 
-        future = self._scopes.get_scope(scope_id).get_future(dependency_id)
+        if scope.state is not ScopeState.ACTIVE:
+            raise ScopeClosedError(scope_id)
+
+        if scope.contains(dependency_id):
+            return scope.get(dependency_id)
+
+        future = scope.get_future(dependency_id)
 
         if future is not None:
             return await future
 
         loop = asyncio.get_running_loop()
         future = loop.create_future()
-        scope = self._scopes.get_scope(scope_id)
         scope.set_future(dependency_id, future)
 
         try:

@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from template_app.runtime.container.models.scope import ScopeState
+
 if TYPE_CHECKING:
     from asyncio import Future
     from collections.abc import Iterator
@@ -29,6 +31,8 @@ class ScopeContext:
     """
 
     id: ScopeID
+
+    state: ScopeState = ScopeState.ACTIVE
 
     _instances: dict[DependencyID, object] = field(
         default_factory=dict,

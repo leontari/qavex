@@ -52,6 +52,10 @@ class ScopeNotFoundError(DependencyError):
     """Scope not found error."""
 
 
+class ScopeClosedError(DependencyError):
+    """Scope is closed error."""
+
+
 class DependencyNamespaceError(DependencyError):
     """Namespace violation error."""
 
