@@ -8,7 +8,11 @@ from types import MappingProxyType
 from template_app.runtime.container.exceptions import (
     ScopeNotFoundError,
 )
-from template_app.runtime.container.models.scope import ScopeID, ScopeState
+from template_app.runtime.container.models.scope import (
+    ScopeID,
+    ScopeSnapshot,
+    ScopeState,
+)
 from template_app.runtime.container.runtime.helpers.context import ScopeContext
 
 
@@ -26,7 +30,12 @@ class ScopeManager:
 
     _scopes: dict[ScopeID, ScopeContext] = field(default_factory=dict)
 
-    def create_scope(self) -> ScopeID:
+    def create_scope(
+        self,
+        *,
+        owner_id: str | None = None,
+        parent_scope: ScopeID | None = None,
+    ) -> ScopeID:
         """
         Create runtime scope.
 
@@ -36,7 +45,11 @@ class ScopeManager:
         """
         scope_id = ScopeID.new()
 
-        self._scopes[scope_id] = ScopeContext(id=scope_id)
+        self._scopes[scope_id] = ScopeContext(
+            id=scope_id,
+            owner_id=owner_id,
+            parent_scope=parent_scope,
+        )
 
         return scope_id
 
@@ -50,14 +63,16 @@ class ScopeManager:
 
         scope.state = ScopeState.CLOSING
 
-        for future in scope.iter_futures():
-            if not future.done():
-                future.cancel()
+        try:
+            for future in scope.iter_futures():
+                if not future.done():
+                    future.cancel()
 
-        scope.clear()
+            scope.clear()
 
-        scope.state = ScopeState.CLOSED
-        self._scopes.pop(scope_id)
+        finally:
+            scope.state = ScopeState.CLOSED
+            self._scopes.pop(scope_id, None)
 
     def get_scope(self, scope_id: ScopeID) -> ScopeContext:
         """
@@ -76,6 +91,26 @@ class ScopeManager:
             msg = f"Unknown scope: {scope_id}"
             raise ScopeNotFoundError(msg) from error
 
+    def close_owner_scope(
+        self,
+        owner_id: str,
+    ) -> None:
+        """
+        Destroy all scopes owned by owner.
+
+        Args:
+            owner_id:
+                Runtime owner identifier.
+
+        """
+        to_close = [
+            scope.id
+            for scope in self._scopes.values()
+            if scope.owner_id == owner_id
+        ]
+        for scope_id in to_close:
+            self.close_scope(scope_id)
+
     def exists(self, scope_id: ScopeID) -> bool:
         """
         Whether scope exists.
@@ -89,6 +124,7 @@ class ScopeManager:
     #############
     # Diagnostics
     #############
+
     @property
     def scopes_count(self) -> int:
         """
@@ -123,3 +159,24 @@ class ScopeManager:
 
         """
         return MappingProxyType(self._scopes)
+
+    @property
+    def snapshots(self) -> tuple[ScopeSnapshot, ...]:
+        """
+        Create immutable diagnostics snapshots.
+
+        Returns:
+            Current scope snapshots.
+
+        """
+        return tuple(
+            ScopeSnapshot(
+                id=scope.id,
+                state=scope.state,
+                instances=scope.count,
+                futures=scope.future_count,
+                owner_id=scope.owner_id,
+                parent_scope=scope.parent_scope,
+            )
+            for scope in self._scopes.values()
+        )

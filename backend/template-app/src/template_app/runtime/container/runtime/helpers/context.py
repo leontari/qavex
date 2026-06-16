@@ -31,16 +31,12 @@ class ScopeContext:
     """
 
     id: ScopeID
-
     state: ScopeState = ScopeState.ACTIVE
+    owner_id: str | None = None
+    parent_scope: ScopeID | None = None
 
-    _instances: dict[DependencyID, object] = field(
-        default_factory=dict,
-    )
-
-    _futures: dict[DependencyID, Future[object]] = field(
-        default_factory=dict,
-    )
+    _instances: dict[DependencyID, object] = field(default_factory=dict)
+    _futures: dict[DependencyID, Future[object]] = field(default_factory=dict)
 
     def contains(self, dependency_id: DependencyID) -> bool:
         """
@@ -57,17 +53,17 @@ class ScopeContext:
         Whether initialization future exists.
 
         Returns:
-            True if initialization future is registered.
+            True if initialization future exists.
 
         """
         return dependency_id in self._futures
 
     def get(self, dependency_id: DependencyID) -> object:
         """
-        Get scoped instance.
+        Get cached instance.
 
         Returns:
-            Cached scoped instance.
+            Cached instance.
 
         Raises: KeyError if instance is not cached.
 
@@ -79,7 +75,7 @@ class ScopeContext:
         Get initialization future.
 
         Returns:
-            Registered initialization future or None.
+            Registered future or None.
 
         """
         return self._futures.get(dependency_id)
@@ -96,14 +92,20 @@ class ScopeContext:
 
     def remove(self, dependency_id: DependencyID) -> None:
         """
-        Remove scoped instance.
+        Remove cached instance.
 
-        Missing instances are ignored.
+        Missing entries are ignored.
+
         """
         self._instances.pop(dependency_id, None)
 
     def remove_future(self, dependency_id: DependencyID) -> None:
-        """Remove initialization future."""
+        """
+        Remove initialization future.
+
+        Missing entries are ignored.
+
+        """
         self._futures.pop(dependency_id, None)
 
     def iter_instances(self) -> Iterator[tuple[DependencyID, object]]:
@@ -167,7 +169,7 @@ class ScopeContext:
     @property
     def count(self) -> int:
         """
-        Registered scoped instances count.
+        Cached scoped instances count.
 
         Returns:
             Number of registered scoped instances.
