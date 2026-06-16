@@ -13,8 +13,6 @@ from template_app.runtime.container.type_vars import T
 if TYPE_CHECKING:
     from template_app.runtime.container.models.namespace import Namespace
 
-    from .models.scope import ScopeID
-
 
 class DependencyResolver(Protocol):
     """

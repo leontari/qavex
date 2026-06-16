@@ -12,7 +12,9 @@ from template_app.runtime.container.models.scope import DependencyScope
 from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
-from template_app.runtime.container.runtime.helpers.scope import ScopeHandle
+from template_app.runtime.container.runtime.helpers.scope import (
+    ScopeHandle,
+)
 from template_app.runtime.container.runtime.manager import DependencyManager
 
 if TYPE_CHECKING:

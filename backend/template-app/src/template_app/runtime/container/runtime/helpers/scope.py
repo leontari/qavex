@@ -8,9 +8,11 @@ if TYPE_CHECKING:
     from contextvars import Token
 
     from template_app.runtime.container.models.scope import ScopeID
+    from template_app.runtime.container.runtime.helpers.context_manager import (  # noqa: E501
+        ResolutionContextManager,
+    )
     from template_app.runtime.container.runtime.helpers.resolution import (
         ResolutionContext,
-        ResolutionContextManager,
     )
     from template_app.runtime.container.runtime.scope_manager import (
         ScopeManager,
@@ -19,13 +21,13 @@ if TYPE_CHECKING:
 
 class ScopeHandle:
     """
-    Async public scope context manager.
+    Async public scope lifecycle helper.
 
     Creates and destroys runtime scope automatically.
 
     Examples:
         async with container.scope():
-            logger = await container.resolve(Logger)
+            ...
 
     """
 
@@ -50,5 +52,7 @@ class ScopeHandle:
         assert self._scope_id is not None
         assert self._token is not None
 
-        self._context.leave_scope(self._token)
-        self._scopes.close_scope(self._scope_id)
+        try:
+            self._context.leave_scope(self._token)
+        finally:
+            self._scopes.close_scope(self._scope_id)

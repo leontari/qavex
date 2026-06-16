@@ -20,7 +20,7 @@ from template_app.runtime.container.models.scope import (
     DependencyScope,
 )
 from template_app.runtime.container.runtime.graph import DependencyGraph
-from template_app.runtime.container.runtime.helpers.resolution import (
+from template_app.runtime.container.runtime.helpers.context_manager import (
     ResolutionContextManager,
 )
 from template_app.runtime.container.runtime.registry import DependencyRegistry
@@ -227,8 +227,7 @@ class DependencyManager:
 
         # 2. check if initialization already in progress
         future = self._singletons.get_future(dependency_id)
-
-        if future is not None:
+        if future:
             return await future
 
         loop = asyncio.get_running_loop()
@@ -346,6 +345,6 @@ class DependencyManager:
     #############
     # For testing
     #############
-
+    # TODO: check necessity
     def clear_singletons(self) -> None:
         self._singletons.clear()

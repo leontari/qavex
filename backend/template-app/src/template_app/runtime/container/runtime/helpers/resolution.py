@@ -1,71 +1,44 @@
-"""Dependency resolution context manager."""
+"""Current dependency resolution context."""
 
 from __future__ import annotations
 
-from contextvars import ContextVar, Token
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.exceptions import DependencyCycleError
-from template_app.runtime.container.runtime.helpers.context import (
-    ResolutionContext,
-)
-
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import DependencyID
+    from template_app.runtime.container.models.dependency import (
+        DependencyID,
+    )
     from template_app.runtime.container.models.scope import ScopeID
 
 
-@dataclass(slots=True)
-class ResolutionContextManager:
+@dataclass(slots=True, frozen=True)
+class ResolutionContext:
     """
-    Async-safe local runtime context manager.
-
-    Source of truth for runtime context
     Current execution context.
+
+    Stored inside ContextVar.
 
     Used for:
         - cycle detection
-        - parent dependency tracking
-        - graph edge construction
+        - dependency tracing
+        - scope propagation
+        - plugin isolation
+        - actor isolation
     """
 
-    def __init__(self) -> None:
-        self._context: ContextVar[ResolutionContext] = ContextVar(
-            "resolution_context",
-            default=ResolutionContext(),
-        )
+    scope_id: ScopeID | None = None  # lifetime boundary
+    plugin_id: str | None = None  # runtime owner
+    actor_id: str | None = None  # execution unit
+    request_id: str | None = None  # tracing / diagnostics
 
-    @property
-    def current(self) -> ResolutionContext:
-        return self._context.get()
+    stack: tuple[DependencyID, ...] = field(default_factory=tuple)
 
-    def enter_scope(self, scope_id: ScopeID) -> Token[ResolutionContext]:
-        context = self.current
+    def push(self, dependency_id: DependencyID) -> ResolutionContext:
+        return replace(self, stack=(*self.stack, dependency_id))
 
-        return self._context.set(
-            ResolutionContext(
-                scope_id=scope_id,
-                plugin_id=context.plugin_id,
-                actor_id=context.actor_id,
-                request_id=context.request_id,
-                stack=context.stack,
-            )
-        )
+    def pop(self) -> ResolutionContext:
+        return replace(self, stack=self.stack[:-1])
 
-    def leave_scope(self, token: Token[ResolutionContext]) -> None:
-        self._context.reset(token)
-
-    def enter_resolution(self, dependency_id: DependencyID) -> Token:
-        context = self.current
-
-        if dependency_id in context.stack:
-            chain = " -> ".join(
-                str(item) for item in (*context.stack, dependency_id)
-            )
-            raise DependencyCycleError(chain)
-
-        return self._context.set(context.push(dependency_id))
-
-    def leave_resolution(self, token: Token[ResolutionContext]) -> None:
-        self._context.reset(token)
+    def with_scope(self, scope_id: ScopeID | None) -> ResolutionContext:
+        return replace(self, scope_id=scope_id)

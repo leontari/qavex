@@ -1,50 +1,154 @@
-"""Current dependency resolution context."""
+"""Runtime scope state."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import (
-        DependencyID,
-    )
+    from asyncio import Future
+
+    from template_app.runtime.container.models.dependency import DependencyID
     from template_app.runtime.container.models.scope import ScopeID
 
 
-@dataclass(slots=True, frozen=True)
-class ResolutionContext:
-    """Current runtime resolution context."""
+@dataclass(slots=True)
+class ScopeContext:
+    """
+    Runtime scope state.
 
-    scope_id: ScopeID | None = None  # lifetime boundary
+    Source of truth for scoped instances.
 
-    plugin_id: str | None = None  # runtime owner
+    Owns:
+        - scoped instances
+        - scoped initialization futures
 
-    actor_id: str | None = None  # execution unit
+    ScopeContext exists only while scope is alive.
+    """
 
-    request_id: str | None = None  # tracing / diagnostics
+    id: ScopeID
 
-    stack: tuple[DependencyID, ...] = field(
-        default_factory=tuple,
+    _instances: dict[DependencyID, object] = field(
+        default_factory=dict,
     )
 
-    def push(
-        self,
-        dependency_id: DependencyID,
-    ) -> ResolutionContext:
-        return ResolutionContext(
-            scope_id=self.scope_id,
-            plugin_id=self.plugin_id,
-            actor_id=self.actor_id,
-            request_id=self.request_id,
-            stack=(*self.stack, dependency_id),
-        )
+    _futures: dict[DependencyID, Future[object]] = field(
+        default_factory=dict,
+    )
 
-    def pop(self) -> ResolutionContext:
-        return ResolutionContext(
-            scope_id=self.scope_id,
-            plugin_id=self.plugin_id,
-            actor_id=self.actor_id,
-            request_id=self.request_id,
-            stack=self.stack[:-1],
-        )
+    def contains(self, dependency_id: DependencyID) -> bool:
+        """
+        Whether scoped instance exists.
+
+        Returns:
+            True if instance is cached.
+
+        """
+        return dependency_id in self._instances
+
+    def contains_future(self, dependency_id: DependencyID) -> bool:
+        """
+        Whether initialization future exists.
+
+        Returns:
+            True if initialization future is registered.
+
+        """
+        return dependency_id in self._futures
+
+    def get(self, dependency_id: DependencyID) -> object:
+        """
+        Get scoped instance.
+
+        Returns:
+            Cached scoped instance.
+
+        Raises: KeyError if instance is not cached.
+
+        """
+        return self._instances[dependency_id]
+
+    def get_future(self, dependency_id: DependencyID) -> Future[object] | None:
+        """
+        Get initialization future.
+
+        Returns:
+            Registered initialization future or None.
+
+        """
+        return self._futures.get(dependency_id)
+
+    def set(self, dependency_id: DependencyID, instance: object) -> None:
+        """Store scoped instance."""
+        self._instances[dependency_id] = instance
+
+    def set_future(
+        self, dependency_id: DependencyID, future: Future[object]
+    ) -> None:
+        """Store initialization future."""
+        self._futures[dependency_id] = future
+
+    def remove(self, dependency_id: DependencyID) -> None:
+        """
+        Remove scoped instance.
+
+        Missing instances are ignored.
+        """
+        self._instances.pop(dependency_id, None)
+
+    def remove_future(self, dependency_id: DependencyID) -> None:
+        """Remove initialization future."""
+        self._futures.pop(dependency_id, None)
+
+    def clear(self) -> None:
+        """
+        Remove all scope state.
+
+        Clears:
+            - scoped instances
+            - initialization futures
+
+        """
+        self._instances.clear()
+        self._futures.clear()
+
+    #############
+    # Diagnostics
+    #############
+
+    @property
+    def instances(self) -> MappingProxyType[DependencyID, object]:
+        """
+        Immutable scoped instances view.
+
+        Returns:
+            Read-only mapping of scoped instances.
+
+        """
+        return MappingProxyType(self._instances)
+
+    @property
+    def futures(self) -> MappingProxyType[DependencyID, object]: ...
+
+    @property
+    def count(self) -> int:
+        """
+        Cached scoped instances count.
+
+        Returns:
+            Number of cached scoped instances.
+
+        """
+        return len(self._instances)
+
+    @property
+    def future_count(self) -> int:
+        """
+        Active initialization future count.
+
+        Returns:
+            Number of registered initialization futures.
+
+        """
+        return len(self._futures)
