@@ -268,22 +268,22 @@ class DependencyManager:
             msg = f"Scope {scope_id} not found for {dependency_id}."
             raise ScopeNotFoundError(msg)
 
-        if self._scopes.contains(scope_id, dependency_id):
-            return self._scopes.get(scope_id, dependency_id)
+        if self._scopes.get_scope(scope_id).contains(dependency_id):
+            return self._scopes.get_scope(scope_id).get(dependency_id)
 
-        future = self._scopes.get_future(scope_id, dependency_id)
+        future = self._scopes.get_scope(scope_id).get_future(dependency_id)
 
         if future is not None:
             return await future
 
         loop = asyncio.get_running_loop()
         future = loop.create_future()
-        self._scopes.set_future(scope_id, dependency_id, future)
+        self._scopes.get_scope(scope_id).set_future(dependency_id, future)
 
         try:
             instance = await descriptor.provider.provide(self)
 
-            self._scopes.set(scope_id, dependency_id, instance)
+            self._scopes.get_scope(scope_id).set(dependency_id, instance)
             future.set_result(instance)
 
             return instance
@@ -293,7 +293,7 @@ class DependencyManager:
             raise
 
         finally:
-            self._scopes.remove_future(scope_id, dependency_id)
+            self._scopes.get_scope(scope_id).remove_future(dependency_id)
 
     async def _resolve_transient(self, descriptor: DependencyDescriptor):
         """Call dependency provider directly."""
