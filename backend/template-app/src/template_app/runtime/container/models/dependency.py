@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Generic
+
+from template_app.runtime.container.type_vars import T
 
 if TYPE_CHECKING:
     from template_app.runtime.container.models.namespace import Namespace
@@ -37,10 +39,10 @@ class DependencyID:
 
 
 @dataclass(frozen=True, slots=True)
-class DependencyDescriptor:
+class DependencyDescriptor(Generic[T]):
     """Dependency registration metadata."""
 
     ident: DependencyID
-    provider: DependencyProvider[type[Any]]
+    provider: DependencyProvider[T]
     visibility: DependencyVisibility
     scope: DependencyScope

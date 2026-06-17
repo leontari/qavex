@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    import asyncio
     from asyncio import Future
     from collections.abc import Iterator, Mapping
 
@@ -16,9 +17,13 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class SingletonCache:
     """
-    Singleton instance cache.
+    Asyncio-safe singleton instance cache.
 
     Source of truth for singleton instances.
+
+    Thread-safety:
+        This cache assumes access from a single event loop
+        and is not thread-safe.
 
     Stores:
         - initialized singleton instances
@@ -39,6 +44,29 @@ class SingletonCache:
     _futures: dict[DependencyID, Future[object]] = field(
         default_factory=dict,
     )
+
+    def get_or_create_future(
+        self,
+        dependency_id: DependencyID,
+        *,
+        loop: asyncio.AbstractEventLoop,
+    ) -> tuple[Future[object], bool]:
+        """
+        Get existing initialization future or create a new one.
+
+        Returns:
+            tuple[future, created_by_current_caller]
+
+        """
+        future = self._futures.get(dependency_id)
+
+        if future is not None:
+            return future, False
+
+        future = loop.create_future()
+        self._futures[dependency_id] = future
+
+        return future, True
 
     def contains(self, dependency_id: DependencyID) -> bool:
         """

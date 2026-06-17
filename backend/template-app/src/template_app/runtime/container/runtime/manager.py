@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from template_app.runtime.container.exceptions import (
     InvalidContractError,
     InvalidProviderError,
     ScopeClosedError,
-    ScopeNotFoundError,
     ScopeRequiredError,
+    UnsupportedScopeError,
 )
 from template_app.runtime.container.models.dependency import (
     DependencyDescriptor,
@@ -160,9 +160,12 @@ class DependencyManager:
         """
         dependency_id = DependencyID(contract=contract, namespace=namespace)
 
-        return await self._resolve_dependency(
-            dependency_id=dependency_id,
-            requester_ns=namespace,
+        return cast(
+            "T",
+            await self._resolve_dependency(
+                dependency_id=dependency_id,
+                requester_ns=namespace,
+            ),
         )
 
     async def _resolve_dependency(
@@ -170,7 +173,7 @@ class DependencyManager:
         *,
         dependency_id: DependencyID,
         requester_ns: Namespace,
-    ) -> object:
+    ) -> T:
         """
         Resolve dependency.
 
@@ -207,8 +210,7 @@ class DependencyManager:
                         descriptor,
                     )
 
-            msg = f"Unsupported dependency scope: {descriptor.scope}"
-            raise RuntimeError(msg)
+            raise UnsupportedScopeError(descriptor.scope)
 
         finally:
             self._context.leave_resolution(token)
@@ -220,33 +222,59 @@ class DependencyManager:
     async def _resolve_singleton(
         self,
         dependency_id: DependencyID,
-        descriptor: DependencyDescriptor,
-    ):
-        """Global future memoization."""
+        descriptor: DependencyDescriptor[T],
+    ) -> T:
+        """
+        Resolve singleton dependency.
+
+        Uses future memoization to prevent
+        concurrent duplicate initialization.
+
+        The first resolver initializes the dependency.
+        Concurrent resolvers await the same initialization
+        future and receive the same instance.
+
+        Args:
+            dependency_id:
+                Dependency identifier.
+
+            descriptor:
+                Registered dependency descriptor.
+
+        Returns:
+            Singleton dependency instance.
+
+        Raises:
+            Any exception raised by provider.provide()
+
+        """
         # 1. fast path (already initialized)
         if self._singletons.contains(dependency_id):
             return self._singletons.get(dependency_id)
 
         # 2. check if initialization already in progress
-        future = self._singletons.get_future(dependency_id)
-        if future:
+        loop = asyncio.get_running_loop()
+
+        future, created = self._singletons.get_or_create_future(
+            dependency_id,
+            loop=loop,
+        )
+        if not created:
             return await future
 
-        loop = asyncio.get_running_loop()
-        future = loop.create_future()
-        self._singletons.set_future(dependency_id, future)
-
-        # we are the "initializer"
+        # 3. we are the "initializer"
         try:
             instance = await descriptor.provider.provide(self)
-
             self._singletons.set(dependency_id, instance)
 
-            future.set_result(instance)
+            if not future.done():
+                future.set_result(instance)
+
             return instance
 
-        except Exception as error:
-            future.set_exception(error)
+        except BaseException as error:
+            if not future.done():
+                future.set_exception(error)
             raise
 
         finally:
@@ -256,9 +284,33 @@ class DependencyManager:
     async def _resolve_scoped(
         self,
         dependency_id: DependencyID,
-        descriptor: DependencyDescriptor,
-    ):
-        """Per-scope future memoization."""
+        descriptor: DependencyDescriptor[T],
+    ) -> T:
+        """
+        Resolve scoped dependency.
+
+        Uses per-scop future memoization to prevent
+        concurrent duplicate initialization.
+
+        Scoped instances are reused only within the currently active scope.
+
+        Args:
+            dependency_id:
+                Dependency identifier.
+            descriptor:
+                Registered dependency descriptor.
+
+        Returns:
+            Scoped dependency instance.
+
+        Raises:
+            ScopeRequiredError:
+                If no active scope exists.
+            ScopeClosedError:
+                If scope is not active.
+            Any exception raised by provider.provide().
+
+        """
         scope_id = self._context.current.scope_id
 
         if scope_id is None:
@@ -272,32 +324,51 @@ class DependencyManager:
         if scope.contains(dependency_id):
             return scope.get(dependency_id)
 
-        future = scope.get_future(dependency_id)
-
-        if future is not None:
-            return await future
-
         loop = asyncio.get_running_loop()
-        future = loop.create_future()
-        scope.set_future(dependency_id, future)
+
+        future, created = scope.get_or_create_future(dependency_id, loop=loop)
+
+        if not created:
+            return await future
 
         try:
             instance = await descriptor.provider.provide(self)
-
             scope.set(dependency_id, instance)
-            future.set_result(instance)
+
+            if not future.done():
+                future.set_result(instance)
 
             return instance
 
-        except Exception as error:
-            future.set_exception(error)
+        except BaseException as error:
+            if not future.done():
+                future.set_exception(error)
             raise
 
         finally:
             scope.remove_future(dependency_id)
 
-    async def _resolve_transient(self, descriptor: DependencyDescriptor):
-        """Call dependency provider directly."""
+    async def _resolve_transient(
+        self,
+        descriptor: DependencyDescriptor[T],
+    ) -> T:
+        """
+        Resolve transient dependency.
+
+        Transient dependencies are never cached.
+        Provider is executed on every resolution.
+
+        Args:
+            descriptor:
+                Registered dependency descriptor.
+
+        Returns:
+            Newly created dependency instance.
+
+        Raises:
+            Any exception raised by provider.provide().
+
+        """
         return await descriptor.provider.provide(self)
 
     ################
@@ -305,11 +376,11 @@ class DependencyManager:
     ################
 
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
-        """Build runtime dependency graph."""
+        """Register runtime dependency relation."""
         stack = self._context.current.stack
 
         if len(stack) >= 2:
-            parent = stack[-1]
+            parent = stack[-2]
             self._graph.add_edge(parent, dependency_id)
         else:
             self._graph.add_node(dependency_id)

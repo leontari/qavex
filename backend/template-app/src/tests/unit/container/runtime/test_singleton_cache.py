@@ -174,3 +174,23 @@ def test_overwrite_future() -> None:
     cache.set_future(dependency, second)
 
     assert cache.get_future(dependency) is second
+
+
+def test_get_or_create_future_reuses_existing(
+    singleton_cache: SingletonCache,
+    dependency_id: DependencyID,
+) -> None:
+    loop = asyncio.new_event_loop()
+    future1, created1 = (
+        singleton_cache.get_or_create_future(dependency_id, loop=loop)
+    )
+    future2, created2 = (
+        singleton_cache.get_or_create_future(dependency_id, loop=loop)
+    )
+
+    assert created1 is True
+    assert created2 is False
+    assert future1 is future2
+    assert singleton_cache.future_count == 1
+
+    loop.close()

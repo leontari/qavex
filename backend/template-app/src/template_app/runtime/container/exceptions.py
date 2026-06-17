@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from template_app.runtime.container.models.dependency import DependencyID
-    from template_app.runtime.container.models.scope import ScopeID
+    from template_app.runtime.container.models.scope import (
+        DependencyScope,
+        ScopeID,
+    )
 
 
 class ContainerError(RuntimeError):
@@ -46,29 +49,65 @@ class DependencyAlreadyRegisteredError(ContainerError):
 
 
 class ScopeNotFoundError(ContainerError):
-    """Scope not found error."""
+    """
+    Scope not found error.
 
-    def __init__(self, scope_id: ScopeID) -> None:
+    Attributes:
+        scope_id:
+            Identifier of the scope
+
+    """
+
+    def __init__(self, scope_id: ScopeID) -> None:  # noqa: D107
         self.scope_id = scope_id
         super().__init__(f"Scope {scope_id} not found.")
 
 
 class ScopeClosedError(ContainerError):
-    """Scope is no longer active."""
+    """
+    Scope is no longer active.
 
-    def __init__(self, scope_id: ScopeID) -> None:
+    Attributes:
+        scope_id:
+            Identifier of the scope
+
+    """
+
+    def __init__(self, scope_id: ScopeID) -> None:  # noqa: D107
         self.scope_id = scope_id
         super().__init__(f"Scope '{scope_id} is closed.")
 
 
 class ScopeRequiredError(ContainerError):
-    """Scoped dependency resolved outside scope."""
+    """
+    Scoped dependency resolved outside scope.
 
-    def __init__(self, dependency_id: DependencyID) -> None:
+    Attributes:
+        dependency_id:
+            Identifier of the dependency.
+
+    """
+
+    def __init__(self, dependency_id: DependencyID) -> None:  # noqa: D107
         self.dependency_id = dependency_id
         super().__init__(
             f"Dependency '{dependency_id}' requires active scope."
         )
+
+
+class UnsupportedScopeError(ContainerError):
+    """
+    Unsupported dependency lifetime.
+
+    Attributes:
+        scope:
+            dependency lifetime policy.
+
+    """
+
+    def __init__(self, scope: DependencyScope) -> None:  # noqa: D107
+        self.scope = scope
+        super().__init__(f"Unsupported dependency scope: {scope}")
 
 
 class DependencyNamespaceError(ContainerError):

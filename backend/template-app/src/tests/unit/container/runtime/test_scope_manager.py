@@ -31,11 +31,13 @@ def test_close_scope(scope_manager: ScopeManager, scope_id: ScopeID) -> None:
 def test_close_scope_cancels_futures(
     scope_manager: ScopeManager,
     dependency_id: DependencyID,
-    scope_id: ScopeID) -> None:
-
+    scope_id: ScopeID
+) -> None:
     scope_id = scope_manager.create_scope()
     scope = scope_manager.get_scope(scope_id)
+
     future = asyncio.Future()
+
     scope.set_future(dependency_id, future)
     scope_manager.close_scope(scope_id)
 
@@ -64,18 +66,10 @@ def test_scopes_count(scope_manager: ScopeManager) -> None:
 
 
 def test_close_owner_scopes(scope_manager: ScopeManager) -> None:
-    scope1 = scope_manager.create_scope(
-        owner_id="plugin-a",
-    )
-    scope2 = scope_manager.create_scope(
-        owner_id="plugin-a",
-    )
-    scope3 = scope_manager.create_scope(
-        owner_id="plugin-b",
-    )
-    scope_manager.close_owner_scopes(
-        "plugin-a",
-    )
+    scope1 = scope_manager.create_scope(owner_id="plugin-a")
+    scope2 = scope_manager.create_scope(owner_id="plugin-a")
+    scope3 = scope_manager.create_scope(owner_id="plugin-b")
+    scope_manager.close_owner_scopes("plugin-a")
 
     assert not scope_manager.exists(scope1)
     assert not scope_manager.exists(scope2)
@@ -97,7 +91,6 @@ def test_active_scopes(scope_manager: ScopeManager) -> None:
 
     assert scope1 in active
     assert scope2 in active
-
 
 def test_scope_contexts(scope_manager: ScopeManager) -> None:
     scope_id = scope_manager.create_scope()
@@ -127,6 +120,22 @@ def test_scope_state_transition(scope_manager: ScopeManager) -> None:
 
     assert scope.state is ScopeState.ACTIVE
 
+    scope_manager.close_scope(scope_id)
+
+    assert not scope_manager.exists(scope_id)
+
+
+def test_nested_scope_metadata(scope_manager: ScopeManager) -> None:
+    parent = scope_manager.create_scope()
+    child = scope_manager.create_scope(parent_scope=parent)
+
+    scope = scope_manager.get_scope(child)
+
+    assert scope.parent_scope == parent
+
+
+def test_close_scope_removes_scope(scope_manager: ScopeManager) -> None:
+    scope_id = scope_manager.create_scope()
     scope_manager.close_scope(scope_id)
 
     assert not scope_manager.exists(scope_id)

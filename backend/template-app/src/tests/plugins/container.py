@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 import pytest
 
 from template_app.runtime.container.container import Container
@@ -8,8 +6,9 @@ from template_app.runtime.container.models.namespace import Namespace
 from template_app.runtime.container.models.scope import (
     ScopeID, DependencyScope,
 )
-from template_app.runtime.container.models.visibility import \
-    DependencyVisibility
+from template_app.runtime.container.models.visibility import (
+    DependencyVisibility,
+)
 from template_app.runtime.container.providers import FactoryProvider
 from template_app.runtime.container.runtime.helpers.context_manager import (
     ResolutionContextManager,
@@ -18,12 +17,15 @@ from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import (
     ScopeManager,
 )
-from template_app.runtime.container.models.dependency import DependencyDescriptor
+from template_app.runtime.container.models.dependency import (
+    DependencyDescriptor,
+)
+from template_app.runtime.container.runtime.singleton_cache import (
+    SingletonCache,
+)
 
 
 class ServiceA: ...
-
-
 class ServiceB: ...
 
 
@@ -88,3 +90,8 @@ def container():
 def scope_context(scope_manager):
     scope_id = scope_manager.create_scope()
     return scope_manager.get_scope(scope_id)
+
+
+@pytest.fixture
+def singleton_cache():
+    return SingletonCache()
