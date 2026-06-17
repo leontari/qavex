@@ -52,20 +52,20 @@ class DependencyManager:
     """
     DI orchestrator.
 
-    Owns:
-        - registry
-        - graph
-        - scope lifecycle
-        - singleton lifecycle
-
     Responsible for:
         - dependency resolution
         - visibility checks
         - graph construction
         - graph validation
 
+    Owns:
+        - registry
+        - graph
+        - scope lifecycle
+        - singleton lifecycle
+
     Registry:
-        Source of truth for metadata registration.
+            Source of truth for metadata registration.
     ScopeManager:
         Source of truth for scoped instances.
     SingletonCache:
@@ -74,8 +74,6 @@ class DependencyManager:
         Source of truth for runtime context.
     RuntimeGraph:
         Source of truth for observed dependency relations.
-    DependencyManager:
-        Orchestrator only.
 
     """
 

@@ -1,4 +1,4 @@
-"""Public DI facade."""
+"""Runtime dependency injection container."""
 
 from __future__ import annotations
 
@@ -26,24 +26,61 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class Container:
     """
-    Public DI API.
+    Runtime dependency injection container.
 
-    DependencyManager:
-        responsible for DI system work, DI orchestrator
-    ContainerDiagnostics:
-        responsible for DI system inspecting.
+    Container provides dependency registration and resolution.
+
+    Design goals:
+        - low-overhead runtime resolution
+        - async-safe dependency initialization
+        - deterministic dependency lifecycle
+        - runtime graph diagnostics
+
+    Threading model:
+        Container is NOT thread-safe.
+
+        Container assumes ownership by a single runtime scheduler
+        and execution context.
+
+        Concurrent dependency initialization is coordinated through
+        Future memoization and delegated to the owning runtime architecture.
+
+        Access from multiple threads is NOT supported.
+
+    Recommended usage:
+        Single runtime kernel:
+            Runtime Kernel
+                └── Container
+            The kernel owns the container and all dependency
+            resolution is performed through the kernel.
+
+        Multithreaded runtime:
+            Worker #1
+                └── Container
+            Worker #2
+                └── Container
+            Each worker owns its own container instance.
+
+    Notes:
+        Thread safety is intentionally delegated to the runtime architecture.
+
+        Container avoids internal locking by design.
+
+        Introducing a global lock would reduce concurrency
+        and potentially create a runtime bottleneck under load.
+
+        If a single container must be shared between multiple execution
+        contexts, access should therefore be serialized externally by
+        a runtime dispatcher, actor mailbox, scheduler or message bus.
 
     """
 
-    _manager: DependencyManager = field(
-        default_factory=DependencyManager,
-    )
+    _manager: DependencyManager = field(default_factory=DependencyManager)
     _diagnostics: ContainerDiagnostics = field(init=False)
 
     def __post_init__(self) -> None:
         self._diagnostics = ContainerDiagnostics(self._manager)
 
-    # delegate to Registry
     def register(
         self,
         *,
@@ -64,7 +101,6 @@ class Container:
             overwrite=overwrite,
         )
 
-    # delegate to manager
     async def resolve(
         self,
         contract: type[T],
@@ -83,7 +119,6 @@ class Container:
             namespace=namespace,
         )
 
-    # for ScopeManager existing separately
     def scope(self) -> ScopeHandle:
         """
         Create async scope context manager.
@@ -101,7 +136,6 @@ class Container:
             context=self._manager.context,
         )
 
-    # for diagnostics
     @property
     def diagnostics(self) -> ContainerDiagnostics:
         """Diagnostics API."""
