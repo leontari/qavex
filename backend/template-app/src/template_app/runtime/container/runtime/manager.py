@@ -21,9 +21,12 @@ from template_app.runtime.container.models.scope import (
     DependencyScope,
     ScopeState,
 )
-from template_app.runtime.container.runtime.graph import DependencyGraph
-from template_app.runtime.container.runtime.helpers.context_manager import (
+from template_app.runtime.container.runtime.context_manager import (
     ResolutionContextManager,
+)
+from template_app.runtime.container.runtime.graph import DependencyGraph
+from template_app.runtime.container.runtime.helpers.visibility_enforcer import (
+    enforce_visibility,
 )
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 from template_app.runtime.container.runtime.scope_manager import (
@@ -33,9 +36,6 @@ from template_app.runtime.container.runtime.singleton_cache import (
     SingletonCache,
 )
 from template_app.runtime.container.type_vars import T
-from template_app.runtime.container.visibility_enforcer import (
-    enforce_visibility,
-)
 
 if TYPE_CHECKING:
     from template_app.runtime.container.contracts import (

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from contextvars import Token
 
     from template_app.runtime.container.models.scope import ScopeID
-    from template_app.runtime.container.runtime.helpers.context_manager import (  # noqa: E501
+    from template_app.runtime.container.runtime.context_manager import (
         ResolutionContextManager,
     )
     from template_app.runtime.container.runtime.helpers.resolution import (
