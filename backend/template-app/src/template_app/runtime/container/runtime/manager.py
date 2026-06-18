@@ -65,7 +65,7 @@ class DependencyManager:
         - singleton lifecycle
 
     Registry:
-            Source of truth for metadata registration.
+        Source of truth for metadata registration.
     ScopeManager:
         Source of truth for scoped instances.
     SingletonCache:
@@ -93,7 +93,9 @@ class DependencyManager:
         default_factory=ScopeManager,
     )
 
-    _singletons: SingletonCache = field(default_factory=SingletonCache)
+    _singletons: SingletonCache = field(
+        default_factory=SingletonCache,
+    )
 
     ##############
     # Registration
@@ -137,32 +139,39 @@ class DependencyManager:
     ############
     # Resolution
     ############
+
     async def resolve(
         self,
         *,
         contract: type[T],
         namespace: Namespace,
+        requester: Namespace,
     ) -> T:
         """
         Resolve dependency instance.
 
-        Implements DependencyResolver.
-
         Args:
             contract:
+                Dependency contract type.
             namespace:
+                Dependency owner namespace.
+            requester:
+                Namespace requesting dependency access.
 
         Returns:
             Resolved dependency instance.
 
         """
-        dependency_id = DependencyID(contract=contract, namespace=namespace)
+        dependency_id = DependencyID(
+            contract=contract,
+            namespace=namespace,
+        )
 
         return cast(
             "T",
             await self._resolve_dependency(
                 dependency_id=dependency_id,
-                requester_ns=namespace,
+                requester_ns=requester,
             ),
         )
 
@@ -183,7 +192,7 @@ class DependencyManager:
 
         enforce_visibility(
             owner=descriptor.ident.namespace,
-            requester=requester_ns or descriptor.ident.namespace,
+            requester=requester_ns,
             visibility=descriptor.visibility,
         )
 
@@ -309,7 +318,7 @@ class DependencyManager:
             Any exception raised by provider.provide().
 
         """
-        scope_id = self._context.current.scope_id
+        scope_id = self._context.current_context.scope_id
 
         if scope_id is None:
             raise ScopeRequiredError(dependency_id)
@@ -375,7 +384,7 @@ class DependencyManager:
 
     def _register_graph_edge(self, dependency_id: DependencyID) -> None:
         """Register runtime dependency relation."""
-        stack = self._context.current.stack
+        stack = self._context.current_context.stack
 
         if len(stack) >= 2:
             parent = stack[-2]

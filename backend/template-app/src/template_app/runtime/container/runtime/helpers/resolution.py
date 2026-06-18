@@ -15,30 +15,40 @@ if TYPE_CHECKING:
 @dataclass(slots=True, frozen=True)
 class ResolutionContext:
     """
-    Current execution context.
+    Current dependency resolution state.
 
-    Stored inside ContextVar.
+    Lives inside ContextVar.
+
+    Stores:
+        - active scope
+        - dependency resolution stack
 
     Used for:
         - cycle detection
-        - dependency tracing
-        - scope propagation
-        - plugin isolation
-        - actor isolation
+        - graph construction
+        - scoped resolution
+
     """
 
-    scope_id: ScopeID | None = None  # lifetime boundary
-    plugin_id: str | None = None  # runtime owner
-    actor_id: str | None = None  # execution unit
-    request_id: str | None = None  # tracing / diagnostics
-
+    scope_id: ScopeID | None = None
     stack: tuple[DependencyID, ...] = field(default_factory=tuple)
 
     def push(self, dependency_id: DependencyID) -> ResolutionContext:
+        """
+        Append dependency to resolution stack.
+
+        Returns:
+            Updated resolution context.
+
+        """
         return replace(self, stack=(*self.stack, dependency_id))
 
     def pop(self) -> ResolutionContext:
-        return replace(self, stack=self.stack[:-1])
+        """
+        Remove last dependency from resolution stack.
 
-    def with_scope(self, scope_id: ScopeID | None) -> ResolutionContext:
-        return replace(self, scope_id=scope_id)
+        Returns:
+            Updated resolution context.
+
+        """
+        return replace(self, stack=self.stack[:-1])

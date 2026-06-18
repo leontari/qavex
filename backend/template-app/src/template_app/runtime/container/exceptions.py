@@ -131,11 +131,41 @@ class AsyncDependencyError(ContainerError):
 
 
 class DependencyCycleError(ContainerError):
-    """Circular dependency detected."""
+    """Circular dependency detected during resolution."""
 
-    def __init__(self, chain: tuple[DependencyID, ...]) -> None:
-        self.chain = chain
-        super().__init__(" -> ".join(map(str, chain)))
+    def __init__(  # noqa: D107
+        self,
+        stack: tuple[DependencyID, ...],
+        dependency_id: DependencyID,
+    ) -> None:
+
+        self.stack = stack
+        self.dependency_id = dependency_id
+        self.cycle = (*stack, dependency_id)
+
+        super().__init__(f"Circular dependency detected: {self.chain}")
+
+    @property
+    def chain(self) -> str:
+        """
+        Formatted dependency cycle chain.
+
+        Returns:
+            Human-readable dependency chain.
+
+        """
+        return " -> ".join(map(str, self.cycle))
+
+    @property
+    def cycle_length(self) -> int:
+        """
+        Cycle size.
+
+        Returns:
+            Number of dependencies in cycle.
+
+        """
+        return len(self.cycle)
 
 
 class DependencyGraphError(ContainerError):

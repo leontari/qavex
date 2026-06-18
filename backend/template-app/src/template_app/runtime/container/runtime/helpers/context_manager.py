@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextvars import ContextVar, Token
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 from template_app.runtime.container.exceptions import DependencyCycleError
@@ -19,58 +19,63 @@ if TYPE_CHECKING:
 @dataclass(slots=True)
 class ResolutionContextManager:
     """
-    Resolution context owner.
+    Dependency resolution context manager.
 
-    Source of truth for current execution context
+    Owns current ContextVar state.
 
-    Used for:
-        - cycle detection
-        - parent dependency tracking
-        - graph edge construction
+    Source of truth for:
+        - active scope
+        - dependency resolution stack
+
     """
 
-    _context: ContextVar[ResolutionContext] = field(
+    _context: ContextVar[ResolutionContext | None] = field(
         default_factory=lambda: ContextVar(
-            "dependency_resolution_context",
-            default=ResolutionContext(),  # TODO: check logic
+            "resolution_context",
+            default=None,
         ),
     )
 
     @property
-    def current(self) -> ResolutionContext:
+    def current_context(self) -> ResolutionContext:
         """
-        Current execution context.
+        Current resolution context.
 
         Returns:
-            Active resolution context.
+            Current context snapshot.
 
         """
-        return self._context.get()
+        context = self._context.get()
 
-    @property
-    def current_scope(self) -> ScopeID:
-        """
-        Current active scope.
+        if context is None:
+            return ResolutionContext()
 
-        Returns:
-            Active scope identifier or None.
+        return context
 
-        """
-        return self._context.get().scope_id
+    #################
+    # Scope lifecycle
+    #################
 
     def enter_scope(self, scope_id: ScopeID) -> Token[ResolutionContext]:
         """
-        Enter scope context.
+        Activate scope.
 
         Returns:
             Context token.
 
         """
-        return self._context.set(self.current.with_scope(scope_id=scope_id))
+        current_context = self.current_context
+        updated_context = replace(current_context, scope_id=scope_id)
+
+        return self._context.set(updated_context)
 
     def leave_scope(self, token: Token[ResolutionContext]) -> None:
-        """Leave scope context."""
+        """Restore previous scope state."""
         self._context.reset(token)
+
+    ######################
+    # Resolution lifecycle
+    ######################
 
     def enter_resolution(
         self, dependency_id: DependencyID
@@ -86,15 +91,12 @@ class ResolutionContextManager:
                 if dependency cycle is detected.
 
         """
-        context = self.current
+        current_context = self.current_context
 
-        if dependency_id in context.stack:
-            chain = " -> ".join(
-                str(item) for item in (*context.stack, dependency_id)
-            )
-            raise DependencyCycleError(chain)
+        if dependency_id in current_context.stack:
+            raise DependencyCycleError(current_context.stack, dependency_id)
 
-        return self._context.set(context.push(dependency_id))
+        return self._context.set(current_context.push(dependency_id))
 
     def leave_resolution(self, token: Token[ResolutionContext]) -> None:
         """Leave dependency resolution."""

@@ -39,11 +39,14 @@ class Container:
     Threading model:
         Container is NOT thread-safe.
 
-        Container assumes ownership by a single runtime scheduler
-        and execution context.
+        Container assumes ownership by a single scheduler
+        (event loop, actor runtime or dispatcher).
 
-        Concurrent dependency initialization is coordinated through
-        Future memoization and delegated to the owning runtime architecture.
+        Concurrent access from multiple tasks within the same scheduler
+        is supported.
+
+        Concurrent dependency initialization of the same dependency
+        is coordinated through Future memoization.
 
         Access from multiple threads is NOT supported.
 
@@ -79,6 +82,12 @@ class Container:
     _diagnostics: ContainerDiagnostics = field(init=False)
 
     def __post_init__(self) -> None:
+        """
+        Initialize runtime diagnostics facade.
+
+        Diagnostics depend on the already constructed
+        DependencyManager instance.
+        """
         self._diagnostics = ContainerDiagnostics(self._manager)
 
     def register(
@@ -106,17 +115,28 @@ class Container:
         contract: type[T],
         *,
         namespace: Namespace,
+        requester: Namespace | None = None,
     ) -> T:
         """
-        Resolve registered dependency.
+        Resolve registered dependency instance.
+
+        Args:
+            contract:
+                Dependency contract type.
+            namespace:
+                Dependency owner namespace.
+            requester:
+                Namespace requesting dependency access.
+                If omitted, dependency namespace is used.
 
         Returns:
-            resolved dependency
+            resolved dependency instance
 
         """
         return await self._manager.resolve(
             contract=contract,
             namespace=namespace,
+            requester=requester or namespace,
         )
 
     def scope(self) -> ScopeHandle:
@@ -125,7 +145,7 @@ class Container:
 
         Examples:
             async with container.scope():
-                logger = await container.resolve(Logger)
+                ...
 
         Returns:
             async scope context manager
