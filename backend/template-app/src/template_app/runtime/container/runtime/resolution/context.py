@@ -6,10 +6,8 @@ from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import (
-        DependencyID,
-    )
-    from template_app.runtime.container.models.scope import ScopeID
+    from ..dependency import DependencyID
+    from ..scope import ScopeID
 
 
 @dataclass(slots=True, frozen=True)

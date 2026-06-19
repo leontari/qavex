@@ -1,4 +1,4 @@
-"""Runtime scope state."""
+"""Singleton instances storage."""
 
 from __future__ import annotations
 
@@ -6,42 +6,44 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.models.scope import ScopeState
-
 if TYPE_CHECKING:
     import asyncio
     from asyncio import Future
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
 
-    from template_app.runtime.container.models.dependency import DependencyID
-    from template_app.runtime.container.models.scope import ScopeID
+    from .dependency import DependencyID
 
 
 @dataclass(slots=True)
-class ScopeContext:
+class SingletonCache:
     """
-    Asyncio-safe runtime scope state.
+    Asyncio-safe singleton instance cache.
 
-    Source of truth for scoped instances.
+    Source of truth for singleton instances.
 
     Thread-safety:
         This cache assumes access from a single event loop
         and is not thread-safe.
 
-    Owns:
-        - scoped instances
-        - scoped initialization futures
+    Stores:
+        - initialized singleton instances
+        - singleton creation futures
 
-    ScopeContext exists only while scope is alive.
+    Notes:
+        Synchronization and race-condition prevention are
+        handled by DependencyManager.
+
+        SingletonCache is a storage component only.
+
     """
 
-    id: ScopeID
-    state: ScopeState = ScopeState.ACTIVE
-    owner_id: str | None = None
-    parent_scope: ScopeID | None = None
+    _instances: dict[DependencyID, object] = field(
+        default_factory=dict,
+    )
 
-    _instances: dict[DependencyID, object] = field(default_factory=dict)
-    _futures: dict[DependencyID, Future[object]] = field(default_factory=dict)
+    _futures: dict[DependencyID, Future[object]] = field(
+        default_factory=dict,
+    )
 
     def get_or_create_future(
         self,
@@ -63,14 +65,15 @@ class ScopeContext:
 
         future = loop.create_future()
         self._futures[dependency_id] = future
+
         return future, True
 
     def contains(self, dependency_id: DependencyID) -> bool:
         """
-        Whether scoped instance exists.
+        Whether singleton instance exists.
 
         Returns:
-            True if instance is cached.
+            True if singleton instance is cached.
 
         """
         return dependency_id in self._instances
@@ -80,19 +83,19 @@ class ScopeContext:
         Whether initialization future exists.
 
         Returns:
-            True if initialization future exists.
+            True if initialization future is registered.
 
         """
         return dependency_id in self._futures
 
     def get(self, dependency_id: DependencyID) -> object:
         """
-        Get cached instance.
+        Get singleton instance.
 
         Returns:
-            Cached instance.
+            Cached singleton instance.
 
-        Raises: KeyError if instance is not cached.
+        Raises: KeyError If instance is not cached.
 
         """
         return self._instances[dependency_id]
@@ -102,13 +105,13 @@ class ScopeContext:
         Get initialization future.
 
         Returns:
-            Registered future or None.
+            Registered initialization future or None
 
         """
         return self._futures.get(dependency_id)
 
     def set(self, dependency_id: DependencyID, instance: object) -> None:
-        """Store scoped instance."""
+        """Store singleton instance."""
         self._instances[dependency_id] = instance
 
     def set_future(
@@ -119,10 +122,9 @@ class ScopeContext:
 
     def remove(self, dependency_id: DependencyID) -> None:
         """
-        Remove cached instance.
+        Remove singleton instance.
 
-        Missing entries are ignored.
-
+        Missing instances are ignored.
         """
         self._instances.pop(dependency_id, None)
 
@@ -130,14 +132,13 @@ class ScopeContext:
         """
         Remove initialization future.
 
-        Missing entries are ignored.
-
+        Missing futures are ignored.
         """
         self._futures.pop(dependency_id, None)
 
     def iter_instances(self) -> Iterator[tuple[DependencyID, object]]:
         """
-        Iterate over registered scoped instances.
+        Iterate over cached singleton instances.
 
         Returns:
             Iterator over cached instances.
@@ -157,12 +158,11 @@ class ScopeContext:
 
     def clear(self) -> None:
         """
-        Remove all scope state.
+        Remove all cached state.
 
         Clears:
-            - scoped instances
+            - singleton instances
             - initialization futures
-
         """
         self._instances.clear()
         self._futures.clear()
@@ -172,12 +172,12 @@ class ScopeContext:
     #############
 
     @property
-    def instances(self) -> MappingProxyType[DependencyID, object]:
+    def instances(self) -> Mapping[DependencyID, object]:
         """
-        Immutable scoped instances view.
+        Immutable singleton instances view.
 
         Returns:
-            Read-only mapping of scoped instances.
+            Read-only mapping of cached singleton instances.
 
         """
         return MappingProxyType(self._instances)
@@ -196,10 +196,10 @@ class ScopeContext:
     @property
     def count(self) -> int:
         """
-        Cached scoped instances count.
+        Cached singleton instances count.
 
         Returns:
-            Number of registered scoped instances.
+            Number of cached singleton instances.
 
         """
         return len(self._instances)

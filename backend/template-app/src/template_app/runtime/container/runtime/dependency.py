@@ -6,14 +6,8 @@ from typing import TYPE_CHECKING, Any, Generic
 from template_app.runtime.container.type_vars import T
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.scope import DependencyScope
-if TYPE_CHECKING:
-    from template_app.runtime.container.contracts import DependencyProvider
-    from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.visibility import (
-        DependencyVisibility,
-    )
+    from ..contracts import DependencyProvider
+    from ..models import DependencyScope, DependencyVisibility, Namespace
 
 
 @dataclass(frozen=True, slots=True)

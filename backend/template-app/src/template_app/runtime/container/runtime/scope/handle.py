@@ -7,16 +7,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from contextvars import Token
 
-    from template_app.runtime.container.models.scope import ScopeID
-    from template_app.runtime.container.runtime.context_manager import (
-        ResolutionContextManager,
-    )
-    from template_app.runtime.container.runtime.helpers.resolution import (
-        ResolutionContext,
-    )
-    from template_app.runtime.container.runtime.scope_manager import (
-        ScopeManager,
-    )
+    from ..resolution import ResolutionContext, ResolutionManager
+    from .manager import ScopeManager
+    from .scope import ScopeID
 
 
 class ScopeHandle:
@@ -34,7 +27,7 @@ class ScopeHandle:
     def __init__(
         self,
         scopes: ScopeManager,
-        context: ResolutionContextManager,
+        context: ResolutionManager,
     ) -> None:
         self._scopes = scopes
         self._context = context

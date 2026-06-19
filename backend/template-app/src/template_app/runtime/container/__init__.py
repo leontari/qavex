@@ -1,7 +1,16 @@
-"""Kernel dependency injection subsystem."""
+"""Dependency injection system."""
 
 from __future__ import annotations
 
-__version__ = "3.5.5"
+from .container import Container
+from .models import DependencyScope, DependencyVisibility, Namespace
 
-__all__ = ("__version__",)
+__version__ = "3.6.0"
+
+__all__ = (
+    "Container",
+    "DependencyScope",
+    "DependencyVisibility",
+    "Namespace",
+    "__version__",
+)

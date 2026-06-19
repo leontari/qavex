@@ -3,14 +3,10 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.diagnostics.exporters.base import (
-    DiagnosticsExporter,
-)
+from .base import DiagnosticsExporter
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.diagnostics.diagnostics import (
-        ContainerSnapshot,
-    )
+    from ..diagnostics import ContainerSnapshot
 
 
 class JsonExporter(DiagnosticsExporter):

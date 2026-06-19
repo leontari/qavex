@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.diagnostics.snapshot import (
+from .snapshot import (
     ContainerSnapshot,
     GraphSnapshot,
     NamespaceSnapshot,
@@ -14,10 +14,8 @@ from template_app.runtime.container.diagnostics.snapshot import (
 )
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.runtime.manager import (
-        DependencyManager,
-    )
+    from ..models import Namespace
+    from ..runtime.manager import DependencyManager
 
 
 @dataclass(frozen=True, slots=True)

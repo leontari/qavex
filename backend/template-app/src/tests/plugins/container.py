@@ -1,23 +1,23 @@
 import pytest
 
 from template_app.runtime.container.container import Container
-from template_app.runtime.container.models.dependency import DependencyID
+from template_app.runtime.container.runtime.dependency import DependencyID
 from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.models.scope import (
+from template_app.runtime.container.runtime.scope.scope import (
     ScopeID, DependencyScope,
 )
 from template_app.runtime.container.models.visibility import (
     DependencyVisibility,
 )
 from template_app.runtime.container.providers import FactoryProvider
-from template_app.runtime.container.runtime.helpers.context_manager import (
+from template_app.runtime.container.runtime.context_manager import (
     ResolutionContextManager,
 )
 from template_app.runtime.container.runtime.registry import DependencyRegistry
-from template_app.runtime.container.runtime.scope_manager import (
+from template_app.runtime.container.runtime.scope.scope_manager import (
     ScopeManager,
 )
-from template_app.runtime.container.models.dependency import (
+from template_app.runtime.container.runtime.dependency import (
     DependencyDescriptor,
 )
 from template_app.runtime.container.runtime.singleton_cache import (
@@ -35,6 +35,11 @@ def namespace() -> Namespace:
 
 
 @pytest.fixture
+def namespace_other() -> Namespace:
+    return Namespace(name="other_namespace")
+
+
+@pytest.fixture
 def dependency_id(namespace: Namespace) -> DependencyID:
     return DependencyID(
         namespace=namespace,
@@ -48,6 +53,13 @@ def dependency_id_2(namespace: Namespace) -> DependencyID:
         contract=ServiceB
     )
 
+@pytest.fixture
+def dependency_a(dependency_id) -> DependencyID:
+    return dependency_id
+
+@pytest.fixture
+def dependency_b(dependency_id_2) -> DependencyID:
+    return dependency_id_2
 
 @pytest.fixture
 def scope_id() -> ScopeID:
@@ -55,9 +67,7 @@ def scope_id() -> ScopeID:
 
 
 @pytest.fixture
-def descriptor(
-    dependency_id: DependencyID,
-) -> DependencyDescriptor:
+def descriptor(dependency_id: DependencyID) -> DependencyDescriptor:
     return DependencyDescriptor(
         ident=dependency_id,
         provider=FactoryProvider(ServiceA),
@@ -72,17 +82,17 @@ def registry() -> DependencyRegistry:
 
 
 @pytest.fixture
-def context_manager():
+def context_manager() -> ResolutionContextManager:
     return ResolutionContextManager()
 
 
 @pytest.fixture
-def scope_manager():
+def scope_manager() -> ScopeManager:
     return ScopeManager()
 
 
 @pytest.fixture
-def container():
+def container() -> Container:
     return Container()
 
 
@@ -93,5 +103,5 @@ def scope_context(scope_manager):
 
 
 @pytest.fixture
-def singleton_cache():
+def singleton_cache() -> SingletonCache:
     return SingletonCache()

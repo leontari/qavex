@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import DependencyID
-    from template_app.runtime.container.models.namespace import Namespace
+    from ..models import Namespace
+    from ..runtime.dependency import DependencyID
 
 
 @dataclass(frozen=True, slots=True)

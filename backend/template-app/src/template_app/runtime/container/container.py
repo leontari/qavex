@@ -5,22 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.diagnostics.diagnostics import (
-    ContainerDiagnostics,
-)
-from template_app.runtime.container.models.scope import DependencyScope
-from template_app.runtime.container.models.visibility import (
-    DependencyVisibility,
-)
-from template_app.runtime.container.runtime.helpers.scope import (
-    ScopeHandle,
-)
-from template_app.runtime.container.runtime.manager import DependencyManager
+from .diagnostics import ContainerDiagnostics
+from .models import DependencyScope, DependencyVisibility
+from .runtime.manager import DependencyManager
+from .runtime.scope import ScopeHandle
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.contracts import DependencyProvider
-    from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.type_vars import T
+    from .contracts import DependencyProvider
+    from .models import Namespace
+    from .type_vars import T
 
 
 @dataclass(slots=True)
@@ -95,7 +88,7 @@ class Container:
         *,
         contract: type[T],
         provider: DependencyProvider[T],
-        namespace: Namespace,
+        namespace: str | Namespace,
         visibility: DependencyVisibility = DependencyVisibility.PUBLIC,
         scope: DependencyScope = DependencyScope.TRANSIENT,
         overwrite: bool = False,
@@ -104,7 +97,7 @@ class Container:
         self._manager.register(
             contract=contract,
             provider=provider,
-            namespace=namespace,
+            namespace=Namespace.parse(namespace),
             visibility=visibility,
             scope=scope,
             overwrite=overwrite,
@@ -114,8 +107,8 @@ class Container:
         self,
         contract: type[T],
         *,
-        namespace: Namespace,
-        requester: Namespace | None = None,
+        namespace: str | Namespace,  # owner
+        requester: str | Namespace,  # caller
     ) -> T:
         """
         Resolve registered dependency instance.
@@ -126,8 +119,7 @@ class Container:
             namespace:
                 Dependency owner namespace.
             requester:
-                Namespace requesting dependency access.
-                If omitted, dependency namespace is used.
+                Dependency requester namespace.
 
         Returns:
             resolved dependency instance
@@ -135,8 +127,8 @@ class Container:
         """
         return await self._manager.resolve(
             contract=contract,
-            namespace=namespace,
-            requester=requester or namespace,
+            namespace=Namespace.parse(namespace),
+            requester=Namespace.parse(requester),
         )
 
     def scope(self) -> ScopeHandle:

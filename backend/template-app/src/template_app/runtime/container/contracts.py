@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Protocol,
-    runtime_checkable,
-)
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from template_app.runtime.container.type_vars import T
+from .type_vars import T
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.namespace import Namespace
+    from .models import Namespace
 
 
 class DependencyResolver(Protocol):

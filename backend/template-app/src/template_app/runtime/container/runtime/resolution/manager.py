@@ -6,18 +6,16 @@ from contextvars import ContextVar, Token
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.exceptions import DependencyCycleError
-from template_app.runtime.container.runtime.helpers.resolution import (
-    ResolutionContext,
-)
+from ...exceptions import DependencyCycleError
+from .context import ResolutionContext
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import DependencyID
-    from template_app.runtime.container.models.scope import ScopeID
+    from ..dependency import DependencyID
+    from ..scope import ScopeID
 
 
 @dataclass(slots=True)
-class ResolutionContextManager:
+class ResolutionManager:
     """
     Dependency resolution context manager.
 

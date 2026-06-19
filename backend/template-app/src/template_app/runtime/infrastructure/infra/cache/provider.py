@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from template_app.runtime.container.models.scope import DependencyScope
+from template_app.runtime.container.runtime.scope.scope import DependencyScope
 from template_app.runtime.infrastructure.infra.cache.client import CacheClient
 
 

@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 
-from template_app.runtime.container.diagnostics.snapshot import (
-    ContainerSnapshot,
-)
+from ..snapshot import ContainerSnapshot
 
 
 class DiagnosticsExporter(ABC):

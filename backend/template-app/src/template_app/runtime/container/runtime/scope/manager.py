@@ -5,15 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
-from template_app.runtime.container.exceptions import (
-    ScopeNotFoundError,
-)
-from template_app.runtime.container.models.scope import (
-    ScopeID,
-    ScopeSnapshot,
-    ScopeState,
-)
-from template_app.runtime.container.runtime.helpers.context import ScopeContext
+from template_app.runtime.container.exceptions import ScopeNotFoundError
+
+from .context import ScopeContext
+from .scope import ScopeID, ScopeSnapshot, ScopeState
 
 
 @dataclass(slots=True)

@@ -2,14 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.diagnostics.exporters.base import (
-    DiagnosticsExporter,
-)
+from .base import DiagnosticsExporter
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.diagnostics.snapshot import (
-        ContainerSnapshot,
-    )
+    from ..snapshot import ContainerSnapshot
 
 
 class TextExporter(DiagnosticsExporter):

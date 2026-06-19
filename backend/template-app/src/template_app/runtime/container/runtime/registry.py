@@ -5,17 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.exceptions import (
+from ..exceptions import (
     DependencyAlreadyRegisteredError,
     DependencyNotFoundError,
 )
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import (
-        DependencyDescriptor,
-        DependencyID,
-    )
-    from template_app.runtime.container.models.namespace import Namespace
+    from ..models import Namespace
+    from .dependency import DependencyDescriptor, DependencyID
 
 
 @dataclass(slots=True)

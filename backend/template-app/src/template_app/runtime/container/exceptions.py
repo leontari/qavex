@@ -5,11 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import DependencyID
-    from template_app.runtime.container.models.scope import (
-        DependencyScope,
-        ScopeID,
-    )
+    from .models import DependencyScope
+    from .runtime.dependency import DependencyID
+    from .runtime.scope.scope import ScopeID
 
 
 class ContainerError(RuntimeError):

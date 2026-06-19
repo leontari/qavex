@@ -1,9 +1,7 @@
-from template_app.runtime.container.diagnostics.exporters.base import (
-    DiagnosticsExporter,
-)
-from template_app.runtime.container.diagnostics.snapshot import (
-    ContainerSnapshot,
-)
+from __future__ import annotations
+
+from ..snapshot import ContainerSnapshot
+from .base import DiagnosticsExporter
 
 
 class MermaidExporter(DiagnosticsExporter):

@@ -4,15 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from template_app.runtime.container.exceptions import (
-    DependencyVisibilityError,
-)
-from template_app.runtime.container.models.visibility import (
-    DependencyVisibility,
-)
+from ..exceptions import DependencyVisibilityError
+from ..models import DependencyVisibility
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.namespace import Namespace
+    from ..models import Namespace
 
 
 def enforce_visibility(

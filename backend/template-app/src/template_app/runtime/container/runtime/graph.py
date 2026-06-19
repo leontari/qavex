@@ -7,7 +7,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.models.dependency import DependencyID
+    from .dependency import DependencyID
 
 _EMPTY_SET = frozenset()
 

@@ -6,45 +6,29 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
-from template_app.runtime.container.exceptions import (
+from template_app.runtime.container.type_vars import T
+
+from ..exceptions import (
     InvalidContractError,
     InvalidProviderError,
     ScopeClosedError,
     ScopeRequiredError,
     UnsupportedScopeError,
 )
-from template_app.runtime.container.models.dependency import (
-    DependencyDescriptor,
-    DependencyID,
-)
-from template_app.runtime.container.models.scope import (
-    DependencyScope,
-    ScopeState,
-)
-from template_app.runtime.container.runtime.context_manager import (
-    ResolutionContextManager,
-)
-from template_app.runtime.container.runtime.graph import DependencyGraph
-from template_app.runtime.container.runtime.helpers.visibility_enforcer import (
-    enforce_visibility,
-)
-from template_app.runtime.container.runtime.registry import DependencyRegistry
-from template_app.runtime.container.runtime.scope_manager import (
-    ScopeManager,
-)
-from template_app.runtime.container.runtime.singleton_cache import (
-    SingletonCache,
-)
-from template_app.runtime.container.type_vars import T
+from ..models import DependencyScope
+from .dependency import DependencyDescriptor, DependencyID
+from .graph import DependencyGraph
+from .registry import DependencyRegistry
+from .resolution import ResolutionManager
+from .scope import ScopeManager
+from .scope.scope import ScopeState
+from .singleton import SingletonCache
+from .visibility import enforce_visibility
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.contracts import (
-        DependencyProvider,
-    )
-    from template_app.runtime.container.models.namespace import Namespace
-    from template_app.runtime.container.models.visibility import (
-        DependencyVisibility,
-    )
+    from ..contracts import DependencyProvider
+    from ..models import Namespace
+    from ..models import DependencyVisibility
 
 
 @dataclass(slots=True)
@@ -85,8 +69,8 @@ class DependencyManager:
         default_factory=DependencyGraph,
     )
 
-    _context: ResolutionContextManager = field(
-        default_factory=ResolutionContextManager,
+    _context: ResolutionManager = field(
+        default_factory=ResolutionManager,
     )
 
     _scopes: ScopeManager = field(
@@ -417,6 +401,6 @@ class DependencyManager:
         return self._singletons
 
     @property
-    def context(self) -> ResolutionContextManager:
+    def context(self) -> ResolutionManager:
         """Runtime resolution context manager."""
         return self._context

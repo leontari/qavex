@@ -3,20 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum, StrEnum, auto
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
 if TYPE_CHECKING:
     from uuid import UUID
-
-
-class DependencyScope(StrEnum):
-    """Dependency lifetime policy."""
-
-    SINGLETON = "singleton"  # single object for the whole app
-    TRANSIENT = "transient"  # new object every time when called
-    SCOPED = "scoped"  # single object for a pipeline, then destroy
 
 
 @dataclass(frozen=True, slots=True)
