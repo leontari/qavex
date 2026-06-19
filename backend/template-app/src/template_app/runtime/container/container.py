@@ -6,13 +6,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from .diagnostics import ContainerDiagnostics
-from .models import DependencyScope, DependencyVisibility
+from .models import DependencyScope, DependencyVisibility, Namespace
 from .runtime.manager import DependencyManager
 from .runtime.scope import ScopeHandle
 
 if TYPE_CHECKING:
     from .contracts import DependencyProvider
-    from .models import Namespace
     from .type_vars import T
 
 

@@ -12,7 +12,7 @@ from .models import (
 )
 from .type_aliases import Factory
 
-__version__ = "3.7.0"
+__version__ = "3.7.1"
 
 __all__ = (
     "AsyncDisposable",
