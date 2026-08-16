@@ -1,6 +1,6 @@
 import pytest
 
-from template_app.runtime.container.container import Container
+from template_app.runtime.container import Container
 from template_app.runtime.infrastructure.runtime import InfrastructureRuntime
 from template_app.runtime.kernel.kernel import RuntimeKernel
 from template_app.runtime.kernel.runtime.state import RuntimeState

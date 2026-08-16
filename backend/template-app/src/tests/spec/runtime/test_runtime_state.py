@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from template_app.runtime.application.builder import ApplicationBuilder
-from template_app.runtime.container.container import Container
+from template_app.runtime.container import Container
 
 
 def test_runtime_contains_container() -> None:

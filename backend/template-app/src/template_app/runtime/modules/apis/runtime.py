@@ -4,11 +4,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from fastapi import APIRouter
 
-    from template_app.runtime.container.container import Container
+    from template_app.runtime.container import Container
     from template_app.runtime.container.contracts import DependencyProvider
     from template_app.runtime.lifecycle.models import LifecycleHook
     from template_app.runtime.lifecycle.registry import LifecycleRegistry

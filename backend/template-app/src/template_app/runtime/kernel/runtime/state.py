@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from template_app.runtime.container.container import Container
+    from template_app.runtime.container import Container
     from template_app.runtime.infrastructure.runtime import (
         InfrastructureRuntime,
     )
