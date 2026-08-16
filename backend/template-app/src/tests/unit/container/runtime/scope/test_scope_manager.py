@@ -3,9 +3,12 @@ import asyncio
 import pytest
 
 from template_app.runtime.container.exceptions import ScopeNotFoundError
-from template_app.runtime.container.models.dependency import DependencyID
-from template_app.runtime.container.models.scope import ScopeID, ScopeState
-from template_app.runtime.container.runtime.scope_manager import ScopeManager
+from template_app.runtime.container.runtime.dependency import DependencyID
+from template_app.runtime.container.runtime.scope import (
+    ScopeID,
+    ScopeState,
+    ScopeManager,
+)
 
 
 def test_create_scope(scope_manager: ScopeManager, scope_id: ScopeID)  -> None:

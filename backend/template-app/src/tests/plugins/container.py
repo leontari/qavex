@@ -1,28 +1,22 @@
 import pytest
 
-from template_app.runtime.container.container import Container
+from template_app.runtime.container import Container, DependencyProvider
 from template_app.runtime.container.runtime.dependency import DependencyID
-from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.runtime.scope.scope import (
-    ScopeID, DependencyScope,
-)
-from template_app.runtime.container.models.visibility import (
+from template_app.runtime.container import (
+    Namespace,
+    DependencyScope,
     DependencyVisibility,
 )
+from template_app.runtime.container.runtime.scope.scope import ScopeID
 from template_app.runtime.container.providers import FactoryProvider
-from template_app.runtime.container.runtime.context_manager import (
-    ResolutionContextManager,
-)
+from template_app.runtime.container.runtime.resolution import ResolutionManager
 from template_app.runtime.container.runtime.registry import DependencyRegistry
-from template_app.runtime.container.runtime.scope.scope_manager import (
-    ScopeManager,
-)
+from template_app.runtime.container.runtime.scope import ScopeManager
 from template_app.runtime.container.runtime.dependency import (
     DependencyDescriptor,
 )
-from template_app.runtime.container.runtime.singleton_cache import (
-    SingletonCache,
-)
+from template_app.runtime.container.runtime.singleton import SingletonCache
+from tests.support.fakes.providers import FakeStringProvider
 
 
 class ServiceA: ...
@@ -30,36 +24,49 @@ class ServiceB: ...
 
 
 @pytest.fixture
-def namespace() -> Namespace:
-    return Namespace(name="test")
+def namespace_a() -> Namespace:
+    return Namespace(name="module.a")
 
 
 @pytest.fixture
-def namespace_other() -> Namespace:
-    return Namespace(name="other_namespace")
+def namespace_b() -> Namespace:
+    return Namespace("module.b")
 
 
 @pytest.fixture
-def dependency_id(namespace: Namespace) -> DependencyID:
+def owner_namespace(namespace_a: Namespace) -> Namespace:
+    return namespace_a
+
+
+@pytest.fixture
+def requester_namespace(namespace_b: Namespace) -> Namespace:
+    return namespace_b
+
+
+@pytest.fixture
+def dependency_id(namespace_a: Namespace) -> DependencyID:
     return DependencyID(
-        namespace=namespace,
+        namespace=namespace_a,
         contract=ServiceA,
     )
 
 @pytest.fixture
-def dependency_id_2(namespace: Namespace) -> DependencyID:
+def dependency_id_2(namespace_b: Namespace) -> DependencyID:
     return DependencyID(
-        namespace=namespace,
+        namespace=namespace_b,
         contract=ServiceB
     )
+
 
 @pytest.fixture
 def dependency_a(dependency_id) -> DependencyID:
     return dependency_id
 
+
 @pytest.fixture
 def dependency_b(dependency_id_2) -> DependencyID:
     return dependency_id_2
+
 
 @pytest.fixture
 def scope_id() -> ScopeID:
@@ -82,8 +89,8 @@ def registry() -> DependencyRegistry:
 
 
 @pytest.fixture
-def context_manager() -> ResolutionContextManager:
-    return ResolutionContextManager()
+def context_manager() -> ResolutionManager:
+    return ResolutionManager()
 
 
 @pytest.fixture
@@ -105,3 +112,8 @@ def scope_context(scope_manager):
 @pytest.fixture
 def singleton_cache() -> SingletonCache:
     return SingletonCache()
+
+
+@pytest.fixture
+def fake_string_provider() -> DependencyProvider[str]:
+    return FakeStringProvider

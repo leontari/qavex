@@ -2,9 +2,11 @@ import asyncio
 
 import pytest
 
-from template_app.runtime.container.container import Container
-from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.models.scope import DependencyScope
+from template_app.runtime.container import (
+    Container,
+    Namespace,
+    DependencyScope,
+)
 
 
 @pytest.mark.asyncio

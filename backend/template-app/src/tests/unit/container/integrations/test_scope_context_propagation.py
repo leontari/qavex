@@ -1,13 +1,11 @@
-from tkinter.font import names
-
 import pytest
 
-from template_app.runtime.container.container import Container
-from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.models.scope import (
+from template_app.runtime.container import (
+    Container,
+    Namespace,
     DependencyScope,
-    ScopeID,
 )
+from template_app.runtime.container.runtime.scope import ScopeID
 
 
 @pytest.mark.asyncio
@@ -31,7 +29,7 @@ async def test_scope_context_propagation(
     )
 
     async with container.scope() as scope_id:
-        context_scope = container._manager._context.current_scope
+        context_scope = container._manager._context.current_context.scope_id
 
         assert context_scope == scope_id
 

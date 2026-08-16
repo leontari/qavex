@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
-from template_app.runtime.container.container import Container
-from template_app.runtime.container.models.namespace import Namespace
+from template_app.runtime.container import Container, Namespace
 
 
 class Service: ...

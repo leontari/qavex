@@ -10,6 +10,7 @@ from .models import (
     Namespace,
     Namespaces,
 )
+from .providers import FactoryProvider
 from .type_aliases import Factory
 
 __version__ = "3.7.1"
@@ -22,6 +23,7 @@ __all__ = (
     "DependencyScope",
     "DependencyVisibility",
     "Factory",
+    "FactoryProvider",
     "Namespace",
     "Namespaces",
     "__version__",

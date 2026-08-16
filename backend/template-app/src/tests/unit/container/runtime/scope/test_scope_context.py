@@ -2,9 +2,12 @@ import asyncio
 
 import pytest
 
-from template_app.runtime.container.models.dependency import DependencyID
-from template_app.runtime.container.runtime.helpers.context import ScopeContext
-from template_app.runtime.container.models.scope import ScopeState, ScopeID
+from template_app.runtime.container.runtime.dependency import DependencyID
+from template_app.runtime.container.runtime.scope import (
+    ScopeContext,
+    ScopeState,
+    ScopeID,
+)
 
 
 def test_scope_defaults(scope_id: ScopeID) -> None:

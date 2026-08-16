@@ -2,10 +2,10 @@
 
 from types import MappingProxyType
 
-from template_app.runtime.container.models.dependency import (
+from template_app.runtime.container.runtime.dependency import (
     DependencyID,
 )
-from template_app.runtime.container.models.namespace import Namespace
+from template_app.runtime.container import Namespace
 from template_app.runtime.container.runtime.graph import (
     DependencyGraph,
 )

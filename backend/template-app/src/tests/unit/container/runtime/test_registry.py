@@ -8,14 +8,16 @@ from template_app.runtime.container.exceptions import (
     DependencyAlreadyRegisteredError,
     DependencyNotFoundError,
 )
-from template_app.runtime.container.models.dependency import (
+from template_app.runtime.container.runtime.dependency import (
     DependencyDescriptor,
     DependencyID,
 )
-from template_app.runtime.container.models.namespace import Namespace
-from template_app.runtime.container.models.scope import DependencyScope
-from template_app.runtime.container.models.visibility import DependencyVisibility
-from template_app.runtime.container.providers import FactoryProvider
+from template_app.runtime.container import (
+    Namespace,
+    DependencyScope,
+    DependencyVisibility,
+    FactoryProvider,
+)
 from template_app.runtime.container.runtime.registry import DependencyRegistry
 
 
